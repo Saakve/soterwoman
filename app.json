@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme" : "soterwoman",
     "name": "soterwoman",
     "slug": "soterwoman",
     "version": "1.0.0",
