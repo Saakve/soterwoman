@@ -5,7 +5,10 @@ const Drawer = createDrawerNavigator()
 
 function UserAuthenticated() {
   return (
-    <Drawer.Navigator >
+    <Drawer.Navigator screenOptions={{
+      headerTitle: "",
+      headerTransparent: true 
+    }}>
       <Drawer.Screen name="Home" component={Home}/>
     </Drawer.Navigator>
   )
