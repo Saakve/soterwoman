@@ -6,9 +6,17 @@ const Drawer = createDrawerNavigator()
 
 function UserAuthenticated() {
   return (
+<<<<<<< HEAD
     <Drawer.Navigator>
       <Drawer.Screen name="Home" component={Home} />
       <Drawer.Screen name="Profile" component={Profile} />
+=======
+    <Drawer.Navigator screenOptions={{
+      headerTitle: "",
+      headerTransparent: true 
+    }}>
+      <Drawer.Screen name="Home" component={Home}/>
+>>>>>>> main
     </Drawer.Navigator>
   );
 }
