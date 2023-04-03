@@ -1,31 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Thumbnail from "./Thumbnail";
-import DetailProfile from "./DetailProfile";
+import Thumbnail from "../Thumbnail";
+import DetailProfile from "../DetailProfile";
 import { supabase } from "../../services/supabase";
 
 export default function Profile() {
   const [profile, setProfile] = useState(null)
   useEffect(() =>{
-      const getUser = async () => {
-        const { data, error } = await supabase.from("user").select()
-        console.log(data)
-        return data
+      const getProfile = async () => {
+        const { data, error } = await supabase.from('profile').select()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        console.log(data[0])
+        console.log(user);
+        const datos = {
+          correo: user.email,
+          datos: data[0]
+        }
+        console.log(datos)
+        setProfile(datos)
       };
-      setProfile(getUser())
+      getProfile();
   }, [])
 
-
-  getUser()
   return (
     <View style={styles.container}>
       <View style={styles.avatarSection}>
-        <Thumbnail />
+        <Thumbnail name={profile?.datos.name} />
       </View>
       <View style={styles.detailsSection}>
-        <DetailProfile icon="mail" title="Email" subtitle={profile} />
-        <DetailProfile icon="phone" title="Work" />
-        <DetailProfile icon="smartphone" title="Personal" />
+        <DetailProfile icon="person" subtitle={profile?.datos.name} />
+        <DetailProfile icon="mail" subtitle={profile?.correo} />
+        <DetailProfile icon="phone" subtitle={profile?.datos.phone} />
+        <DetailProfile icon="smartphone" title="Número de emergencia" />
+        <DetailProfile icon="lock" title="Contraseña"  />
       </View>
     </View>
   );
@@ -36,7 +45,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatarSection: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "purple",
