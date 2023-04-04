@@ -16,9 +16,9 @@ export default function Profile() {
         console.log(user);
         const datos = {
           correo: user.email,
+          avatar_url: user.avatar_url,
           datos: data[0]
         }
-        console.log(datos)
         setProfile(datos)
       };
       getProfile();
@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatarSection: {
+    paddingTop: 100,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "purple",

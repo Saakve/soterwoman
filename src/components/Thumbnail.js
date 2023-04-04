@@ -1,45 +1,100 @@
 import React from "react";
-import { StyleSheet, View, TouchableOpacity, Image, Text, } from "react-native";
+import { useState, useEffect } from "react";
+import { supabase } from "../services/supabase";
+import { StyleSheet, View, Alert, Image, Button } from "react-native";
+import * as DocumentPicker from "expo-document-picker";
 
-export default function Thumbnail({ name, avatar, onPress }) {
+export default function Thumbail({ name, url, size = 150, onUpload }) {
+      const [uploading, setUploading] = useState(false)
+    const [avatarUrl, setaAvatarUrl] = useState(null)
+    const avatarSize = { height: size, width: size}
 
-  const ImageComponent = onPress ? TouchableOpacity : View;
+    const donwloadImage = async path => {
+        try {
+            const { data, error } = await supabase.storage.from('avatars').download(path)
+            if (error) throw error
 
-  return (
-    <View style={styles.container}>
-      <ImageComponent onPress={onPress}>
-        <Image
-          source={{
-            uri: avatar,
-          }}
-          style={styles.avatar}
-        />
-      </ImageComponent>
+            const fr = new FileReader()
+            fr.readAsDataURL(data)
+            fr.onload = () => {
+                setaAvatarUrl(fr.result)
+            }
+        } catch (error) {
+            if(error instanceof Error) console.log(`Error downloading image: ${error.message}`)
+        }
+    }
 
-      <Text style={[styles.name]}>{name}</Text>
-    </View>
-  );
+    const uploadAvatar = async () => {
+        try {
+            setUploading(true)
+
+            const file = await DocumentPicker.getDocumentAsync({
+              type: 'image/*',
+            })
+            
+            const photo = {
+                uri: file.uri,
+                type: file.mimeType,
+                name: file.name,
+            }
+
+            const formData = new FormData()
+            formData.append('file', photo)
+
+            const fileExt = file.name.split('.').pop()
+            const filePath = `${Math.random()}.${fileExt}`
+
+            const { error } = await supabase.storage.from('avatars').upload(filePath, formData)
+            if (error) throw error
+
+            onUpload(filePath)
+
+        } catch (error) {
+            console.log(error)
+            if (isCancel(error)) console.warn('cancelled')
+            else if (isInProgress(error)) console.warn('multiple pickers were opened, only the last will be considered')
+            else if (error instanceof Error) Alert.alert(error.message)
+            else throw error
+        } finally {
+            setUploading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (url) donwloadImage(url)
+    }, [url])
+
+    return (
+      <View>
+        {
+          avatarUrl 
+          ? <Image source={{ uri: avatarUrl }} accessibilityLabel="Avatar" style={[avatarSize, styles.avatar, styles.image]}/>
+          : <View style={[avatarSize, styles.avatar, styles.noImage]} />
+        }
+        <View>
+          <Button
+            title={uploading ? 'Uploading ...' : 'Upload'}
+            onPress={uploadAvatar}
+            disabled={uploading}
+          />
+        </View>
+      </View>
+    )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 30,
-    marginHorizontal: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderColor: "white",
-    borderWidth: 2,
-    marginTop: 50
-  },
-  name: {
-    fontSize: 20,
-    marginTop: 24,
-    marginBottom: 2,
-    fontWeight: "bold",
-  },
-});
+    avatar: {
+      borderRadius: 5,
+      overflow: 'hidden',
+      maxWidth: '100%',
+    },
+    image: {
+      objectFit: 'cover',
+      paddingTop: 0,
+    },
+    noImage: {
+      backgroundColor: '#333',
+      border: '1px solid rgb(200, 200, 200)',
+      borderRadius: 5,
+    },
+  })    
