@@ -22,7 +22,6 @@ export function UserContextProvider({children}) {
         }
         
         if(errorProfile) console.log(errorProfile)
-        if(errorSession) console.log(errorSession)
 
         setUserData(userData)
     }

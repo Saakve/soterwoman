@@ -234,10 +234,16 @@ CREATE POLICY "Anyone can update their own avatar"
 --Triggers.
 CREATE FUNCTION public."handle_new_user"()
 RETURNS trigger AS $$
+DECLARE
+  namefromprovider VARCHAR(50);
 BEGIN
-  INSERT INTO public."profile" ("id", "name")
-  VALUES (NEW."id", NEW."raw_user_meta_data"->>'full_name');
-RETURN NEW;
+  SELECT SUBSTRING(NEW."raw_user_meta_data"->>'full_name','([A-Za-z]{3,}(\s[A-Za-z]+)*)') INTO namefromprovider;
+  IF namefromprovider IS NOT NULL THEN
+    INSERT INTO public.profile (id, name) VALUES (NEW."id", namefromprovider );
+  ELSE
+    INSERT INTO public.profile (id, name) VALUES (NEW."id");
+  END IF;
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
