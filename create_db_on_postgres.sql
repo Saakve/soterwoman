@@ -241,7 +241,7 @@ BEGIN
   IF namefromprovider IS NOT NULL THEN
     INSERT INTO public.profile (id, name) VALUES (NEW."id", namefromprovider );
   ELSE
-    INSERT INTO public.profile (id, name) VALUES (NEW."id");
+    INSERT INTO public.profile (id) VALUES (NEW."id");
   END IF;
   RETURN NEW;
 END;
