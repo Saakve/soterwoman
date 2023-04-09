@@ -21,7 +21,7 @@ CREATE TABLE vehicle (
   id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   model VARCHAR(50) NOT NULL DEFAULT 'MODEL' CHECK (CHAR_LENGTH(model) > 2),
   brand VARCHAR(50) NOT NULL DEFAULT 'BRAND' CHECK (CHAR_LENGTH(brand) > 2),
-  year INTEGER NOT NULL DEFAULT 1900 CHECK (year > 1900),
+  year INTEGER NOT NULL DEFAULT 1900 CHECK (year >= 1900),
   licenseplate VARCHAR(11) CHECK (licenseplate ~ '^[A-Z0-9]{1,4}(-[A-Z0-9]{1,4}){1,2}$')
 );
 
@@ -231,7 +231,83 @@ CREATE POLICY "Anyone can update their own avatar"
     bucket_id = 'avatars'
   );
 
---Triggers.
+--Functions and Triggers
+CREATE FUNCTION public."completePassengerProfile" (
+  profileToUpdate UUID,
+  newname VARCHAR,
+  newphone VARCHAR,
+  newemergencyphone VARCHAR
+)
+RETURNS void AS $$
+BEGIN
+  IF profileToUpdate IS NULL THEN
+    RAISE EXCEPTION 'Need to specify a ID';  
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM profile WHERE id = profileToUpdate AND idusertype IS NULL) THEN
+    
+    UPDATE profile
+    SET
+      name = newname,
+      phone = newphone,
+      idusertype = (SELECT id FROM usertype WHERE name = 'passenger')
+    WHERE id = profileToUpdate;
+
+    UPDATE passenger
+    SET
+      emergencyphone = newemergencyphone
+    WHERE id = profileToUpdate;
+
+  END IF;
+
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE FUNCTION public."completeDriverProfile" (
+  profileToUpdate UUID, 
+  newname VARCHAR, 
+  newphone VARCHAR,
+  newdrivinglicense VARCHAR,
+  newcity VARCHAR,
+  newmodel VARCHAR,
+  newbrand VARCHAR,
+  newyear INTEGER,
+  newlicenseplate VARCHAR
+)
+RETURNS void AS $$
+BEGIN
+  IF profileToUpdate IS NULL THEN
+    RAISE EXCEPTION 'Need to specify a ID';
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM profile WHERE id = profileToUpdate AND idusertype IS NULL) THEN
+
+    UPDATE profile
+    SET 
+      name = newname, 
+      phone = newphone, 
+      idusertype = (SELECT id FROM usertype WHERE name = 'driver') 
+    WHERE id = profileToUpdate;
+
+    UPDATE driver
+    SET
+      drivinglicense = newdrivinglicense,
+      city = newcity
+    WHERE id = profileToUpdate;
+
+    UPDATE vehicle
+    SET
+      model = newmodel,
+      brand = newbrand,
+      year = newyear,
+      licenseplate = newlicenseplate
+    WHERE id = (SELECT idvehicle FROM driver WHERE driver.id = profileToUpdate);
+
+  END IF;
+
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 CREATE FUNCTION public."handle_new_user"()
 RETURNS trigger AS $$
 DECLARE
