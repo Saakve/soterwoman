@@ -4,8 +4,8 @@ import { supabase } from "../services/supabase";
 import { StyleSheet, View, Alert, Image, Button } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 
-export default function Thumbail({ name, url, size = 150, onUpload }) {
-      const [uploading, setUploading] = useState(false)
+export default function Thumbnail({ name, url, size = 150, onUpload }) {
+    const [uploading, setUploading] = useState(false)
     const [avatarUrl, setaAvatarUrl] = useState(null)
     const avatarSize = { height: size, width: size}
 
@@ -43,14 +43,13 @@ export default function Thumbail({ name, url, size = 150, onUpload }) {
 
             const fileExt = file.name.split('.').pop()
             const filePath = `${Math.random()}.${fileExt}`
-
             const { error } = await supabase.storage.from('avatars').upload(filePath, formData)
             if (error) throw error
 
-            onUpload(filePath)
+            await onUpload(filePath)
 
         } catch (error) {
-            console.log(error)
+          //  console.log(error)
             if (isCancel(error)) console.warn('cancelled')
             else if (isInProgress(error)) console.warn('multiple pickers were opened, only the last will be considered')
             else if (error instanceof Error) Alert.alert(error.message)
