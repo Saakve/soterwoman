@@ -1,11 +1,10 @@
 import { Button } from "@rneui/base";
-import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 export function AuthHome({ navigation, userType }) {
 
     const moveToSignIn = () => navigation.navigate('SignIn')
-    const moveToSignUp = () => navigation.navigate('SignUp', { view: userType })
+    const moveToSignUp = userType === 'passenger' ? () => navigation.navigate('SignUpPassenger') : () => navigation.navigate('SignUpDriver')
 
     return (
         <View style={styles.container}>

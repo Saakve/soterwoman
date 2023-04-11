@@ -1,8 +1,9 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { SignIn } from "../components/SignIn"
-import { SignUp } from "../components/SignUp"
 import { PassengerCarousel } from "../components/PassengerCarousel"
 import { DriverCarousel } from "../components/DriverCarousel"
+import { SignUpPassenger } from "../components/SignUpPassenger"
+import { SignUpDriver } from "../components/SignUpDriver"
 
 const Stack = createNativeStackNavigator()
 
@@ -28,7 +29,8 @@ export function Auth() {
         }}
       />
       <Stack.Screen name="SignIn" component={SignIn} />
-      <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="SignUpPassenger" component={SignUpPassenger} />
+      <Stack.Screen name="SignUpDriver" component={SignUpDriver}/>
     </Stack.Navigator>
   )
 }
