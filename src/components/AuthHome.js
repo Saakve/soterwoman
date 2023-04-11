@@ -1,5 +1,5 @@
 import { Button } from "@rneui/base";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 
 export function AuthHome({ navigation, userType }) {
 
@@ -9,15 +9,28 @@ export function AuthHome({ navigation, userType }) {
     return (
         <View style={styles.container}>
             <View style={styles.buttons}>
-                <Button title={'INICIAR SESIÓN'} onPress={() => moveToSignIn()} />
-                <Button title={'REGISTRARSE'} onPress={() => moveToSignUp()} />
+                <Button 
+                  title={'INICIAR SESIÓN'}
+                  onPress={() => moveToSignIn()}
+                  buttonStyle={styles.button}
+                  color="#B762C1"
+                />
+                <Button 
+                  title={'REGISTRARSE'}
+                  onPress={() => moveToSignUp()}
+                  color="#8946A6"
+                  buttonStyle={styles.button}
+                />
             </View>
-            <Button
-                size="sm"
-                title={userType === 'passenger' ? '¿Eres conductora?' : '¿Eres pasajera?'}
-                onPress={userType === 'passenger' ? () => navigation.navigate('DriverCarousel', { animation: 'slide_from_bottom' }) : () => navigation.navigate('PassengerCarousel', { animation: 'slide_from_bottom' })}
-                type="clear"
-            />
+            <Text
+              style={styles.switchUserType}
+              onPress={ userType === 'passenger' 
+                ? () => navigation.navigate('DriverCarousel', { animation: 'slide_from_bottom' }) 
+                : () => navigation.navigate('PassengerCarousel', { animation: 'slide_from_bottom' })
+              }
+            >
+              {userType === 'passenger' ? '¿Eres conductora?' : '¿Eres pasajera?'}
+            </Text>
         </View>
     )
 }
@@ -29,5 +42,17 @@ const styles = StyleSheet.create({
     buttons: {
         flexDirection: 'row',
         justifyContent: 'space-around'
+    },
+    button: {
+        borderRadius: 10,
+        width: 167,
+        height: 50
+    },
+    switchUserType: {
+        color: "red",
+        fontFamily: "OpenSans-Regular",
+        fontSize: 14,
+        textAlign: "center",
+        paddingTop: 21
     }
 })

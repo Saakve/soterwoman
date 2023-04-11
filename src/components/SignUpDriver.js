@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { View, Text, Alert, StyleSheet } from "react-native"
+import { View, Alert, StyleSheet, ScrollView, BackHandler } from "react-native"
 import { Input, Button } from "@rneui/base"
 
 import { useSignUp } from "../hooks/useSignUp"
@@ -23,45 +23,60 @@ export function SignUpDriver() {
         if (errorSignUp) Alert.alert('Error', errorSignUp.message)
     }, [errorSignUp])
 
+    useEffect(() => {
+        if (page === 1) {
+            const backAction = () => {
+                setPage(0)
+                return true
+            }
+
+            const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction)
+
+            return () => backHandler.remove()
+        }
+    }, [page])
+
     if (page === 0) {
         return (
-            <View style={styles.container}>
-                <Input
-                    label="Nombre completo"
-                    value={name}
-                    onChangeText={text => setName(text)}
-                />
-                <Input
-                    label="Correo electrónico"
-                    value={email}
-                    onChangeText={text => setEmail(text)}
-                />
-                <Input
-                    label="Número de teléfono"
-                    value={phone}
-                    onChangeText={text => setPhone(text)}
-                />
-                <Input
-                    label="Número de licencia de conducir"
-                    value={drivinglicense}
-                    onChangeText={text => setDrivinglicense(text)}
-                />
-                <Input
-                    label="Ciudad"
-                    value={city}
-                    onChangeText={text => setCity(text)}
-                />
-                <Input
-                    label="Contraseña"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={text => setPassword(text)}
-                />
-                <Button
-                    title="Siguiente"
-                    onPress={() => setPage(1)}
-                />
-            </View>
+            <ScrollView>
+                <View style={styles.container}>
+                    <Input
+                        placeholder="Nombre completo"
+                        value={name}
+                        onChangeText={text => setName(text)}
+                    />
+                    <Input
+                        placeholder="Correo electrónico"
+                        value={email}
+                        onChangeText={text => setEmail(text)}
+                    />
+                    <Input
+                        placeholder="Número de teléfono"
+                        value={phone}
+                        onChangeText={text => setPhone(text)}
+                    />
+                    <Input
+                        placeholder="Número de licencia de conducir"
+                        value={drivinglicense}
+                        onChangeText={text => setDrivinglicense(text)}
+                    />
+                    <Input
+                        placeholder="Ciudad"
+                        value={city}
+                        onChangeText={text => setCity(text)}
+                    />
+                    <Input
+                        placeholder="Contraseña"
+                        secureTextEntry
+                        value={password}
+                        onChangeText={text => setPassword(text)}
+                    />
+                    <Button
+                        title="Siguiente"
+                        onPress={() => setPage(1)}
+                    />
+                </View>
+            </ScrollView>
         )
     }
 
@@ -69,29 +84,29 @@ export function SignUpDriver() {
         return (
             <View style={styles.container}>
                 <Input
-                    label="Marca"
+                    placeholder="Marca"
                     value={brand}
                     onChangeText={text => setBrand(text)}
                 />
                 <Input
-                    label="Modelo"
+                    placeholder="Modelo"
                     value={model}
                     onChangeText={text => setModel(text)}
                 />
                 <Input
-                    label="Año"
+                    placeholder="Año"
                     value={year}
                     onChangeText={text => setYear(text)}
                 />
                 <Input
-                    label="Número de la placa"
+                    placeholder="Número de la placa"
                     value={licenseplate}
                     onChangeText={text => setLicenseplate(text)}
                 />
                 <Button
                     title="Registrarse"
                     disabled={isLoadingSignUp}
-                    onPress={() => signUp({ email, password, name, phone, drivinglicense, brand, model, year, licenseplate })}
+                    onPress={() => signUp({ email, password, name, phone, drivinglicense, city, brand, model, year, licenseplate })}
                 />
             </View>
         )
