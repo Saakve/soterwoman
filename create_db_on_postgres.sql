@@ -8,7 +8,7 @@ INSERT INTO usertype (name) VALUES ('passenger');
 
 CREATE TABLE profile (
   id UUID NOT NULL PRIMARY KEY REFERENCES auth.users,
-  name VARCHAR(50) NOT NULL DEFAULT 'NAME' CHECK (name ~ '^[A-Za-z]{3,}(\s[A-Za-z]+)*$'),
+  name VARCHAR(150) NOT NULL DEFAULT 'NAME' CHECK (name ~ '^[A-Za-z]{3,}(\s[A-Za-z]+)*$'),
   phone VARCHAR(10) NOT NULL DEFAULT '0000000000' CHECK (phone ~ '^[0-9]{10}$'),
   rating REAL NOT NULL DEFAULT 0 CHECK (rating >= 0 AND rating <= 5),
   usagetime INT NOT NULL DEFAULT 0 CHECK (usagetime >= 0),
@@ -19,8 +19,8 @@ CREATE TABLE profile (
 
 CREATE TABLE vehicle (
   id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  model VARCHAR(50) NOT NULL DEFAULT 'MODEL' CHECK (CHAR_LENGTH(model) > 2),
-  brand VARCHAR(50) NOT NULL DEFAULT 'BRAND' CHECK (CHAR_LENGTH(brand) > 2),
+  model VARCHAR(50) NOT NULL DEFAULT 'MODEL' CHECK (CHAR_LENGTH(model) >= 2),
+  brand VARCHAR(50) NOT NULL DEFAULT 'BRAND' CHECK (CHAR_LENGTH(brand) >= 2),
   year INTEGER NOT NULL DEFAULT 1900 CHECK (year >= 1900),
   licenseplate VARCHAR(11) CHECK (licenseplate ~ '^[A-Z0-9]{1,4}(-[A-Z0-9]{1,4}){1,2}$')
 );
@@ -28,7 +28,7 @@ CREATE TABLE vehicle (
 CREATE TABLE driver (
   id UUID PRIMARY KEY REFERENCES auth.users,
   drivinglicense VARCHAR(12) NOT NULL DEFAULT '123456789ACD' CHECK (drivinglicense ~ '^[A-Za-z0-9]{12}$'),
-  city VARCHAR(50) NOT NULL DEFAULT 'city' CHECK (CHAR_LENGTH(city) > 3),
+  city VARCHAR(150) NOT NULL DEFAULT 'city' CHECK (city ~ '^[A-Za-z]{3,}(\s[A-Za-z]+)*$'),
   idvehicle INT REFERENCES vehicle
 );
 
