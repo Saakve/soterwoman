@@ -7,9 +7,9 @@ export function UserContextProvider({children}) {
     const [userData, setUserData] = useState({})
 
     const getUserData = async () => {
-        const { data: profile, errorProfile } = await supabase.from('profile').select()
         const { id, email } = (await supabase.auth.getSession()).data.session.user
-        
+        const { data: profile, errorProfile } = await supabase.from('profile').select().eq("id", id)
+
         const userData = {
             id,
             email,
