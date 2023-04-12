@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { supabase } from "../services/supabase"
+import { validateEmailAndPassword, validateName, validatePhone } from "../utils/validateInputs"
 
 export function useSignUp({ usertype }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -8,13 +9,29 @@ export function useSignUp({ usertype }) {
     const createUser = async ({email, password}) => {
         const { data, error } = await supabase.auth.signUp({email, password})
 
-        console.log(data)
         if(error) console.log(error)
 
         return data.user.id
     }
 
+    const validateProfileInputs = (email, password, name, phone) => {
+        validateEmailAndPassword(email,password)
+        validateName(name)
+        validatePhone(phone)
+    }
+
+    const validatePassengerInputs = (emergencyPhone) => {
+        validatePhone(emergencyPhone, 'emergencyPhone')
+    }
+
+    //const validateDriverAndVehicleInputs = (drivinglicense, city, model, brand, year, licenseplate) => {
+    //    
+    //}
+
     const signUpPassenger = async ({ email, password, name, phone, emergencyPhone }) => {
+        validateProfileInputs(email, password, name, phone)
+        validatePassengerInputs(emergencyPhone)
+
         setIsLoading(true)
 
         const id = await createUser({ email, password })
@@ -26,7 +43,6 @@ export function useSignUp({ usertype }) {
             newemergencyphone: emergencyPhone
         })
 
-        console.log(data)
         if(error) {
             console.log(error)
             setError(error)
@@ -35,6 +51,7 @@ export function useSignUp({ usertype }) {
     }
 
     const signUpDriver = async ({ email, password, name, phone, drivinglicense, city, model, brand, year, licenseplate }) => {
+        validateProfileInputs(email, password, name, phone)
         setIsLoading(true)
 
         const id = await createUser({ email, password })
@@ -51,11 +68,7 @@ export function useSignUp({ usertype }) {
             newlicenseplate: licenseplate
         })
 
-        console.log(data)
-        if(error) {
-            console.log(error)
-            setError(error)
-        }
+        if(error) setError(error)
         setIsLoading(false)
     }
 

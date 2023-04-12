@@ -1,12 +1,18 @@
-import { useEffect, useState } from "react"
-import { View, Alert, StyleSheet, ScrollView, BackHandler } from "react-native"
-import { Input, Button } from "@rneui/base"
+import { createContext, useContext, useEffect, useState } from "react"
+import { View, Alert, StyleSheet, ScrollView, BackHandler, Text, Dimensions } from "react-native"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { Button } from "@rneui/base"
 
 import { useSignUp } from "../hooks/useSignUp"
+import { InputStyled } from "./InputStyled.js"
+import { GoBackButton } from "../components/GoBackButton"
 
-export function SignUpDriver() {
-    const { isLoading: isLoadingSignUp, error: errorSignUp, signUp } = useSignUp({ usertype: 'driver' })
-    const [page, setPage] = useState(0)
+const Stack = createNativeStackNavigator()
+const AllInfoContex = createContext(null)
+const { height } = Dimensions.get('window')
+
+const DriverInfo = ({ navigation }) => {
+    const { setDriverInfo } = useContext(AllInfoContex)
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -14,6 +20,69 @@ export function SignUpDriver() {
     const [phone, setPhone] = useState("")
     const [drivinglicense, setDrivinglicense] = useState("")
     const [city, setCity] = useState("")
+
+    const handlePressButton = () => {
+        setDriverInfo({ email, password, name, phone, drivinglicense, city })
+        navigation.navigate('VehicleInfo')
+    }
+
+    return (
+        <ScrollView>
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Crear nueva cuenta</Text>
+                </View>
+                <InputStyled
+                    placeholder="Nombre completo"
+                    value={name}
+                    onChangeText={text => setName(text)}
+                    inputMode="text"
+                />
+                <InputStyled
+                    placeholder="Correo electrónico"
+                    value={email}
+                    onChangeText={text => setEmail(text)}
+                    inputMode="email"
+                />
+                <InputStyled
+                    placeholder="Teléfono"
+                    value={phone}
+                    onChangeText={text => setPhone(text)}
+                    inputMode="tel"
+                />
+                <InputStyled
+                    placeholder="Número de licencia de conducir"
+                    value={drivinglicense}
+                    onChangeText={text => setDrivinglicense(text)}
+                    inputMode="text"
+                />
+                <InputStyled
+                    placeholder="Ciudad"
+                    value={city}
+                    onChangeText={text => setCity(text)}
+                    inputMode="text"
+                />
+                <InputStyled
+                    placeholder="Contraseña"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={text => setPassword(text)}
+                />
+                <Button
+                    title="Siguiente"
+                    onPress={() => handlePressButton()}
+                    color="#8946A6"
+                    buttonStyle={styles.button}
+                />
+            </View>
+        </ScrollView>
+    )
+}
+
+const VehicleInfo = () => {
+    const { isLoading: isLoadingSignUp, error: errorSignUp, signUp } = useSignUp({ usertype: 'driver' })
+    const { driverInfo } = useContext(AllInfoContex)
+
     const [model, setModel] = useState("")
     const [brand, setBrand] = useState("")
     const [year, setYear] = useState("")
@@ -23,106 +92,83 @@ export function SignUpDriver() {
         if (errorSignUp) Alert.alert('Error', errorSignUp.message)
     }, [errorSignUp])
 
-    useEffect(() => {
-        if (page === 1) {
-            const backAction = () => {
-                setPage(0)
-                return true
-            }
-
-            const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction)
-
-            return () => backHandler.remove()
-        }
-    }, [page])
-
-    if (page === 0) {
-        return (
-            <ScrollView>
-                <View style={styles.container}>
-                    <Input
-                        placeholder="Nombre completo"
-                        value={name}
-                        onChangeText={text => setName(text)}
-                    />
-                    <Input
-                        placeholder="Correo electrónico"
-                        value={email}
-                        onChangeText={text => setEmail(text)}
-                    />
-                    <Input
-                        placeholder="Número de teléfono"
-                        value={phone}
-                        onChangeText={text => setPhone(text)}
-                    />
-                    <Input
-                        placeholder="Número de licencia de conducir"
-                        value={drivinglicense}
-                        onChangeText={text => setDrivinglicense(text)}
-                    />
-                    <Input
-                        placeholder="Ciudad"
-                        value={city}
-                        onChangeText={text => setCity(text)}
-                    />
-                    <Input
-                        placeholder="Contraseña"
-                        secureTextEntry
-                        value={password}
-                        onChangeText={text => setPassword(text)}
-                    />
-                    <Button
-                        title="Siguiente"
-                        onPress={() => setPage(1)}
-                    />
-                </View>
-            </ScrollView>
-        )
+    const handlePressButton = () => {
+        console.log({ ...driverInfo, brand, model, year, licenseplate })
     }
 
-    if (page === 1) {
-        return (
+    return (
+        <ScrollView>
             <View style={styles.container}>
-                <Input
+                <View style={styles.header}>
+                    <Text style={styles.title}>Detalles del vehículo</Text>
+                </View>
+                <InputStyled
                     placeholder="Marca"
                     value={brand}
                     onChangeText={text => setBrand(text)}
+                    inputMode="text"
                 />
-                <Input
+                <InputStyled
                     placeholder="Modelo"
                     value={model}
                     onChangeText={text => setModel(text)}
+                    inputMode="text"
                 />
-                <Input
+                <InputStyled
                     placeholder="Año"
                     value={year}
                     onChangeText={text => setYear(text)}
+                    inputMode="numeric"
                 />
-                <Input
+                <InputStyled
                     placeholder="Número de la placa"
                     value={licenseplate}
                     onChangeText={text => setLicenseplate(text)}
+                    inputMode="text"
                 />
                 <Button
                     title="Registrarse"
                     disabled={isLoadingSignUp}
-                    onPress={() => signUp({ email, password, name, phone, drivinglicense, city, brand, model, year, licenseplate })}
+                    onPress={() => handlePressButton()}
+                    color="#8946A6"
+                    buttonStyle={styles.button}
                 />
             </View>
-        )
-    }
+        </ScrollView>
+    )
+}
+
+export function SignUpDriver() {
+    const [driverInfo, setDriverInfo] = useState({})
+
+    return (
+        <AllInfoContex.Provider value={{ driverInfo, setDriverInfo }}>
+            <Stack.Navigator screenOptions={{
+                headerShadowVisible: false,
+                title: "",
+                headerLeft: () => <GoBackButton />
+            }}>
+                <Stack.Screen name="DriverInfo" component={DriverInfo} />
+                <Stack.Screen name="VehicleInfo" component={VehicleInfo} />
+            </Stack.Navigator>
+        </AllInfoContex.Provider>
+    )
 }
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 20,
-        justifyContent: "center",
-        alignContent: "center",
+        backgroundColor: "#FFF",
+        height
+    },
+    header: {
+        alignSelf: "center",
+        width: 335
     },
     title: {
-        textAlign: "center",
-        fontSize: 20,
-        marginBottom: 20,
+        fontFamily: "OpenSans-Bold",
+        textAlign: "left",
+        fontSize: 24,
+        marginBottom: 13,
     },
     input: {
         borderColor: "red",
@@ -132,5 +178,13 @@ const styles = StyleSheet.create({
     providers: {
         flexDirection: "row",
         justifyContent: "space-around"
+    },
+    button: {
+        marginTop: 20,
+        color: "#8946A6",
+        width: 330,
+        height: 50,
+        alignSelf: "center",
+        borderRadius: 10
     }
 })

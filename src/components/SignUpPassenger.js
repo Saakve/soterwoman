@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react"
-import { View, Text, Alert, StyleSheet } from "react-native"
-import { Input, Button } from "@rneui/base"
+import { View, Text, Alert, StyleSheet, Dimensions } from "react-native"
+import { Button } from "@rneui/base"
 
+import { InputStyled } from "./InputStyled"
 import { useSignUp } from "../hooks/useSignUp"
+import { ScrollView } from "react-native-gesture-handler"
+
+const { height }= Dimensions.get("window")
 
 export function SignUpPassenger() {
     const { isLoading: isLoadingSignUp, error: errorSignUp, signUp } = useSignUp({ usertype: 'passenger' })
@@ -18,42 +22,32 @@ export function SignUpPassenger() {
     }, [errorSignUp])
 
     return (
-        <View style={styles.container}>
-            <View style={styles.form}>
+        <ScrollView>
+            <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.title}>Crear nueva cuenta</Text>
                 </View>
-                <Input
-                    inputStyle={styles.inputplaceholder}
-                    inputContainerStyle={styles.inputcontainer}
+                <InputStyled
                     placeholder="Nombre completo"
                     value={name}
                     onChangeText={text => setName(text)}
                 />
-                <Input
-                    inputStyle={styles.inputplaceholder}
-                    inputContainerStyle={styles.inputcontainer}
+                <InputStyled
                     placeholder="Correo electrónico"
                     value={email}
                     onChangeText={text => setEmail(text)}
                 />
-                <Input
-                    inputStyle={styles.inputplaceholder}
-                    inputContainerStyle={styles.inputcontainer}
+                <InputStyled
                     placeholder="Teléfono"
                     value={phone}
                     onChangeText={text => setPhone(text)}
                 />
-                <Input
-                    inputStyle={styles.inputplaceholder}
-                    inputContainerStyle={styles.inputcontainer}
+                <InputStyled
                     placeholder="Teléfono de emergencia"
                     value={emergencyPhone}
                     onChangeText={text => setEmergencyPhone(text)}
                 />
-                <Input
-                    inputStyle={styles.inputplaceholder}
-                    inputContainerStyle={styles.inputcontainer}
+                <InputStyled
                     placeholder="Contraseña"
                     secureTextEntry
                     value={password}
@@ -67,15 +61,14 @@ export function SignUpPassenger() {
                     buttonStyle={styles.button}
                 />
             </View>
-        </View>
+        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 24
-    },
-    form: {
+        backgroundColor: "#FFF",
+        height
     },
     header: {
         alignSelf: "center",
@@ -85,20 +78,7 @@ const styles = StyleSheet.create({
         fontFamily: "OpenSans-Bold",
         textAlign: "left",
         fontSize: 24,
-        marginTop: 32,
         marginBottom: 13,
-    },
-    inputplaceholder: {
-        paddingLeft: 20,
-        paddingTop: 13,
-        paddingBottom: 12,
-    },
-    inputcontainer: {
-        width: 335,
-        borderColor: "black",
-        borderWidth: 1,
-        borderRadius: 5,
-        alignSelf: "center"
     },
     input: {
         flexDirection: "row",
