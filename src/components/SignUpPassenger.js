@@ -5,6 +5,7 @@ import { Button } from "@rneui/base"
 import { InputStyled } from "./InputStyled"
 import { useSignUp } from "../hooks/useSignUp"
 import { ScrollView } from "react-native-gesture-handler"
+import { validatePassengerInputs } from "../utils/validateInputs"
 
 const { height } = Dimensions.get("window")
 
@@ -17,36 +18,21 @@ export function SignUpPassenger() {
     const [phone, setPhone] = useState("")
     const [emergencyPhone, setEmergencyPhone] = useState("")
 
-    const [emailErrorMessage, setEmailErrorMessage] = useState(null)
-    const [passwordErrorMessage, setPasswordErrorMessage] = useState(null)
-    const [nameErrorMessage, setNameErrorMessage] = useState(null)
-    const [phoneErrorMessage, setPhoneErrorMessage] = useState(null)
-    const [emergencyPhoneErrorMessage, setEmergencyPhoneErrorMessage] = useState(null)
+    const [errorMessage, setErrorMessage] = useState(null)
 
     useEffect(() => {
         if (errorSignUp) Alert.alert('Error', errorSignUp.message)
     }, [errorSignUp])
 
-
-    const cleanInputsErrors = () => {
-        setEmailErrorMessage(null)
-        setPasswordErrorMessage(null)
-        setNameErrorMessage(null)
-        setPhoneErrorMessage(null)
-        setEmergencyPhoneErrorMessage(null)
-    }
-
     const handlePressButton = async () => {
-        cleanInputsErrors()
+        setErrorMessage(null)
         try {
-            await signUp({ email, password, name, phone, emergencyPhone })
+            await validatePassengerInputs(name, email.toLowerCase(), phone, emergencyPhone, password)
         } catch (error) {
-            if(error.param === 'email') setEmailErrorMessage(error.message)
-            if(error.param === 'password') setPasswordErrorMessage(error.message)
-            if(error.param === 'name') setNameErrorMessage(error.message)
-            if(error.param === 'phone') setPhoneErrorMessage(error.message)
-            if(error.param === 'emergencyPhone') setEmergencyPhoneErrorMessage(error.message)
+            setErrorMessage(error)
+            return
         }
+        await signUp({ email, password, name, phone, emergencyPhone })
     }
 
     return (
@@ -56,39 +42,44 @@ export function SignUpPassenger() {
                     <Text style={styles.title}>Crear nueva cuenta</Text>
                 </View>
                 <InputStyled
+                    name='name'
                     placeholder="Nombre completo"
                     value={name}
                     onChangeText={text => setName(text)}
-                    errorMessage={nameErrorMessage}
+                    errorMessage={errorMessage}
                     inputMode="text"
                 />
                 <InputStyled
+                    name='email'
                     placeholder="Correo electrónico"
                     value={email}
                     onChangeText={text => setEmail(text)}
-                    errorMessage={emailErrorMessage}
+                    errorMessage={errorMessage}
                     inputMode="email"
                 />
                 <InputStyled
+                    name='phone'
                     placeholder="Teléfono"
                     value={phone}
                     onChangeText={text => setPhone(text)}
-                    errorMessage={phoneErrorMessage}
+                    errorMessage={errorMessage}
                     inputMode="tel"
                 />
                 <InputStyled
+                    name='emergencyPhone'
                     placeholder="Teléfono de emergencia"
                     value={emergencyPhone}
                     onChangeText={text => setEmergencyPhone(text)}
-                    errorMessage={emergencyPhoneErrorMessage}
+                    errorMessage={errorMessage}
                     inputMode="tel"
                 />
                 <InputStyled
+                    name='password'
                     placeholder="Contraseña"
                     secureTextEntry
                     value={password}
                     onChangeText={text => setPassword(text)}
-                    errorMessage={passwordErrorMessage}
+                    errorMessage={errorMessage}
                     inputMode="text"
                 />
                 <Button

@@ -6,6 +6,7 @@ import { useSignInWithProvider } from "../hooks/useSignInWithProvider"
 import { useSignInWithEmail } from "../hooks/useSignInWithEmail"
 
 import { InputStyled } from "./InputStyled"
+import { validateFormatEmailAndPassword } from "../utils/validateInputs"
 
 export function SignIn() {
     const { isLoading: isLoadingFacebook, error: errorFacebook, signIn: signInWithFacebook } = useSignInWithProvider({ provider: 'facebook' })
@@ -14,28 +15,23 @@ export function SignIn() {
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [emailErrorMessage, setEmailErrorMessage] = useState(null)
-    const [passwordErrorMessage, setPasswordErrorMessage] = useState(null)
+    const [errorMessage, setErrorMessage] = useState(null)
 
     useEffect(() => {
         const anyerror = errorFacebook || errorGoogle || errorEmail
         if (anyerror) Alert.alert('Error', anyerror.message)
     }, [errorFacebook, errorGoogle, errorEmail])
 
-    const cleanInputsErrors = () => {
-        setEmailErrorMessage(null)
-        setPasswordErrorMessage(null)
-    }
-
     const handlePressButton = async () => {
-        cleanInputsErrors()
+        setErrorMessage(null)
         try {
-            await signIn({email, password})
+            validateFormatEmailAndPassword(email, password)
         } catch (error) {
             console.log(error)
-            if(error.param === 'email') setEmailErrorMessage(error.message)
-            if(error.param === 'password') setPasswordErrorMessage(error.message)
+            setErrorMessage(error)
+            return
         }
+        await signIn({email, password})
     }
 
     return (
@@ -44,18 +40,20 @@ export function SignIn() {
                 <Text style={styles.title}>Iniciar sesión</Text>
             </View>
             <InputStyled
+                name='email'
                 placeholder="Correo electrónico"
                 value={email}
                 onChangeText={text => setEmail(text.trim())}
-                errorMessage={emailErrorMessage}
+                errorMessage={errorMessage}
                 inputMode="email"
             />
             <InputStyled
+                name='password'
                 placeholder="Contraseña"
                 secureTextEntry
                 value={password}
                 onChangeText={text => setPassword(text.trimStart())}
-                errorMessage={passwordErrorMessage}
+                errorMessage={errorMessage}
                 inputMode="text"
             />
             <Button

@@ -1,9 +1,17 @@
+import { AuthError } from "@supabase/supabase-js"
+import { supabase } from "../services/supabase"
+
 class FormatError extends Error {
     constructor(message, param) {
         super(message)
         this.name = "FormatError"
         this.param = param
+        this.__isFormatError = true
     }
+}
+
+export function isFormatError(error){
+    return typeof error === 'object' && error !== null && '__isFormatError' in error
 }
 
 /**
@@ -41,14 +49,27 @@ export function validateName(name) {
     validateOnlyString(name, 'name')
 }
 
-export function validatePhone(phone, paramOfException = 'phone') {
-    if (phone.length !== 10) throw new FormatError('Deben ser 10 números', paramOfException)
-    validateOnlyNumbers(phone, paramOfException)
+export async function validatePhone(phone) {
+    if (phone.length !== 10) throw new FormatError('Deben ser 10 números', 'phone')
+    validateOnlyNumbers(phone, 'phone')
+    const { data } = await supabase.rpc("phoneExists", { phonetoevaluate: phone })
+    if(data) throw Object.defineProperty(new AuthError('Teléfono ya en uso'), 'param', {value: 'phone'})
 }
 
-export function validateEmail(email) {
+export function validateEmergencyPhone(phone) {
+    if (phone.length !== 10) throw new FormatError('Deben ser 10 números', 'emergencyPhone')
+    validateOnlyNumbers(phone, 'emergencyPhone')
+}
+
+export function validateFormatEmail(email) {
     validateMaxMinLengthOfString(email, 3, 255, 'email')
-    if (!(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+$/.test(email))) throw new FormatError('Formato inválido', 'email')
+    if (!(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+$/.test(email))) throw new FormatError('Formato inválido', 'email')    
+}
+
+export async function validateEmail(email) {
+    validateFormatEmail(email)
+    const { data } = await supabase.rpc("emailExists", { emailtoevaluate: email })
+    if(data) throw Object.defineProperty(new AuthError('Email ya en uso'), 'param', {value: 'email'})
 }
 
 export function validatePassword(password) {
@@ -70,51 +91,67 @@ export function validateBrand(brand) {
 
 export function validateYear(year) {
     validateOnlyNumbers(year, 'year')
-    if (year >= 1900) throw new FormatError('Año inválido', 'year')
+    if (year < 1900) throw new FormatError('Año inválido', 'year')
 }
 
-export function validateLicensePlate(licensePlate) {
+export async function validateLicensePlate(licensePlate) {
     validateMaxMinLengthOfString(licensePlate, 3, 11, 'licensePlate')
     if (!(/^[A-Z0-9]{1,4}(-[A-Z0-9]{1,4}){1,2}$/.test(licensePlate))) throw new FormatError('Placa inválida', 'licensePlate')
+    const { data } = await supabase.rpc("licensePlateExists", { licenseplatetoevaluate: licensePlate })
+    if(data) throw Object.defineProperty(new AuthError('Placa ya en uso'), 'param', {value: 'licensePlate'})
 }
 
-export function validateDrivingLicense(drivingLicense) {
+export async function validateDrivingLicense(drivingLicense) {
     if (drivingLicense.length !== 12) throw new FormatError('Deben ser 12 caracteres alfanuméricos', 'drivingLicense')
     if (!(/^[A-Za-z0-9]{12}$/.test(drivingLicense))) throw new FormatError('Solo caracteres alfanuméricos', 'drivingLicense')
+    const { data } = await supabase.rpc("drivingLicenseExists", { drivinglicensetoevaluate: drivingLicense })
+    if(data) throw Object.defineProperty(new AuthError('Licensia ya en uso'), 'param', {value: 'drivingLicense'})
 }
 
-export function validateEmailAndPassword(email, password) {
-    validateEmail(email)
+export function validateFormatEmailAndPassword(email, password) {
+    validateFormatEmail(email)
     validatePassword(password)
 }
 
-export function validateProfileInputs(email, password, name, phone) {
-    validateEmailAndPassword(email, password)
-    validateName(name)
-    validatePhone(phone)
-}
-
-export function validatePassengerInputs(name, email, phone, emergencyPhone, password) {
-    validateName(name)
-    validateEmail(email)
-    validatePhone(phone)
-    validatePhone(emergencyPhone, 'emergencyPhone')
+export async function validateEmailAndPassword(email, password) {
+    await validateEmail(email)
     validatePassword(password)
 }
 
-export function validateDriverInputs(name, email, phone, drivingLicense, city, password) {
+export async function validateProfileInputs(email, password, name, phone) {
+    await validateEmailAndPassword(email, password)
     validateName(name)
-    validateEmail(email)
-    validatePhone(phone)
-    validateDrivingLicense(drivingLicense)
+    await validatePhone(phone)
+}
+
+export async function validatePassengerInputs(name, email, phone, emergencyPhone, password) {
+    validateName(name)
+    await validateEmail(email)
+    await validatePhone(phone)
+    validateEmergencyPhone(emergencyPhone)
+    validatePassword(password)
+}
+
+export async function validateDriverInputs(name, email, phone, drivingLicense, city, password) {
+    validateName(name)
+    await validateEmail(email)
+    await validatePhone(phone)
+    await validateDrivingLicense(drivingLicense)
     validateCity(city)
     validatePassword(password)
 }
 
-export function validateDriverAndVehicleInputs(name, email, phone, drivingLicense, city, password, model, brand, year, licensePlate) {
-    validateDriverInputs(name, email, phone, drivingLicense, city, password, drivingLicense, city)
-    validateModel(model)
+export async function validateVehicleInputs(brand, model, year, licensePlate) {
     validateBrand(brand)
+    validateModel(model)
     validateYear(year)
-    validateLicensePlate(licensePlate)
+    await validateLicensePlate(licensePlate)
+}
+
+export async function validateDriverAndVehicleInputs(name, email, phone, drivingLicense, city, password, brand, model, year, licensePlate) {
+    await validateDriverInputs(name, email, phone, drivingLicense, city, password, drivingLicense, city)
+    validateBrand(brand)
+    validateModel(model)
+    validateYear(year)
+    await validateLicensePlate(licensePlate)
 }

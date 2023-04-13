@@ -1,11 +1,19 @@
 import { Input } from "@rneui/base"
 import { StyleSheet } from "react-native"
+import { isFormatError } from "../utils/validateInputs";
+import { isAuthError } from "@supabase/supabase-js";
 
-export function InputStyled(props) {
+export function InputStyled({name, errorMessage = null,  ...props}) {
+
     return (
         <Input
             inputStyle={styles.inputplaceholder}
             inputContainerStyle={styles.inputcontainer}
+            errorMessage={ 
+                ((isFormatError(errorMessage) || isAuthError(errorMessage)) && errorMessage.param === name) 
+                ? errorMessage.message
+                : (typeof errorMessage === 'string') ? errorMessage : null 
+            }
             {...props}
         />
     )

@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { supabase } from "../services/supabase"
-import { validateProfileInputs, validatePhone, validateDriverAndVehicleInputs, validateEmail, validatePassengerInputs } from "../utils/validateInputs"
 
 export function useSignUp({ usertype }) {
     const [isLoading, setIsLoading] = useState(false)
@@ -15,7 +14,6 @@ export function useSignUp({ usertype }) {
     }
 
     const signUpPassenger = async ({ email, password, name, phone, emergencyPhone }) => {
-        validatePassengerInputs(name, email, phone, emergencyPhone, password)
         setIsLoading(true)
 
         const id = await createUser({ email, password })
@@ -34,9 +32,7 @@ export function useSignUp({ usertype }) {
         setIsLoading(false)
     }
 
-    const signUpDriver = async ({ email, password, name, phone, drivingLicense, city, model, brand, year, licensePlate }) => {
-        console.log(name, email, phone, drivingLicense, city, password)
-        validateDriverAndVehicleInputs(name, email, phone, drivingLicense, city, password, model, brand, year, licensePlate)
+    const signUpDriver = async ({ email, password, name, phone, drivingLicense, city, brand, model, year, licensePlate }) => {
         setIsLoading(true)
 
         const id = await createUser({ email, password })
