@@ -6,6 +6,7 @@ import { Button } from "@rneui/base"
 import { useSignUp } from "../hooks/useSignUp"
 import { InputStyled } from "./InputStyled.js"
 import { GoBackButton } from "../components/GoBackButton"
+import { validateDriverInputs } from "../utils/validateInputs"
 
 const Stack = createNativeStackNavigator()
 const AllInfoContex = createContext(null)
@@ -14,15 +15,43 @@ const { height } = Dimensions.get('window')
 const DriverInfo = ({ navigation }) => {
     const { setDriverInfo } = useContext(AllInfoContex)
 
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
     const [name, setName] = useState("")
+    const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
-    const [drivinglicense, setDrivinglicense] = useState("")
+    const [drivingLicense, setDrivingLicense] = useState("")
     const [city, setCity] = useState("")
+    const [password, setPassword] = useState("")
 
-    const handlePressButton = () => {
-        setDriverInfo({ email, password, name, phone, drivinglicense, city })
+    const [nameErrorMessage, setNameErrorMessage] = useState(null)
+    const [emailErrorMessage, setEmailErrorMessage] = useState(null)
+    const [phoneErrorMessage, setPhoneErrorMessage] = useState(null)
+    const [drivingLicenseErrorMessage, setDrivingLicenseErrorMessage ] = useState(null)
+    const [cityErrorMessage, setCityErrorMessage] = useState(null)
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState(null)
+
+    const cleanInputsErrors = () => {
+        setNameErrorMessage(null)
+        setEmailErrorMessage(null)
+        setPhoneErrorMessage(null)
+        setDrivingLicenseErrorMessage(null)
+        setCityErrorMessage(null)
+        setPasswordErrorMessage(null)
+    }
+
+    const handlePressButton = async () => {
+        cleanInputsErrors()
+        try {
+            validateDriverInputs(name, email, phone, drivingLicense, city, password)
+        } catch (error) {
+            if(error.param === 'name') setNameErrorMessage(error.message)
+            if(error.param === 'email') setEmailErrorMessage(error.message)
+            if(error.param === 'phone') setPhoneErrorMessage(error.message)
+            if(error.param === 'drivingLicense') setDrivingLicenseErrorMessage(error.message)
+            if(error.param === 'city') setCityErrorMessage(error.message)
+            if(error.param === 'password') setPasswordErrorMessage(error.message)
+            return
+        }
+        setDriverInfo({ email, password, name, phone, drivingLicense, city })
         navigation.navigate('VehicleInfo')
     }
 
@@ -37,40 +66,47 @@ const DriverInfo = ({ navigation }) => {
                     value={name}
                     onChangeText={text => setName(text)}
                     inputMode="text"
+                    errorMessage={nameErrorMessage}
                 />
                 <InputStyled
                     placeholder="Correo electrónico"
                     value={email}
                     onChangeText={text => setEmail(text)}
                     inputMode="email"
+                    errorMessage={emailErrorMessage}
                 />
                 <InputStyled
                     placeholder="Teléfono"
                     value={phone}
                     onChangeText={text => setPhone(text)}
                     inputMode="tel"
+                    errorMessage={phoneErrorMessage}
                 />
                 <InputStyled
                     placeholder="Número de licencia de conducir"
-                    value={drivinglicense}
-                    onChangeText={text => setDrivinglicense(text)}
+                    value={drivingLicense}
+                    onChangeText={text => setDrivingLicense(text)}
                     inputMode="text"
+                    errorMessage={drivingLicenseErrorMessage}
                 />
                 <InputStyled
                     placeholder="Ciudad"
                     value={city}
                     onChangeText={text => setCity(text)}
                     inputMode="text"
+                    errorMessage={cityErrorMessage}
                 />
                 <InputStyled
                     placeholder="Contraseña"
                     secureTextEntry
                     value={password}
                     onChangeText={text => setPassword(text)}
+                    inputMode="text"
+                    errorMessage={passwordErrorMessage}
                 />
                 <Button
                     title="Siguiente"
-                    onPress={() => handlePressButton()}
+                    onPress={handlePressButton}
                     color="#8946A6"
                     buttonStyle={styles.button}
                 />
@@ -86,14 +122,35 @@ const VehicleInfo = () => {
     const [model, setModel] = useState("")
     const [brand, setBrand] = useState("")
     const [year, setYear] = useState("")
-    const [licenseplate, setLicenseplate] = useState("")
+    const [licensePlate, setLicensePlate] = useState("")
+
+    const [modelErrorMessage, setModelErrorMessage] = useState(null)
+    const [brandErrorMessage, setBrandErrorMessage] = useState(null)
+    const [yearErrorMessage, setYearErrorMessage] = useState(null)
+    const [licensePlateErrorMessage, setLicensePlateErrorMessage] = useState(null)
 
     useEffect(() => {
         if (errorSignUp) Alert.alert('Error', errorSignUp.message)
     }, [errorSignUp])
 
-    const handlePressButton = () => {
-        console.log({ ...driverInfo, brand, model, year, licenseplate })
+    const cleanInputsErrors = () => {
+        setModelErrorMessage(null)
+        setBrandErrorMessage(null)
+        setYearErrorMessage(null)
+        setLicensePlateErrorMessage(null)
+    }
+
+    const handlePressButton = async () => {
+        cleanInputsErrors()
+        try {
+            await signUp({ ...driverInfo, brand, model, year, licensePlate })
+        } catch (error) {
+            console.log(error)
+            if(error.param === 'brand') setBrandErrorMessage(error.message)
+            if(error.param === 'model') setModelErrorMessage(error.message)
+            if(error.param === 'year') setYearErrorMessage(error.message)
+            if(error.param === 'licensePlate') setLicensePlate(error.message)
+        }
     }
 
     return (
@@ -107,29 +164,33 @@ const VehicleInfo = () => {
                     value={brand}
                     onChangeText={text => setBrand(text)}
                     inputMode="text"
+                    errorMessage={brandErrorMessage}
                 />
                 <InputStyled
                     placeholder="Modelo"
                     value={model}
                     onChangeText={text => setModel(text)}
                     inputMode="text"
+                    errorMessage={modelErrorMessage}
                 />
                 <InputStyled
                     placeholder="Año"
                     value={year}
                     onChangeText={text => setYear(text)}
                     inputMode="numeric"
+                    errorMessage={yearErrorMessage}
                 />
                 <InputStyled
                     placeholder="Número de la placa"
-                    value={licenseplate}
-                    onChangeText={text => setLicenseplate(text)}
+                    value={licensePlate}
+                    onChangeText={text => setLicensePlate(text)}
                     inputMode="text"
+                    errorMessage={licensePlateErrorMessage}
                 />
                 <Button
                     title="Registrarse"
                     disabled={isLoadingSignUp}
-                    onPress={() => handlePressButton()}
+                    onPress={handlePressButton}
                     color="#8946A6"
                     buttonStyle={styles.button}
                 />

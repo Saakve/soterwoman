@@ -48,6 +48,7 @@ export function SignIn() {
                 value={email}
                 onChangeText={text => setEmail(text.trim())}
                 errorMessage={emailErrorMessage}
+                inputMode="email"
             />
             <InputStyled
                 placeholder="Contraseña"
@@ -55,6 +56,7 @@ export function SignIn() {
                 value={password}
                 onChangeText={text => setPassword(text.trimStart())}
                 errorMessage={passwordErrorMessage}
+                inputMode="text"
             />
             <Button
                 title="Iniciar sesion"

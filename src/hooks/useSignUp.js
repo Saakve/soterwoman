@@ -1,37 +1,21 @@
 import { useState } from "react"
 import { supabase } from "../services/supabase"
-import { validateEmailAndPassword, validateName, validatePhone } from "../utils/validateInputs"
+import { validateProfileInputs, validatePhone, validateDriverAndVehicleInputs, validateEmail, validatePassengerInputs } from "../utils/validateInputs"
 
 export function useSignUp({ usertype }) {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    const createUser = async ({email, password}) => {
-        const { data, error } = await supabase.auth.signUp({email, password})
+    const createUser = async ({ email, password }) => {
+        const { data, error } = await supabase.auth.signUp({ email, password })
 
-        if(error) console.log(error)
+        if (error) console.log(error)
 
         return data.user.id
     }
 
-    const validateProfileInputs = (email, password, name, phone) => {
-        validateEmailAndPassword(email,password)
-        validateName(name)
-        validatePhone(phone)
-    }
-
-    const validatePassengerInputs = (emergencyPhone) => {
-        validatePhone(emergencyPhone, 'emergencyPhone')
-    }
-
-    //const validateDriverAndVehicleInputs = (drivinglicense, city, model, brand, year, licenseplate) => {
-    //    
-    //}
-
     const signUpPassenger = async ({ email, password, name, phone, emergencyPhone }) => {
-        validateProfileInputs(email, password, name, phone)
-        validatePassengerInputs(emergencyPhone)
-
+        validatePassengerInputs(name, email, phone, emergencyPhone, password)
         setIsLoading(true)
 
         const id = await createUser({ email, password })
@@ -43,15 +27,16 @@ export function useSignUp({ usertype }) {
             newemergencyphone: emergencyPhone
         })
 
-        if(error) {
+        if (error) {
             console.log(error)
             setError(error)
         }
         setIsLoading(false)
     }
 
-    const signUpDriver = async ({ email, password, name, phone, drivinglicense, city, model, brand, year, licenseplate }) => {
-        validateProfileInputs(email, password, name, phone)
+    const signUpDriver = async ({ email, password, name, phone, drivingLicense, city, model, brand, year, licensePlate }) => {
+        console.log(name, email, phone, drivingLicense, city, password)
+        validateDriverAndVehicleInputs(name, email, phone, drivingLicense, city, password, model, brand, year, licensePlate)
         setIsLoading(true)
 
         const id = await createUser({ email, password })
@@ -60,18 +45,18 @@ export function useSignUp({ usertype }) {
             profiletoupdate: id,
             newname: name,
             newphone: phone,
-            newdrivinglicense: drivinglicense,
+            newdrivinglicense: drivingLicense,
             newcity: city,
             newmodel: model,
             newbrand: brand,
             newyear: year,
-            newlicenseplate: licenseplate
+            newlicenseplate: licensePlate
         })
 
-        if(error) setError(error)
+        if (error) setError(error)
         setIsLoading(false)
     }
 
-    if( usertype === 'passenger' ) return {isLoading, error, signUp: signUpPassenger}
-    if( usertype === 'driver' ) return { isLoading, error, signUp:signUpDriver }
+    if (usertype === 'passenger') return { isLoading, error, signUp: signUpPassenger }
+    if (usertype === 'driver') return { isLoading, error, signUp: signUpDriver }
 }

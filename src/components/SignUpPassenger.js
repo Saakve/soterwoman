@@ -6,7 +6,7 @@ import { InputStyled } from "./InputStyled"
 import { useSignUp } from "../hooks/useSignUp"
 import { ScrollView } from "react-native-gesture-handler"
 
-const { height }= Dimensions.get("window")
+const { height } = Dimensions.get("window")
 
 export function SignUpPassenger() {
     const { isLoading: isLoadingSignUp, error: errorSignUp, signUp } = useSignUp({ usertype: 'passenger' })
@@ -17,9 +17,37 @@ export function SignUpPassenger() {
     const [phone, setPhone] = useState("")
     const [emergencyPhone, setEmergencyPhone] = useState("")
 
+    const [emailErrorMessage, setEmailErrorMessage] = useState(null)
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState(null)
+    const [nameErrorMessage, setNameErrorMessage] = useState(null)
+    const [phoneErrorMessage, setPhoneErrorMessage] = useState(null)
+    const [emergencyPhoneErrorMessage, setEmergencyPhoneErrorMessage] = useState(null)
+
     useEffect(() => {
         if (errorSignUp) Alert.alert('Error', errorSignUp.message)
     }, [errorSignUp])
+
+
+    const cleanInputsErrors = () => {
+        setEmailErrorMessage(null)
+        setPasswordErrorMessage(null)
+        setNameErrorMessage(null)
+        setPhoneErrorMessage(null)
+        setEmergencyPhoneErrorMessage(null)
+    }
+
+    const handlePressButton = async () => {
+        cleanInputsErrors()
+        try {
+            await signUp({ email, password, name, phone, emergencyPhone })
+        } catch (error) {
+            if(error.param === 'email') setEmailErrorMessage(error.message)
+            if(error.param === 'password') setPasswordErrorMessage(error.message)
+            if(error.param === 'name') setNameErrorMessage(error.message)
+            if(error.param === 'phone') setPhoneErrorMessage(error.message)
+            if(error.param === 'emergencyPhone') setEmergencyPhoneErrorMessage(error.message)
+        }
+    }
 
     return (
         <ScrollView>
@@ -31,32 +59,42 @@ export function SignUpPassenger() {
                     placeholder="Nombre completo"
                     value={name}
                     onChangeText={text => setName(text)}
+                    errorMessage={nameErrorMessage}
+                    inputMode="text"
                 />
                 <InputStyled
                     placeholder="Correo electrónico"
                     value={email}
                     onChangeText={text => setEmail(text)}
+                    errorMessage={emailErrorMessage}
+                    inputMode="email"
                 />
                 <InputStyled
                     placeholder="Teléfono"
                     value={phone}
                     onChangeText={text => setPhone(text)}
+                    errorMessage={phoneErrorMessage}
+                    inputMode="tel"
                 />
                 <InputStyled
                     placeholder="Teléfono de emergencia"
                     value={emergencyPhone}
                     onChangeText={text => setEmergencyPhone(text)}
+                    errorMessage={emergencyPhoneErrorMessage}
+                    inputMode="tel"
                 />
                 <InputStyled
                     placeholder="Contraseña"
                     secureTextEntry
                     value={password}
                     onChangeText={text => setPassword(text)}
+                    errorMessage={passwordErrorMessage}
+                    inputMode="text"
                 />
                 <Button
                     title="Registrarse"
                     disabled={isLoadingSignUp}
-                    onPress={() => signUp({ email, password, name, phone, emergencyPhone })}
+                    onPress={handlePressButton}
                     color="#8946A6"
                     buttonStyle={styles.button}
                 />
