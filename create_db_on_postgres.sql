@@ -9,7 +9,7 @@ INSERT INTO usertype (name) VALUES ('passenger');
 CREATE TABLE profile (
   id UUID NOT NULL PRIMARY KEY REFERENCES auth.users,
   name VARCHAR(150) NOT NULL DEFAULT 'NAME' CHECK (name ~ '^[A-Za-z]{3,}(\s[A-Za-z]+)*$'),
-  phone VARCHAR(10) NOT NULL DEFAULT '0000000000' CHECK (phone ~ '^[0-9]{10}$'),
+  phone VARCHAR(10) UNIQUE DEFAULT NULL CHECK (phone ~ '^[0-9]{10}$'),
   rating REAL NOT NULL DEFAULT 0 CHECK (rating >= 0 AND rating <= 5),
   usagetime INT NOT NULL DEFAULT 0 CHECK (usagetime >= 0),
   debt MONEY NOT NULL DEFAULT MONEY(0) CHECK (debt >= MONEY(0)),
@@ -22,12 +22,12 @@ CREATE TABLE vehicle (
   model VARCHAR(50) NOT NULL DEFAULT 'MODEL' CHECK (CHAR_LENGTH(model) >= 2),
   brand VARCHAR(50) NOT NULL DEFAULT 'BRAND' CHECK (CHAR_LENGTH(brand) >= 2),
   year INTEGER NOT NULL DEFAULT 1900 CHECK (year >= 1900),
-  licenseplate VARCHAR(11) CHECK (licenseplate ~ '^[A-Z0-9]{1,4}(-[A-Z0-9]{1,4}){1,2}$')
+  licenseplate VARCHAR(11) UNIQUE CHECK (licenseplate ~ '^[A-Z0-9]{1,4}(-[A-Z0-9]{1,4}){1,2}$')
 );
 
 CREATE TABLE driver (
   id UUID PRIMARY KEY REFERENCES auth.users,
-  drivinglicense VARCHAR(12) NOT NULL DEFAULT '123456789ACD' CHECK (drivinglicense ~ '^[A-Za-z0-9]{12}$'),
+  drivinglicense VARCHAR(12) UNIQUE DEFAULT NULL CHECK (drivinglicense ~ '^[A-Za-z0-9]{12}$'),
   city VARCHAR(150) NOT NULL DEFAULT 'city' CHECK (city ~ '^[A-Za-z]{3,}(\s[A-Za-z]+)*$'),
   idvehicle INT REFERENCES vehicle
 );
@@ -232,6 +232,50 @@ CREATE POLICY "Anyone can update their own avatar"
   );
 
 --Functions and Triggers
+CREATE FUNCTION public."emailExists"(emailToEvaluate VARCHAR)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM auth.users WHERE auth.users.email = emailToEvaluate) THEN
+    RETURN true;
+  ELSE
+    RETURN false;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE FUNCTION public."phoneExists"(phoneToEvaluate VARCHAR)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM profile WHERE phone = phoneToEvaluate) THEN
+    RETURN true;
+  ELSE
+    RETURN false;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE FUNCTION public."licensePlateExists"(licenseplateToEvaluate VARCHAR)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM vehicle WHERE licenseplate = licenseplateToEvaluate) THEN
+    RETURN true;
+  ELSE
+    RETURN false;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE FUNCTION public."drivingLicenseExists"(drivinglicenseToEvaluate VARCHAR)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM driver WHERE drivinglicense = drivinglicenseToEvaluate) THEN
+    RETURN true;
+  ELSE
+    RETURN false;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 CREATE FUNCTION public."completePassengerProfile" (
   profileToUpdate UUID,
   newname VARCHAR,
