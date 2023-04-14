@@ -3,6 +3,7 @@ import { supabase } from '../services/supabase'
 import { useContext, useEffect } from 'react'
 import UserContext from '../context/UserContext'
 import SignInLikeContext from "../context/SingInLikeContext"
+import { ModalRating } from './ModalRating'
 
 function Home({ navigation }) {
     const { userData, dataIsLoaded } = useContext(UserContext)
@@ -22,6 +23,7 @@ function Home({ navigation }) {
 
     return (
         <View style={styles.container}>
+            <ModalRating visible={true}/>
             <Text>Bienvenido a mi app</Text>
             <Text>Id:   {userData.id}</Text>
             <Text>Name: {userData.name}</Text>
