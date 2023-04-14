@@ -7,6 +7,7 @@ import { useSignUp } from "../hooks/useSignUp"
 import { InputStyled } from "./InputStyled.js"
 import { GoBackButton } from "../components/GoBackButton"
 import { validateDriverInputs, validateVehicleInputs } from "../utils/validateInputs"
+import { ModalAfterSignUP } from "./ModalAfterSignUp"
 
 const Stack = createNativeStackNavigator()
 const AllInfoContex = createContext(null)
@@ -102,7 +103,7 @@ const DriverInfo = ({ navigation }) => {
     )
 }
 
-const VehicleInfo = () => {
+const VehicleInfo = ({ navigation }) => {
     const { isLoading: isLoadingSignUp, error: errorSignUp, signUp } = useSignUp({ usertype: 'driver' })
     const { allInfo } = useContext(AllInfoContex)
 
@@ -110,6 +111,8 @@ const VehicleInfo = () => {
     const [brand, setBrand] = useState("")
     const [year, setYear] = useState("")
     const [licensePlate, setLicensePlate] = useState("")
+
+    const [showModal, setShowModal] = useState(false)
 
     const [errorMessage, setErrorMessage] = useState(null)
 
@@ -126,11 +129,18 @@ const VehicleInfo = () => {
             return
         }
         await signUp({ ...allInfo, brand, model, year, licensePlate })
+        setShowModal(true)
+    }
+
+    const handlePressModal = () => {
+        navigation.navigate('SignIn')
+        setShowModal(false)
     }
 
     return (
         <ScrollView>
             <View style={styles.container}>
+                <ModalAfterSignUP visible={showModal} onPress={handlePressModal}/>
                 <View style={styles.header}>
                     <Text style={styles.title}>Detalles del vehículo</Text>
                 </View>

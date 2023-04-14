@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react"
+import { ScrollView } from "react-native-gesture-handler"
 import { View, Text, Alert, StyleSheet, Dimensions } from "react-native"
 import { Button } from "@rneui/base"
 
 import { InputStyled } from "./InputStyled"
+import { ModalAfterSignUP } from "./ModalAfterSignUp"
 import { useSignUp } from "../hooks/useSignUp"
-import { ScrollView } from "react-native-gesture-handler"
 import { validatePassengerInputs } from "../utils/validateInputs"
 
 const { height } = Dimensions.get("window")
 
-export function SignUpPassenger() {
+export function SignUpPassenger({ navigation }) {
     const { isLoading: isLoadingSignUp, error: errorSignUp, signUp } = useSignUp({ usertype: 'passenger' })
 
     const [email, setEmail] = useState("")
@@ -17,6 +18,8 @@ export function SignUpPassenger() {
     const [name, setName] = useState("")
     const [phone, setPhone] = useState("")
     const [emergencyPhone, setEmergencyPhone] = useState("")
+
+    const [showModal, setShowModal] = useState(false)
 
     const [errorMessage, setErrorMessage] = useState(null)
 
@@ -33,11 +36,18 @@ export function SignUpPassenger() {
             return
         }
         await signUp({ email, password, name, phone, emergencyPhone })
+        setShowModal(true)
+    }
+
+    const handlePressModal = () => {
+        navigation.navigate('SignIn')
+        setShowModal(false)
     }
 
     return (
         <ScrollView>
             <View style={styles.container}>
+                <ModalAfterSignUP visible={showModal} onPress={handlePressModal} />
                 <View style={styles.header}>
                     <Text style={styles.title}>Crear nueva cuenta</Text>
                 </View>
