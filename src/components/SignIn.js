@@ -72,7 +72,7 @@ export function SignIn({ route }) {
                 inputMode="text"
             />
             <Button
-                title="Iniciar sesion"
+                title="Iniciar sesión"
                 disabled={isLoadingEmail}
                 onPress={handlePressButton}
                 color="#8946A6"

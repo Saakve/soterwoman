@@ -23,7 +23,7 @@ function Home({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <ModalRating visible={true}/>
+            <ModalRating visible={true} userToRate={'afcfc3f6-4854-4976-88e8-57a8480fdd09'}/>
             <Text>Bienvenido a mi app</Text>
             <Text>Id:   {userData.id}</Text>
             <Text>Name: {userData.name}</Text>

@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Modal } from "react-native"
 import { Button } from "@rneui/base"
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import { supabase } from "../services/supabase"
 
 function StarButton({ pressed = false, onPress }) {
     const color = pressed ? '#FDCD03' : "#DADADA"
@@ -26,22 +27,36 @@ function getArrayOf5Items(item) {
     return array
 }
 
-export function ModalRating({ visible = false, onPress, userToRate }) {
-    const [rating, setRating] = useState(0)
+export function ModalRating({ visible = false, onPress = () => {}, userToRate }) {
+    const [rating, setRating] = useState(1)
+    const [show, setShow] = useState(visible)
+
+    const handlePressButton = async () => {
+        setShow(false)
+        onPress()
+        const { data } = await supabase.from('profile').select('rating').eq('id', userToRate)
+        if(data[0].rating === 0) {
+            const { error } = await supabase.from('profile').update({ rating }).eq('id', userToRate).select()
+            if(error) console.log(error)
+        }  else {
+            const { error } = await supabase.from('profile').update({ rating: (data[0].rating + rating) / 2 }).eq('id', userToRate).select()
+            if(error) console.log(error)
+        }
+    }
 
     return (
         <Modal
             animationType="fade"
             transparent={true}
-            visible={visible}
+            visible={show}
         >
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
                     <Text style={styles.modalText}>Ofrece una calificación a tu viaje</Text>
                     <View style={styles.stars}>
-                        {getArrayOf5Items(false).map((_, index) => <StarButton key={index} pressed={index <= rating} onPress={() => setRating(index)} />)}
+                        {getArrayOf5Items(false).map((_, index) => <StarButton key={index} pressed={index < rating} onPress={() => setRating(index + 1)} />)}
                     </View>
-                    <Button titleStyle={styles.textButton} buttonStyle={styles.buttonModal} onPress={onPress} title='Aceptar' color={styles.buttonModal.color} />
+                    <Button titleStyle={styles.textButton} buttonStyle={styles.buttonModal} onPress={handlePressButton} title='Aceptar' color={styles.buttonModal.color} />
                 </View>
             </View>
         </Modal>
