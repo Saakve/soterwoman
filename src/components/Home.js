@@ -1,22 +1,32 @@
 import { StyleSheet, Text, View, Button } from 'react-native'
 import { supabase } from '../services/supabase'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import UserContext from '../context/UserContext'
+import SignInLikeContext from "../context/SingInLikeContext"
 
-function Home() {
-    const user = useContext(UserContext)
+function Home({ navigation }) {
+    const { userData, dataIsLoaded } = useContext(UserContext)
+    const { signInLike } = useContext(SignInLikeContext)
 
     const signOut = async () => {
         const { error } = await supabase.auth.signOut()
     }
 
+    useEffect(() => {
+        if (dataIsLoaded && !userData.idUserType) { 
+            console.log(signInLike)
+            if(signInLike === 'passenger') navigation.navigate('CompletePassengerProfile')
+            if(signInLike === 'driver') navigation.navigate('CompleteDriverProfile')
+        }
+    }, [dataIsLoaded])
+
     return (
         <View style={styles.container}>
             <Text>Bienvenido a mi app</Text>
-            <Text>Id:   {user.id}</Text>
-            <Text>Name: {user.name}</Text>
-            <Text>Email: {user.email}</Text>
-            <Text>Phone: {user.phone}</Text>
+            <Text>Id:   {userData.id}</Text>
+            <Text>Name: {userData.name}</Text>
+            <Text>Email: {userData.email}</Text>
+            <Text>Phone: {userData.phone}</Text>
             <Button title='Cerrar Sesión' onPress={() => signOut()} />
         </View>
     )

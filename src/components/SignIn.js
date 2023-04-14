@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { View, Text, Alert, StyleSheet } from "react-native"
 import { Button } from "@rneui/base"
 
@@ -7,12 +7,16 @@ import { useSignInWithEmail } from "../hooks/useSignInWithEmail"
 
 import { InputStyled } from "./InputStyled"
 import { validateFormatEmailAndPassword } from "../utils/validateInputs"
+import SignInLikeContext from "../context/SingInLikeContext"
 
-export function SignIn() {
+export function SignIn({ route }) {
+    const { setSignInLike } = useContext(SignInLikeContext)
+    const { userType } = route.params
+
     const { isLoading: isLoadingFacebook, error: errorFacebook, signIn: signInWithFacebook } = useSignInWithProvider({ provider: 'facebook' })
     const { isLoading: isLoadingGoogle, error: errorGoogle, signIn: signInWithGoogle } = useSignInWithProvider({ provider: 'google' })
     const { isLoading: isLoadingEmail, error: errorEmail, signIn } = useSignInWithEmail()
-
+    
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [errorMessage, setErrorMessage] = useState(null)
@@ -31,7 +35,18 @@ export function SignIn() {
             setErrorMessage(error)
             return
         }
+        setSignInLike(userType)
         await signIn({email, password})
+    }
+
+    const handleGooglePressButton = async () => {
+        setSignInLike(userType)
+        await signInWithGoogle()
+    }
+
+    const handleFacebookPressButton = async () => {
+        setSignInLike(userType)
+        await signInWithFacebook()
     }
 
     return (
@@ -71,7 +86,7 @@ export function SignIn() {
                         type: "font-awesome",
                         name: "facebook"
                     }}
-                    onPress={() => signInWithFacebook()}
+                    onPress={handleFacebookPressButton}
                     disabled={isLoadingFacebook || isLoadingGoogle}
                 />
                 <Button
@@ -79,7 +94,7 @@ export function SignIn() {
                         type: "font-awesome",
                         name: "google"
                     }}
-                    onPress={() => signInWithGoogle()}
+                    onPress={handleGooglePressButton}
                     disabled={isLoadingFacebook || isLoadingGoogle}
                     color="#fff"
                 />

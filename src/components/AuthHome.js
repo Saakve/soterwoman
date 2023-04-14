@@ -3,7 +3,7 @@ import { StyleSheet, View, Text } from "react-native";
 
 export function AuthHome({ navigation, userType }) {
 
-    const moveToSignIn = () => navigation.navigate('SignIn')
+    const moveToSignIn = () => navigation.navigate('SignIn', { userType })
     const moveToSignUp = userType === 'passenger' ? () => navigation.navigate('SignUpPassenger') : () => navigation.navigate('SignUpDriver')
 
     return (

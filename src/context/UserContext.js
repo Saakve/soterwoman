@@ -5,6 +5,7 @@ const UserContext = createContext(null)
 
 export function UserContextProvider({children}) {
     const [userData, setUserData] = useState({})
+    const [dataIsLoaded, setDataIsLoaded] = useState(false)
 
     const getUserData = async () => {
         const { id, email } = (await supabase.auth.getSession()).data.session.user
@@ -17,13 +18,15 @@ export function UserContextProvider({children}) {
             name: profile[0].name,
             debt: profile[0].debt,
             rating: profile[0].rating,
-            usageTime: profile[0].usageTime,
-            idImage: profile[0].idImage
+            usageTime: profile[0].usagetime,
+            idImage: profile[0].idimage,
+            idUserType: profile[0].idusertype
         }
-        
+
         if(errorProfile) console.log(errorProfile)
 
         setUserData(userData)
+        setDataIsLoaded(true)
     }
 
     useEffect(() => {
@@ -31,7 +34,7 @@ export function UserContextProvider({children}) {
     },[])
 
     return (
-        <UserContext.Provider value={userData}>
+        <UserContext.Provider value={{userData, dataIsLoaded}}>
             {children}
         </UserContext.Provider>
     )
