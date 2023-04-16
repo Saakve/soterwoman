@@ -1,28 +1,24 @@
-import { Home } from "../components/Home"
-import { createDrawerNavigator } from "@react-navigation/drawer"
 import { UserContextProvider } from "../context/UserContext"
-import Profile from "../components/profile/Profile"
-import Vehicle from "../components/vehicle/Vehicle"
-import Trip from "../components/Trip"
+import { CompletePassengerProfile } from "../components/ComplePassengerProfile"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { ProfileComplete } from "../components/ProfileComplete"
+import { CompleteDriverProfile } from "../components/CompleteDriverProfile"
 
-const Drawer = createDrawerNavigator()
+const Stack = createNativeStackNavigator()
 
 function UserAuthenticated() {
   return (
     <UserContextProvider>
-      <Drawer.Navigator
-        screenOptions={{
-          headerTitle: "",
-          headerTransparent: true,
-        }}
-      >
-        <Drawer.Screen name="Home" component={Home} />
-        <Drawer.Screen name="Profile" component={Profile} />
-        <Drawer.Screen name="Vehicle" component={Vehicle} />
-        <Drawer.Screen name="Trip" component={Trip} />
-      </Drawer.Navigator>
+      <Stack.Navigator screenOptions={{
+        headerShown: false
+      }}>
+        <Stack.Screen name="ProfileComplete" component={ProfileComplete} />
+        <Stack.Screen name='CompletePassengerProfile' component={CompletePassengerProfile} />
+        <Stack.Screen name='CompleteDriverProfile' component={CompleteDriverProfile} />
+      </Stack.Navigator>
     </UserContextProvider>
-  );
+  )
 }
+
 
 export { UserAuthenticated }

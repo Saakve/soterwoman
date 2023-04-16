@@ -1,25 +1,56 @@
 import { StyleSheet, Text, View, Button } from 'react-native'
 import { supabase } from '../services/supabase'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import UserContext from '../context/UserContext'
+import SignInLikeContext from "../context/SingInLikeContext"
+import { ModalRating } from './ModalRating'
 
-function Home() {
-    const user = useContext(UserContext)
-    console.log(user)
+function Home({ navigation }) {
+    const { userData, dataIsLoaded } = useContext(UserContext)
+    const { signInLike } = useContext(SignInLikeContext)
+    const [channel, setChannel] = useState(null)
 
     const signOut = async () => {
         const { error } = await supabase.auth.signOut()
-        console.log(error)
+    }
+
+    useEffect(() => {
+        if (dataIsLoaded && !userData.idUserType) {
+            console.log(signInLike)
+            if (signInLike === 'passenger') navigation.navigate('CompletePassengerProfile')
+            if (signInLike === 'driver') navigation.navigate('CompleteDriverProfile')
+        }
+    }, [dataIsLoaded])
+
+    useEffect(() => {
+        const channel = supabase.channel("trips")
+        .on('broadcast', { event: "accept" }, response => console.log(response.payload))
+        .subscribe()
+        
+        setChannel(channel)
+        console.log("LISTENING")
+
+        return () => supabase.removeChannel(channel)
+    }, [supabase])
+
+    const sendRequest = async () => {
+        await channel.send({
+            type: 'broadcast',
+            event: "request",
+            payload: `Hola soy ${userData.name}`,
+        })
     }
 
     return (
         <View style={styles.container}>
+            <ModalRating visible={true} userToRate={'afcfc3f6-4854-4976-88e8-57a8480fdd09'} />
             <Text>Bienvenido a mi app</Text>
-            <Text>Id:   {user.id}</Text>
-            <Text>Name: {user.name}</Text>
-            <Text>Email: {user.email}</Text>
-            <Text>Phone: {user.phone}</Text>
+            <Text>Id:   {userData.id}</Text>
+            <Text>Name: {userData.name}</Text>
+            <Text>Email: {userData.email}</Text>
+            <Text>Phone: {userData.phone}</Text>
             <Button title='Cerrar Sesión' onPress={() => signOut()} />
+            <Button title='Solicitar viajes' onPress={sendRequest} />
         </View>
     )
 }
