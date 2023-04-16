@@ -232,6 +232,89 @@ CREATE POLICY "Anyone can update their own avatar"
   );
 
 --Functions and Triggers
+CREATE OR REPLACE FUNCTION public."getVehicleFromIdDriver"(iddriver UUID)
+RETURNS SETOF vehicle AS $$
+BEGIN
+  RETURN QUERY
+  SELECT *
+  FROM vehicle
+  WHERE id = (
+    SELECT idvehicle FROM driver WHERE id = iddriver
+  );
+
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public."equalPassword" (userid UUID, passwordToValidate VARCHAR)
+RETURNS boolean AS $$
+BEGIN
+  IF EXISTS ( 
+    SELECT 1 FROM auth.users 
+    WHERE id = userid 
+    AND encrypted_password = crypt(passwordToValidate, encrypted_password)) 
+  THEN
+    RETURN TRUE;
+  ELSE 
+    RETURN FALSE;  
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public."getTripsToday"(rowsToShow INTEGER) 
+RETURNS SETOF trip AS $$
+BEGIN
+  RETURN QUERY 
+  SELECT * FROM trip
+  WHERE date(trip.done_on) = current_date
+  ORDER BY trip.done_on DESC
+  LIMIT rowsToShow;
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public."getTripsThisWeek"(rowsToShow INTEGER) 
+RETURNS SETOF trip AS $$
+BEGIN
+  RETURN QUERY
+  SELECT * FROM trip
+  WHERE date_part('year', done_on) = date_part('year', CURRENT_DATE) 
+  AND date_part('week', done_on ) = date_part('week', CURRENT_TIMESTAMP)
+  ORDER BY done_on DESC 
+  LIMIT rowsToShow;
+
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public."getTripsThisMonth"(rowsToShow INTEGER) 
+RETURNS SETOF trip AS $$
+BEGIN
+  RETURN QUERY 
+  SELECT * FROM trip 
+  WHERE date_part('year', done_on) = date_part('year', CURRENT_DATE)
+  AND date_part('month', done_on ) = date_part('month', CURRENT_TIMESTAMP)
+  ORDER BY done_on DESC
+  LIMIT rowsToShow;
+  
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public."getTripsThisYear"(rowsToShow INTEGER) 
+RETURNS SETOF trip AS $$
+BEGIN
+  RETURN QUERY
+  SELECT *
+  FROM trip
+  WHERE date_part('year', done_on) = date_part('year', CURRENT_DATE)
+  ORDER BY done_on DESC
+  LIMIT rowsToShow;
+
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE FUNCTION public."emailExists"(emailToEvaluate VARCHAR)
 RETURNS BOOLEAN AS $$
 BEGIN
