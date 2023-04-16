@@ -6,7 +6,7 @@ import UserContext from "../../context/UserContext";
 import { Input } from "@rneui/themed";
 
 export default function Vehicle() {
-  const userData = useContext(UserContext)
+  const { userData } = useContext(UserContext)
   const [vehicle, setVehicle] = useState(null);
 
   useEffect(() => {

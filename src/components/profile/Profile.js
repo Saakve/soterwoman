@@ -77,7 +77,7 @@ const ChangePassword = ({ onPress, userData }) => {
 }
 
 export default function Profile() {
-  const userData = useContext(UserContext);
+  const { userData } = useContext(UserContext);
   const [save, setSave] = useState(false);
   const [page, setPage] = useState(1);
   const [email, setEmail] = useState(userData.email);
