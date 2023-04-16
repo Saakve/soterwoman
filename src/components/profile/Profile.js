@@ -4,33 +4,36 @@ import Thumbnail from "../Thumbnail";
 import { supabase } from "../../services/supabase";
 import UserContext from "../../context/UserContext";
 import { Input, Button } from "@rneui/themed";
+import { Icon } from "react-native-elements";
 
-const ChangePassword = ({onPress, userData}) => {
+const ChangePassword = ({ onPress, userData }) => {
   const [password, setPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
-  const [newPasswordValidation, setNewPasswordValidation] = useState("");
+  const [newPasswordValidation, setNewPasswordValidation] = useState("")
   const [errorMessage, setErrorMessage] = useState(null)
 
   const handleOnPress = async () => {
-    setErrorMessage(null)
-    if(newPassword !== newPasswordValidation){
+    setErrorMessage(null);
+    if (newPassword !== newPasswordValidation) {
       setErrorMessage("Contraseñas diferentes")
-      return 
-    }        
-  
-    const { data, error } = await supabase.rpc("equalPassword", { userid : userData.id ,passwordtovalidate : password });
-    console.log(data, error);
-    if(!data){
+      return
+    }
+
+    const { data, error } = await supabase.rpc("equalPassword", {
+      userid: userData.id,
+      passwordtovalidate: password,
+    });
+    console.log(data, error)
+    if (!data) {
       setErrorMessage("Contraseña actual no coincide")
       return
     }
-    const {dataNewPassword, errorNewPassword} = await supabase.auth.updateUser({password: newPassword});
-    console.log("PASSWORD", dataNewPassword, errorNewPassword);
-
-
+    const { dataNewPassword, errorNewPassword } =
+      await supabase.auth.updateUser({ password: newPassword })
+    console.log("PASSWORD", dataNewPassword, errorNewPassword)
 
     onPress()
-  }
+  };
   return (
     <View>
       <View style={styles.avatarSection}>
@@ -75,21 +78,24 @@ const ChangePassword = ({onPress, userData}) => {
 
 export default function Profile() {
   const userData = useContext(UserContext);
+  const [save, setSave] = useState(false);
+  const [page, setPage] = useState(1);
   const [email, setEmail] = useState(userData.email);
+
   const [profile, setProfile] = useState({
     name: userData?.name,
     phone: userData?.phone,
-  });
+  })
+
   const [driver, setDriver] = useState({
     drivinglicense: driver?.drivinglicense,
     city: driver?.city,
-  });
+  })
   const [passenger, setPassenger] = useState({
     emergencyphone: passenger?.emergencyphone,
-  });
+  })
 
-  const [save, setSave] = useState(false);
-  const [page, setPage] = useState(1)
+
 
   useEffect(() => {
     const userType = userData.idUserType === 1 ? "driver" : "passenger";
@@ -147,7 +153,8 @@ export default function Profile() {
       .select();
     console.log("PASAJERO", dataPassenger, errorPassenger);
 
-    const { data: dataEmail, error: errorMail } = await supabase.auth.updateUser({email});
+    const { data: dataEmail, error: errorMail } =
+      await supabase.auth.updateUser({ email });
     console.log("EMAEL", dataEmail, errorMail);
   };
 
@@ -169,15 +176,20 @@ export default function Profile() {
       </View>
       <View style={styles.detailsSection}>
         <Input
-          icon="user"
+          leftIcon={<Icon name="person" size={30} />}
           value={profile?.name}
           onChangeText={(name) => {
             setProfile({ ...profile, name });
             setSave(true);
           }}
         />
-        <Input value={email} onChangeText={(email) => setEmail(email)} />
         <Input
+          leftIcon={<Icon name="mail" size={30} />}
+          value={email}
+          onChangeText={(email) => setEmail(email)}
+        />
+        <Input
+          leftIcon={<Icon name="phone" size={30} />}
           value={profile?.phone}
           onChangeText={(phone) => {
             setProfile({ ...profile, phone });
@@ -186,6 +198,7 @@ export default function Profile() {
         />
         {userData.idUserType === 2 ? (
           <Input
+            leftIcon={<Icon name="phone" size={30} />}
             value={passenger?.emergencyphone}
             onChangeText={(emergencyphone) =>
               editProfile("emergencyphone", emergencyphone)
@@ -194,12 +207,14 @@ export default function Profile() {
         ) : (
           <View>
             <Input
+              leftIcon={<Icon name="info" size={30} />}
               value={driver?.drivinglicense}
               onChangeText={(drivinglicense) =>
                 editProfile("drivinglicense", drivinglicense)
               }
             />
             <Input
+              leftIcon={<Icon name="place" size={30} />}
               value={driver?.city}
               onChangeText={(city) => editProfile("city", city)}
             />
@@ -215,11 +230,12 @@ export default function Profile() {
       </View>
     </View>
   ) : (
-    <ChangePassword style={styles.changePassword} 
-    onPress={() => {
-      setPage(1)
-    }}
-    userData={userData} 
+    <ChangePassword
+      style={styles.changePassword}
+      onPress={() => {
+        setPage(1);
+      }}
+      userData={userData}
     />
   );
 }
@@ -242,6 +258,6 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
   changePassword: {
-    marginTop: 500
-  }
+    marginTop: 500,
+  },
 });
