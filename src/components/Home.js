@@ -7,8 +7,6 @@ function Home() {
     const user = useContext(UserContext)
     console.log(user)
 
-    supabase.from('trip').select().then(value => console.log(value))
-
     const signOut = async () => {
         const { error } = await supabase.auth.signOut()
         console.log(error)
