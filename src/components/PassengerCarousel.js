@@ -1,8 +1,6 @@
 import { Button } from "@rneui/base";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
-import { useFonts } from 'expo-font'
-import * as SplashScreen from 'expo-splash-screen'
 import { getData, storeData } from "../utils/manageDataOnDevice";
 import { AuthHome } from "./AuthHome";
 
@@ -14,20 +12,9 @@ const DESCRIPTIONS = [
 ]
 const { height } = Dimensions.get('window')
 
-SplashScreen.preventAutoHideAsync()
 
 export function PassengerCarousel({ navigation, route }) {
-    const [fontsLoaded] = useFonts({
-        'OpenSans-Regular': require('../../assets/fonts/OpenSans/OpenSans-Regular.ttf'),
-        'OpenSans-Bold': require('../../assets/fonts/OpenSans/OpenSans-Bold.ttf')
-    })
     const [page, setPage] = useState(route.params?.page || 0)
-
-    const onLayoutRootView = useCallback(async () => {
-        if (fontsLoaded) {
-            await SplashScreen.hideAsync()
-        }
-    }, [fontsLoaded])
 
     const handleOnPress = () => {
         navigation.push('PassengerCarousel', { page: page + 1 })
@@ -53,10 +40,8 @@ export function PassengerCarousel({ navigation, route }) {
         if (page === 2) return require('../../assets/Passenger_3.png')
     }
 
-    if (!fontsLoaded) return null
-
     return (
-        <View style={styles.container} onLayout={onLayoutRootView}>
+        <View style={styles.container}>
             <View style={styles.content}>
                 <Image
                     source={getImage()}
