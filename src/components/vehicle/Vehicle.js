@@ -1,30 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import DetailProfile from "../DetailProfile";
 import { supabase } from "../../services/supabase";
 import { Icon } from "react-native-elements";
+import UserContext from "../../context/UserContext";
+import { Input } from "@rneui/themed";
 
 export default function Vehicle() {
+  const userData = useContext(UserContext)
   const [vehicle, setVehicle] = useState(null);
+
   useEffect(() => {
     const getVehicle = async () => {
-      const { data, error } = await supabase.from("vehicle").select();
-      console.log(data);
-      setVehicle(data[0]);
+      const { data, error } = await supabase.rpc("getVehicleFromIdDriver", {
+        iddriver: userData.id,
+      });
+      console.log("Soy el vehiculo", data, error)
+      setVehicle(data[0])
     };
     getVehicle();
+    console.log(vehicle?.year)
   }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.iconSection}>
-        <Icon styles={styles.icon} name="directions-car" size={150} />
+        <Icon name="directions-car" size={150} />
       </View>
       <View style={styles.detailsSection}>
-        <DetailProfile icon="directions-car" subtitle={vehicle?.brand} />
-        <DetailProfile icon="local-taxi" subtitle={vehicle?.model} />
-        <DetailProfile icon="today" subtitle={vehicle?.year} />
-        <DetailProfile icon="check-circle" subtitle={vehicle?.licenseplate} />
+        <Input
+          leftIcon={<Icon name="directions-car" size={30} />}
+          value={vehicle?.brand}
+          disabled={true}
+        />
+        <Input
+          leftIcon={<Icon name="local-taxi" size={30} />}
+          value={vehicle?.model}
+          disabled={true}
+        />
+        <Input
+          leftIcon={<Icon name="today" size={30} />}
+          value={vehicle?.year ? `${vehicle?.year}` : ""}
+          disabled={true}
+        />
+        <Input
+          leftIcon={<Icon name="check" size={30} />}
+          value={vehicle?.licenseplate}
+          disabled={true}
+        />
       </View>
     </View>
   );
