@@ -1,9 +1,9 @@
 import { Home } from "../components/Home"
 import { createDrawerNavigator } from "@react-navigation/drawer"
 import { HomeDriver } from "./HomeDriver"
-import Profile from "./profile/Profile"
-import Vehicle from "./vehicle/Vehicle"
+import ProfileDetails from "./ProfileDetails";
 import Trip from "./Trip"
+import VehicleDetails from "./VehicleDetails";
 
 const Drawer = createDrawerNavigator()
 
@@ -15,8 +15,8 @@ function ProfileComplete() {
         }}>
             <Drawer.Screen name="Home" component={Home} />
             <Drawer.Screen name='HomeDriver' component={HomeDriver} />
-            <Drawer.Screen name='Profile' component={Profile} />
-            <Drawer.Screen name='Vehicle' component={Vehicle} />
+            <Drawer.Screen name='Profile' component={ProfileDetails} />
+            <Drawer.Screen name='Vehicle' component={VehicleDetails} />
             <Drawer.Screen name='Trip' component={Trip} />
         </Drawer.Navigator>
     )
