@@ -133,7 +133,7 @@ const VehicleInfo = ({ navigation }) => {
     }
 
     const handlePressModal = () => {
-        navigation.navigate('SignIn')
+        navigation.navigate('SignIn', { userType: 'driver' })
         setShowModal(false)
     }
 

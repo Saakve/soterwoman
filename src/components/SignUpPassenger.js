@@ -40,7 +40,7 @@ export function SignUpPassenger({ navigation }) {
     }
 
     const handlePressModal = () => {
-        navigation.navigate('SignIn')
+        navigation.navigate('SignIn', { userType: 'passenger' })
         setShowModal(false)
     }
 
