@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Switch } from "react-native-elements";
 import { supabase } from "../services/supabase";
+import { makeChannel } from "../services/makeChannel";
 
 export function ToggleOnService() {
     const [onService, setOnService] = useState(false)
-    const [channel, setChannel] = useState(null)
     const [tripRequests, setTripRequest] = useState([])
+    const [channel, setChannel] = useState(null)
 
     const toggleSwitch = () => {
         setOnService(previousState => !previousState)
@@ -14,13 +15,14 @@ export function ToggleOnService() {
 
     useEffect(() => {
         if (onService) {
-            const channel = supabase.channel("trips")
-            .on('broadcast', { event: "request" }, response => setTripRequest(prevTripRequests => [...prevTripRequests, response.payload]))
-            .subscribe()
+            const channel = makeChannel({
+                eventType: 'broadcast',
+                channelName: "trips",
+                filter: { event: "request" }, 
+                callback: response => setTripRequest(prevTripRequests => [...prevTripRequests, response.payload])
+            })
             setChannel(channel)
-
-            console.log("LISTENING")
-        } else if (channel){
+        } else if (channel) {
             supabase.removeChannel(channel)
         }
     }, [onService])

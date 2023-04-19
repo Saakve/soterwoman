@@ -4,11 +4,12 @@ import { useContext, useEffect, useState } from 'react'
 import UserContext from '../context/UserContext'
 import SignInLikeContext from "../context/SingInLikeContext"
 import { ModalRating } from './ModalRating'
+import { makeChannel } from '../services/makeChannel'
 
 function Home({ navigation }) {
     const { userData, dataIsLoaded } = useContext(UserContext)
     const { signInLike } = useContext(SignInLikeContext)
-    const [channel, setChannel] = useState(null)
+    const [ channel, setChannel ] = useState(null)
 
     const signOut = async () => {
         const { error } = await supabase.auth.signOut()
@@ -23,13 +24,15 @@ function Home({ navigation }) {
     }, [dataIsLoaded])
 
     useEffect(() => {
-        const channel = supabase.channel("trips")
-        .on('broadcast', { event: "accept" }, response => console.log(response.payload))
-        .subscribe()
-        
+        const channel = makeChannel({
+            channelName: 'trips', 
+            eventType: "broadcast", 
+            filter: { event: "accept" }, 
+            callback: response => console.log(response)
+        })
         setChannel(channel)
         console.log("LISTENING")
-
+        
         return () => supabase.removeChannel(channel)
     }, [supabase])
 
