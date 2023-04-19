@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import Thumbnail from "../Thumbnail";
-import { supabase } from "../../services/supabase";
-import UserContext from "../../context/UserContext";
+import Thumbnail from "./Thumbnail";
+import { supabase } from "../services/supabase";
+import UserContext from "../context/UserContext";
 import { Input, Button } from "@rneui/themed";
 import { Icon } from "react-native-elements";
 
@@ -76,7 +76,7 @@ const ChangePassword = ({ onPress, userData }) => {
   );
 }
 
-export default function Profile() {
+export default function ProfileDetails() {
   const { userData } = useContext(UserContext);
   const [save, setSave] = useState(false);
   const [page, setPage] = useState(1);

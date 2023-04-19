@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { supabase } from "../../services/supabase";
+import { supabase } from "../services/supabase";
 import { Icon } from "react-native-elements";
-import UserContext from "../../context/UserContext";
+import UserContext from "../context/UserContext";
 import { Input } from "@rneui/themed";
 
-export default function Vehicle() {
+export default function VehicleDetails() {
   const { userData } = useContext(UserContext)
   const [vehicle, setVehicle] = useState(null);
 
