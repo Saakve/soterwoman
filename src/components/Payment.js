@@ -1,9 +1,10 @@
+import { Button } from "@rneui/base";
 import { CardField, StripeProvider } from "@stripe/stripe-react-native";
 import { useEffect, useState } from "react";
 import { StyleSheet, View, Text } from "react-native";
+import { fetchKey, getPublishableKey } from "../services/getPublishableKey";
 
 export function Payment() {
-   const [publishableKey, setPublishableKey] = useState(null)
 
     return (
         <StripeProvider
@@ -13,14 +14,19 @@ export function Payment() {
                 <Text style={styles.text}>
                     Agregar método de pago
                 </Text>
-                <CardField
-                    style={styles.card}
-                    cardStyle={{
-                        borderColor: "#000",
-                        borderWidth: 1,
-                        borderRadius: 5,
-                    }}
-                />
+                <View style={{alignItems: "center"}}>
+                    <CardField
+                        style={styles.card}
+                        cardStyle={{
+                            borderWidth: 1,
+                            borderRadius: 5,
+                        }}
+                        onCardChange={(cardDetails) => {
+                            console.log('cardDetails', cardDetails);
+                        }}
+                    />
+                </View>
+                <Button buttonStyle={styles.button} color={styles.button.color} title="Guardar"/>
             </View>
         </StripeProvider>
     )
@@ -34,11 +40,21 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFF"
     },
     text: {
-        textAlign: "center"
+        textAlign: "center",
+        marginBottom: 10,
+        fontFamily: "OpenSans-Bold",
+        fontSize: 17
     },
     card: {
-        backgroundColor: "000",
-        width: "100%",
+        width: "90%",
         height: 60,
+    },
+    button: {
+        marginTop: 20,
+        color: "#8946A6",
+        width: 330,
+        height: 50,
+        alignSelf: "center",
+        borderRadius: 10
     }
 })
