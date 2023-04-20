@@ -1,20 +1,52 @@
 import { Button } from "@rneui/base";
-import { CardField, StripeProvider } from "@stripe/stripe-react-native";
-import { useEffect, useState } from "react";
+import { CardField, StripeProvider, useConfirmSetupIntent } from "@stripe/stripe-react-native";
+import { useContext, useEffect, useState } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import { fetchKey, getPublishableKey } from "../services/getPublishableKey";
+import { getPublishableKey } from "../services/getPublishableKey";
+import { createSetupIntentOnBackend } from "../services/createSetupIntentOnBackend";
+
+import UserContext from "../context/UserContext";
 
 export function Payment() {
+    const { userData } = useContext(UserContext)
+    const [publishableKey, setPublishableKey] = useState(null)
+    const { confirmSetupIntent, loading } = useConfirmSetupIntent()
+
+    useEffect(() => {
+        fetchKey = async () => {
+            const key = await getPublishableKey()
+            console.log(key)
+            setPublishableKey(key)
+        }
+        fetchKey()
+    }, [])
+
+    const handleSavePaymentMethod = async () => {
+        const { id, client_secret } = await createSetupIntentOnBackend()
+        const { setupIntent, error } = await confirmSetupIntent(client_secret, {
+            paymentMethodType: 'Card',
+            paymentMethodData: {
+                billingDetails: {
+                    name: userData.name,
+                    phone: userData.phone
+                }
+            }
+        })
+
+        console.log(id)
+        console.log(setupIntent)
+        if (error) console.log(error)
+    }
 
     return (
         <StripeProvider
-            publishableKey=""
+            publishableKey={publishableKey}
         >
             <View style={styles.container}>
                 <Text style={styles.text}>
                     Agregar método de pago
                 </Text>
-                <View style={{alignItems: "center"}}>
+                <View style={{ alignItems: "center" }}>
                     <CardField
                         style={styles.card}
                         cardStyle={{
@@ -26,7 +58,7 @@ export function Payment() {
                         }}
                     />
                 </View>
-                <Button buttonStyle={styles.button} color={styles.button.color} title="Guardar"/>
+                <Button buttonStyle={styles.button} color={styles.button.color} title="Guardar" onPress={handleSavePaymentMethod} />
             </View>
         </StripeProvider>
     )
