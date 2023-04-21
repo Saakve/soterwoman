@@ -4,6 +4,7 @@ import { supabase } from "../services/supabase";
 import { Icon } from "react-native-elements";
 import UserContext from "../context/UserContext";
 import { Input } from "@rneui/themed";
+import { InputStyled } from "./InputStyled";
 
 export default function VehicleDetails() {
   const { userData } = useContext(UserContext)
@@ -27,25 +28,37 @@ export default function VehicleDetails() {
         <Icon name="directions-car" size={150} />
       </View>
       <View style={styles.detailsSection}>
-        <Input
+        <InputStyled
           leftIcon={<Icon name="directions-car" size={30} />}
           value={vehicle?.brand}
           disabled={true}
+          name="brand"
+          placeholder="Marca"
+          inputMode="text"
         />
-        <Input
+        <InputStyled
           leftIcon={<Icon name="local-taxi" size={30} />}
           value={vehicle?.model}
           disabled={true}
+          name="model"
+          placeholder="Modelo"
+          inputMode="text"
         />
-        <Input
+        <InputStyled
           leftIcon={<Icon name="today" size={30} />}
           value={vehicle?.year ? `${vehicle?.year}` : ""}
           disabled={true}
+          name="year"
+          placeholder="Año"
+          inputMode="numeric"
         />
-        <Input
+        <InputStyled
           leftIcon={<Icon name="check" size={30} />}
           value={vehicle?.licenseplate}
           disabled={true}
+          name="licensePlate"
+          placeholder="Número de la placa"
+          inputMode="text"
         />
       </View>
     </View>
@@ -60,10 +73,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#B762C1",
-    paddingTop: 50
+    paddingTop: 50,
   },
   detailsSection: {
     flex: 1,
     backgroundColor: "white",
+    paddingTop: 20,
   },
 });
