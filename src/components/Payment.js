@@ -1,9 +1,9 @@
 import { Button } from "@rneui/base";
-import { CardField, StripeProvider, useConfirmSetupIntent } from "@stripe/stripe-react-native";
+import { CardField, StripeProvider, useConfirmSetupIntent, CardForm } from "@stripe/stripe-react-native";
 import { useContext, useEffect, useState } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { getPublishableKey } from "../services/getPublishableKey";
-import { createSetupIntentOnBackend } from "../services/createSetupIntentOnBackend";
+import { addCard, createSetupIntentOnBackend } from "../services/stripe";
 
 import UserContext from "../context/UserContext";
 
@@ -22,18 +22,11 @@ export function Payment() {
     }, [])
 
     const handleSavePaymentMethod = async () => {
-        const { id, client_secret } = await createSetupIntentOnBackend()
+        const { client_secret } = await addCard({id: "cus_Nka0i1TlmlsEwt"})
         const { setupIntent, error } = await confirmSetupIntent(client_secret, {
-            paymentMethodType: 'Card',
-            paymentMethodData: {
-                billingDetails: {
-                    name: userData.name,
-                    phone: userData.phone
-                }
-            }
+            paymentMethodType: 'Card'
         })
 
-        console.log(id)
         console.log(setupIntent)
         if (error) console.log(error)
     }
