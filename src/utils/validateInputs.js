@@ -76,6 +76,11 @@ export function validatePassword(password) {
     validateMaxMinLengthOfString(password, 6, 150, 'password')
 }
 
+export function validateNewPassword(newPassword, newPasswordValidation) {
+  validateMaxMinLengthOfString(newPassword, 6, 125, "newpassword");
+  validateMaxMinLengthOfString(newPasswordValidation, 6, 125, "newpasswordvalidation");
+}
+
 export function validateCity(city) {
     validateMaxMinLengthOfString(city, 3, 150, 'city')
     validateOnlyString(city, 'city')
@@ -139,6 +144,11 @@ export async function validateDriverInputs(name, email, phone, drivingLicense, c
     await validateDrivingLicense(drivingLicense)
     validateCity(city)
     validatePassword(password)
+}
+
+export async function validateDrivingLicenseAndCity (drivingLicense, city) {
+    await validateDrivingLicense(drivingLicense)
+    validateCity(city)
 }
 
 export async function validateVehicleInputs(brand, model, year, licensePlate) {

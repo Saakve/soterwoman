@@ -69,7 +69,7 @@ export default function Thumbnail({ name, url, size = 150, onUpload }) {
           avatarUrl 
           ? <Image source={{ uri: avatarUrl }} accessibilityLabel="Avatar" style={[avatarSize, styles.avatar, styles.image]}/>
           : <View style={[avatarSize, styles.avatar, styles.noImage]} />
-        }
+        } 
         <View>
           <Button
             title={uploading ? 'Uploading ...' : 'Upload'}
