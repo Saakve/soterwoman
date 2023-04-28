@@ -5,6 +5,7 @@ import ProfileDetails from "./ProfileDetails";
 import Trip from "./Trip"
 import VehicleDetails from "./VehicleDetails";
 import { Payment } from "./Payment";
+import { Cards } from "./Cards";
 
 const Drawer = createDrawerNavigator()
 
@@ -20,6 +21,7 @@ function ProfileComplete() {
             <Drawer.Screen name='Profile' component={ProfileDetails} />
             <Drawer.Screen name='Vehicle' component={VehicleDetails} />
             <Drawer.Screen name='Trip' component={Trip} />
+            <Drawer.Screen name="Cards" component={Cards}/>
         </Drawer.Navigator>
     )
 }
