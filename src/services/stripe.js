@@ -11,7 +11,7 @@ export async function createSetupIntentOnBackend() {
     return responseObject
 }
 
-export async function addCard({id}) {
+export async function addCard({ id }) {
     const response = await fetch(`${BASE_URL}/add-card/${id}`, {
         method: 'POST',
         headers: {
@@ -25,10 +25,29 @@ export async function addCard({id}) {
 // acct_1N1YZwFN3cAPLu0j 1
 // acct_1N11tn2UWKvKuybi *
 
-export async function getCards({id}) {
+export async function getCards({ id }) {
     const response = await fetch(`${BASE_URL}/accounts/${id}/cards`)
 
     const responseObject = await response.json()
 
     return responseObject
+}
+
+export async function updateCard({ idaccount, name, postal_code, isDefault, idcard }) {
+    try {
+        const response = await fetch(`${BASE_URL}/accounts/${idaccount}/cards/${idcard}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({isDefault})
+        })
+
+        const responseObject = await response.json()
+
+        return responseObject
+    }
+    catch (error) {
+        console.error(error)
+    }
 }

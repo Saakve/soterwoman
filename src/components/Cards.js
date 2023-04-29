@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text } from "react-native";
-import { getCards } from "../services/stripe";
+import { getCards, updateCard } from "../services/stripe";
 import { useState, useEffect } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { Card } from "./Card";
@@ -16,13 +16,15 @@ export function Cards() {
         getCardsForUser()
     }, [])
 
-    const handlePressCard = ({ id }) => {
-        const newCards = cards.map( (card) => card.id === id 
+    const handlePressCard = async ({ id }) => {
+        const newCards = cards.map((card) => card.id === id
             ? ({ ...card, isDefault: true })
             : ({ ...card, isDefault: false })
         )
 
         setCards(newCards)
+
+        await updateCard({ idaccount: 'acct_1N11tn2UWKvKuybi', idcard: id, isDefault: true })
     }
 
     const renderCard = ({ item }) => {
