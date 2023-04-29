@@ -11,12 +11,15 @@ import { makeChannel } from "../services/makeChannel";
 import UserContext from "../context/UserContext";
 import { supabase } from "../services/supabase";
 import { Input, Button } from "@rneui/themed";
-import Thumbnail from "./Avatar";
+import Avatar from "./Avatar";
 
 export default function Message() {
   const [channel, setChannel] = useState(null);
   const [messages, setMessages] = useState([{ message: "Inicial", from: 1 }]);
   const [message, setMessage] = useState("");
+  const [name, setName] = useState("")
+  const [idImage, setIdImage] = useState("")
+
   const { userData } = useContext(UserContext);
   const userType =
     userData.idUserType !== 1
@@ -29,10 +32,14 @@ export default function Message() {
       eventType: "broadcast",
       filter: { event: userData.id },
       callback: (response) => {
+        console.log("aaaa", response)
+        setName(response.payload.from.name)
+        setIdImage(response.payload.from.idImage)
+        console.log(idImage)
         setMessages((latestMessages) => [
           ...latestMessages,
-          { message: response.payload.message, from: response.payload.from }
-        ])
+          { message: response.payload.message, from: response.payload.from },
+        ]);
       } 
     });
 
@@ -42,17 +49,17 @@ export default function Message() {
     return () => supabase.removeChannel(channel);
   }, [supabase]);
 
-  console.log("SI SOY YO", messages);
+  //console.log("SI SOY YO", messages);
 
   const sendMessage = async () => {
     setMessages((latestMessages) => [
       ...latestMessages,
-      { message, from: userData.idUserType },
+      { message, from: {idUserType: userData.idUserType} },
     ]);
     await channel.send({
       type: "broadcast",
       event: userType,
-      payload: { message, from: userData.idUserType },
+      payload: { message, from: {idUserType: userData.idUserType, idImage: userData.idImage, name: userData.name}},
     });
     setMessage("");
   };
@@ -60,15 +67,15 @@ export default function Message() {
   return (
     <View style={styles.container}>
       <View style={styles.avatarSection}>
-        <Thumbnail name={userData?.name} 
-        url={userData?.idImage} />
+        <Avatar name={name} 
+        url={idImage} />
       </View>
       <View style={styles.messageContainer}>
         <FlatList
           data={messages}
           style={styles.messages}
           renderItem={({ item }) =>
-            item.from !== userData.idUserType ? (
+            item.from.idUserType !== userData.idUserType ? (
               <View style={styles.messageDestinSection}>
                 <Button
                   style={styles.messageDestin}

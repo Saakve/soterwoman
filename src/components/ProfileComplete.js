@@ -5,6 +5,7 @@ import ProfileDetails from "./ProfileDetails";
 import Trip from "./Trip";
 import VehicleDetails from "./VehicleDetails";
 import Message from "./Message";
+import Call from "./Call";
 
 const Drawer = createDrawerNavigator();
 
@@ -22,6 +23,7 @@ function ProfileComplete() {
       <Drawer.Screen name="Vehicle" component={VehicleDetails} />
       <Drawer.Screen name="Trip" component={Trip} />
       <Drawer.Screen name="Message" component={Message}/>
+      <Drawer.Screen name="Call" component={Call}/>
     </Drawer.Navigator>
   );
 }

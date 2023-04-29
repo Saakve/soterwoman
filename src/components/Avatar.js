@@ -50,7 +50,6 @@ export default function Avatar({ name, url, size = 150, onUpload }) {
             await onUpload(filePath)
 
         } catch (error) {
-          //  console.log(error)
             if (isCancel(error)) console.warn('cancelled')
             else if (isInProgress(error)) console.warn('multiple pickers were opened, only the last will be considered')
             else if (error instanceof Error) Alert.alert(error.message)
