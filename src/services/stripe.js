@@ -51,3 +51,18 @@ export async function updateCard({ idaccount, name, postal_code, isDefault, idca
         console.error(error)
     }
 }
+
+export async function deleteCard({idaccount, idcard}) {
+    try {
+        const response = await fetch(`${BASE_URL}/accounts/${idaccount}/cards/${idcard}`, {
+            method: 'DELETE'
+        })
+
+        console.log(response)
+
+        return response.status 
+
+    } catch (error) {
+        console.error(error)
+    }
+}

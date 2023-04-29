@@ -1,7 +1,18 @@
 import { StyleSheet, View, Text } from "react-native";
 import { Button, Icon } from "@rneui/base";
 
-export function Card({ id, last4, brand, isDefault, name, postal_code, borderColor, onPress, onPressLeftButton, onPressRightButton }) {
+export function Card({
+    id,
+    last4,
+    brand,
+    isDefault,
+    name,
+    postal_code,
+    borderColor,
+    onPress = () => {},
+    onPressLeftButton = () => {},
+    onPressRightButton = () => {}
+}) {
     return (
         <View style={{ ...styles.container, borderColor }}>
             <View style={styles.card} onTouchEnd={() => onPress({ id })}>

@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text } from "react-native";
-import { getCards, updateCard } from "../services/stripe";
+import { deleteCard, getCards, updateCard } from "../services/stripe";
 import { useState, useEffect } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { Card } from "./Card";
@@ -27,10 +27,26 @@ export function Cards() {
         await updateCard({ idaccount: 'acct_1N11tn2UWKvKuybi', idcard: id, isDefault: true })
     }
 
+    const handleDeleteCard = async ({ id }) => {
+        const oldCards = cards
+        const newCards = cards.filter((card) => card.id !== id)
+
+        setCards(newCards)
+
+        const status = await deleteCard({ idaccount: 'acct_1N11tn2UWKvKuybi', idcard: id })
+        console.log(status)
+        if(status !== 204) setCards(oldCards) 
+    }
+
     const renderCard = ({ item }) => {
         const borderColor = item.isDefault ? "#hsla(220, 100%, 38%, 0.5)" : "#FFF"
 
-        return <Card {...item} onPress={handlePressCard} borderColor={borderColor} />
+        return <Card
+            {...item}
+            onPress={handlePressCard}
+            onPressRightButton={handleDeleteCard}
+            borderColor={borderColor}
+        />
     }
 
     return (
