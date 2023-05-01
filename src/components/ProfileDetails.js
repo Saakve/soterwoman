@@ -191,7 +191,7 @@ export default function ProfileDetails() {
 
     const { data: dataEmail, error: errorMail } =
       await supabase.auth.updateUser({ email });
-    console.log("EMAEL", dataEmail, errorMail);
+    console.log("EMAIL", dataEmail, errorMail);
   };
 
   return page === 1 ? (
