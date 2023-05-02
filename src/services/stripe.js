@@ -1,66 +1,106 @@
 const BASE_URL = 'https://divine-cloud-1237.fly.dev'
 
-export async function createSetupIntentOnBackend() {
-    const response = await fetch(`${BASE_URL}/create-setup-intent`, {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    const responseObject = await response.json()
-    return responseObject
-}
-
-export async function addCard({ id }) {
-    const response = await fetch(`${BASE_URL}/add-card/${id}`, {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    const responseObject = await response.json()
-    return responseObject
-}
-
-// acct_1N1YZwFN3cAPLu0j 1
-// acct_1N11tn2UWKvKuybi *
-
-export async function getCards({ id }) {
-    const response = await fetch(`${BASE_URL}/accounts/${id}/cards`)
-
-    const responseObject = await response.json()
-
-    return responseObject
-}
-
-export async function updateCard({ idaccount, name, postal_code, isDefault, idcard }) {
+export async function createDriverCard({ idAccount, tokenCard }) {
     try {
-        const response = await fetch(`${BASE_URL}/accounts/${idaccount}/cards/${idcard}`, {
+        const response = await fetch(`${BASE_URL}/create-account-card/${idAccount}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ tokenCard })
+        })
+
+        return await response.json()
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function createPassengerPaymentMethod({ idCustomer }) {
+    try {
+        const response = await fetch(`${BASE_URL}/create-setup-intent/${idCustomer}`, {
+            method: "POST"
+        })
+
+        return await response.json()
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function getDriverCards({ id }) {
+    try {
+        const response = await fetch(`${BASE_URL}/accounts/${id}/cards`)
+        return await response.json()
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function getPassengerPaymentMethods({ id }) {
+    try {
+        const response = await fetch(`${BASE_URL}/customers/${id}/payment-methods`)
+        return await response.json()
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function updateDriverCard({ idAccount, idCard, name, postal_code, isDefault }) {
+    try {
+        const response = await fetch(`${BASE_URL}/accounts/${idAccount}/cards/${idCard}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({isDefault})
+            body: JSON.stringify({ name, postal_code, isDefault })
         })
 
-        const responseObject = await response.json()
-
-        return responseObject
+        return await response.json()
     }
     catch (error) {
         console.error(error)
     }
 }
 
-export async function deleteCard({idaccount, idcard}) {
+export async function updatePassengerPaymentMethod({ idCustomer, idPaymentMethod, name, postal_code, isDefault }) {
     try {
-        const response = await fetch(`${BASE_URL}/accounts/${idaccount}/cards/${idcard}`, {
-            method: 'DELETE'
+        const response = await fetch(`${BASE_URL}/customers/${idCustomer}/payment-methods/${idPaymentMethod}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name, postal_code, isDefault })
         })
 
-        console.log(response)
+        return await response.json()
+    } catch (error) {
+        console.error(error)
+    }
+}
 
-        return response.status 
+export async function deleteDriverCard({ idAccount, idCard }) {
+    try {
+        const response = await fetch(`${BASE_URL}/accounts/${idAccount}/cards/${idCard}`, {
+            method: "DELETE"
+        })
+
+        return response.status
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function deletePassengerPaymentMethod({ idCustomer, idPaymentMethod }) {
+    try {
+        const response = await fetch(`${BASE_URL}/customers/${idCustomer}/payment-methods/${idPaymentMethod}`, {
+            method: "DELETE"
+        })
+
+        return response.status
 
     } catch (error) {
         console.error(error)

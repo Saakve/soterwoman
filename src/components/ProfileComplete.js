@@ -20,7 +20,6 @@ function ProfileComplete() {
             headerTitle: "",
             headerTransparent: true
         }}>
-            <Drawer.Screen name="Payment" component={Payment} />
             <Drawer.Screen name="Home" component={Home} />
             <Drawer.Screen name='HomeDriver' component={HomeDriver} />
             <Drawer.Screen name='Profile' component={ProfileDetails} />
