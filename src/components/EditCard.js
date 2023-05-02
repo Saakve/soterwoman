@@ -4,21 +4,21 @@ import UserContext from "../context/UserContext";
 import { updateDriverCard, updatePassengerPaymentMethod } from "../services/stripe";
 
 export function EditCard({ navigation, route }) {
-    const { userData: { idUserType } } = useContext(UserContext)
+    const { userData: { idUserType, idStripe } } = useContext(UserContext)
     const { card } = route.params
 
     handlePressButton = async ({ postalCode, name }) => {
         let response
         if (idUserType === 1) {
             response = await updateDriverCard({
-                idAccount: "acct_1N11tn2UWKvKuybi",
+                idAccount: idStripe,
                 idCard: card.id,
                 name,
                 postal_code: postalCode
             })
         } else {
             response = await updatePassengerPaymentMethod({
-                idCustomer: "cus_NnxwRjNZtvRIHI",
+                idCustomer: idStripe,
                 idPaymentMethod: card.id,
                 name,
                 postal_code: postalCode

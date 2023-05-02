@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text } from "react-native";
 import { deleteDriverCard, deletePassengerPaymentMethod, getDriverCards, getPassengerPaymentMethods, updateDriverCard, updatePassengerPaymentMethod } from "../services/stripe";
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useState, useContext, useCallback } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { Card } from "./Card";
 import UserContext from "../context/UserContext";
@@ -9,7 +9,7 @@ import { useFocusEffect } from "@react-navigation/native";
 
 export function ListOfCards({ navigation }) {
     const [cards, setCards] = useState(null)
-    const { userData: { idUserType } } = useContext(UserContext)
+    const { userData: { idUserType, idStripe } } = useContext(UserContext)
 
     useFocusEffect(
         useCallback(() => {
@@ -19,18 +19,18 @@ export function ListOfCards({ navigation }) {
                 let cards
 
                 if (idUserType === 1) {
-                    cards = await getDriverCards({ id: "acct_1N11tn2UWKvKuybi" })
+                    cards = await getDriverCards({ id: idStripe })
                 } else {
-                    cards = await getPassengerPaymentMethods({ id: "cus_NnxwRjNZtvRIHI" })
+                    cards = await getPassengerPaymentMethods({ id: idStripe })
                 }
 
                 if (isActive) setCards(cards)
             }
-            
-            fetchCards()
+
+            if (idStripe) fetchCards()
 
             return () => { isActive = false }
-        }, [])
+        }, [idStripe])
     )
 
     const handlePressCard = async ({ id }) => {
@@ -41,8 +41,8 @@ export function ListOfCards({ navigation }) {
 
         setCards(newCards)
 
-        if (idUserType === 1) await updateDriverCard({ idAccount: 'acct_1N11tn2UWKvKuybi', idCard: id, isDefault: true })
-        else await updatePassengerPaymentMethod({ idCustomer: "cus_NnxwRjNZtvRIHI", idPaymentMethod: id, isDefault: true })
+        if (idUserType === 1) await updateDriverCard({ idAccount: idStripe, idCard: id, isDefault: true })
+        else await updatePassengerPaymentMethod({ idCustomer: idStripe, idPaymentMethod: id, isDefault: true })
     }
 
     const handleDeleteCard = async ({ id }) => {
@@ -53,9 +53,9 @@ export function ListOfCards({ navigation }) {
 
         let status
         if (idUserType === 1) {
-            status = await deleteDriverCard({ idAccount: "acct_1N11tn2UWKvKuybi", idCard: id })
+            status = await deleteDriverCard({ idAccount: idStripe, idCard: id })
         } else {
-            status = await deletePassengerPaymentMethod({ idCustomer: "cus_NnxwRjNZtvRIHI", idPaymentMethod: id })
+            status = await deletePassengerPaymentMethod({ idCustomer: idStripe, idPaymentMethod: id })
         }
         if (status !== 204) setCards(oldCards)
     }
@@ -88,7 +88,12 @@ export function ListOfCards({ navigation }) {
                     keyExtractor={item => item.id}
                 />
             </View>
-            <Button title="Agregar tarjeta" type="clear" buttonStyle={styles.button} onPress={() => navigation.navigate('AddCard')} />
+            <Button
+                title="Agregar tarjeta"
+                type="clear"
+                buttonStyle={styles.button}
+                onPress={() => navigation.navigate('AddCard')}
+            />
         </View>
     )
 }
@@ -98,7 +103,8 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "flex-start",
         alignContent: "center",
-        backgroundColor: "#FFF"
+        backgroundColor: "#FFF",
+        paddingTop: "10%"
     },
     text: {
         textAlign: "center",

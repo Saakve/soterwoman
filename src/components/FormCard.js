@@ -1,7 +1,7 @@
 import { Button } from "@rneui/base";
 import { CardField, StripeProvider } from "@stripe/stripe-react-native";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Alert } from "react-native";
 import { getPublishableKey } from "../services/getPublishableKey";
 import { InputStyled } from "../components/InputStyled"
 
@@ -13,6 +13,7 @@ export function FormCard({ onPressButton = ({ name, postalCode }) => { }, card, 
     const [name, setName] = useState(card && card.name || "")
     const [postalCode, setPostalCode] = useState(card && card.postal_code || "")
     const [loading, setLoading] = useState(false)
+    const [cardComplete, setCardComplete] = useState(disabledCardField || false)
     const cardField = useRef()
 
     useEffect(() => {
@@ -24,6 +25,11 @@ export function FormCard({ onPressButton = ({ name, postalCode }) => { }, card, 
     }, [])
 
     const handlePressButton = async () => {
+        if(!cardComplete) {
+            Alert.alert("Advertencia","Ingrese una tarjeta válida")
+            return
+        }
+
         setLoading(true)
         setErrorMessage(null)
         try {
@@ -38,6 +44,8 @@ export function FormCard({ onPressButton = ({ name, postalCode }) => { }, card, 
         setLoading(false)
     }
 
+    const handleChange = ({complete}) => setCardComplete(complete)
+
     return (
         <StripeProvider publishableKey={publishableKey}>
             <View style={styles.container}>
@@ -48,7 +56,7 @@ export function FormCard({ onPressButton = ({ name, postalCode }) => { }, card, 
                         cardStyle={styles.card}
                         postalCodeEnabled={false}
                         placeholders={card && { number: card.last4, expiration: "" }}
-                        onCardChange={disabledCardField && (() => cardField.current.clear())}
+                        onCardChange={disabledCardField && (() => cardField.current.clear()) || handleChange}
                     />
                     <InputStyled
                         value={name}

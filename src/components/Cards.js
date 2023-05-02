@@ -1,7 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { ListOfCards } from "./ListOfCards"
 import { AddCard } from "./AddCard"
-import { useEffect } from "react"
 import { EditCard } from "./EditCard"
 
 const Stack = createNativeStackNavigator()

@@ -20,7 +20,8 @@ export function UserContextProvider({children}) {
             rating: profile[0].rating,
             usageTime: profile[0].usagetime,
             idImage: profile[0].idimage,
-            idUserType: profile[0].idusertype
+            idUserType: profile[0].idusertype,
+            idStripe: profile[0].idstripe
         }
 
         if(errorProfile) console.log(errorProfile)
@@ -34,7 +35,7 @@ export function UserContextProvider({children}) {
     },[])
 
     return (
-        <UserContext.Provider value={{userData, dataIsLoaded}}>
+        <UserContext.Provider value={{userData, dataIsLoaded, setUserData}}>
             {children}
         </UserContext.Provider>
     )

@@ -17,9 +17,39 @@ export async function createDriverCard({ idAccount, tokenCard }) {
     }
 }
 
+export async function createFirstDriverCard({ tokenCard, rfc, name, email, address, dob }) {
+    try {
+        const response = await fetch(`${BASE_URL}/create-account-card/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ tokenCard, id_number: rfc, name, email, address, dob })
+        })
+
+        return await response.json()
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 export async function createPassengerPaymentMethod({ idCustomer }) {
     try {
         const response = await fetch(`${BASE_URL}/create-setup-intent/${idCustomer}`, {
+            method: "POST"
+        })
+
+        return await response.json()
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function createFirstPassengerPaymentMethod() {
+    try {
+        const response = await fetch(`${BASE_URL}/create-setup-intent/`, {
             method: "POST"
         })
 
