@@ -5,6 +5,7 @@ import UserContext from '../context/UserContext'
 import SignInLikeContext from "../context/SingInLikeContext"
 import { ModalRating } from './ModalRating'
 import { makeChannel } from '../services/makeChannel'
+import { ModalTip } from './ModalTip'
 
 function Home({ navigation }) {
     const { userData, dataIsLoaded } = useContext(UserContext)
@@ -46,6 +47,7 @@ function Home({ navigation }) {
 
     return (
         <View style={styles.container}>
+            <ModalTip visible={true} driverToSendTip={"acct_1N3CV3FauMmYefG2"}/> 
             <ModalRating visible={false} userToRate={'afcfc3f6-4854-4976-88e8-57a8480fdd09'} />
             <Text>Bienvenido a mi app</Text>
             <Text>Id:   {userData.id}</Text>
