@@ -47,7 +47,7 @@ function Home({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <ModalTip visible={true} driverToSendTip={"acct_1N3CV3FauMmYefG2"}/> 
+            <ModalTip visible={userData.idUserType === 2} driverToSendTip={"acct_1N3CV3FauMmYefG2"}/> 
             <ModalRating visible={false} userToRate={'afcfc3f6-4854-4976-88e8-57a8480fdd09'} />
             <Text>Bienvenido a mi app</Text>
             <Text>Id:   {userData.id}</Text>

@@ -1,10 +1,14 @@
-import { View, Text, StyleSheet, Modal } from "react-native"
-import { Button } from "@rneui/base"
 import { useContext, useEffect, useState } from "react"
-import { createTipIntent } from "../services/stripe"
-import UserContext from '../context/UserContext'
+import { View, Text, StyleSheet, Modal, Alert } from "react-native"
+
+import { Button } from "@rneui/base"
+
 import { confirmPayment, initStripe } from "@stripe/stripe-react-native"
+
+import { createTipIntent } from "../services/stripe"
 import { getPublishableKey } from "../services/getPublishableKey"
+
+import UserContext from '../context/UserContext'
 
 function TipButton({ pressed = false, onPress, value }) {
     const color = pressed ? '#FFCDDD' : "#FFF"
@@ -26,16 +30,39 @@ export function ModalTip({ visible = false, onPress = () => { }, driverToSendTip
     const { userData } = useContext(UserContext)
     const [amount, setAmount] = useState(0)
     const [show, setShow] = useState(visible)
+    const [loading, setLoading] = useState(false)
 
     const amounts = [0, 10, 20, 30]
 
     const handlePressButton = async () => {
-        setShow(false)
+        setLoading(true)
 
-        const { tipIntent } = await createTipIntent({ idCustomer: userData.idStripe, idAccount: driverToSendTip, amount: amount * 100 })
-        console.log(tipIntent)
-        const { paymentIntent, error } = await confirmPayment(tipIntent)
-        console.log(error, paymentIntent)
+        if (amount === 0) {
+            setLoading(false)
+            setShow(false)
+            return
+        }
+
+        const { tipIntent, error: errorTipIntent } = await createTipIntent({ idCustomer: userData.idStripe, idAccount: driverToSendTip, amount: amount * 100 })
+
+        if (errorTipIntent) {
+            Alert.alert("Ups!", "Hubo un problema no se realizo ningún cargo")
+            setLoading(false)
+            setShow(false)
+            return
+        }
+
+        const { error } = await confirmPayment(tipIntent)
+
+        if (error) {
+            Alert.alert("Ups!", "Hubo un problema no se realizo ningún cargo")
+            setLoading(false)
+            setShow(false)
+            return
+        }
+
+        setLoading(false)
+        setShow(false)
         onPress()
     }
 
@@ -57,9 +84,24 @@ export function ModalTip({ visible = false, onPress = () => { }, driverToSendTip
                 <View style={styles.modalView}>
                     <Text style={styles.modalText}>Si lo deseas, agrega una propina</Text>
                     <View style={styles.stars}>
-                        {amounts.map((value, index) => <TipButton key={index} pressed={value === amount} onPress={() => setAmount(value)} value={value} />)}
+                        {amounts.map((value, index) =>
+                            <TipButton
+                                key={index}
+                                pressed={value === amount}
+                                onPress={() => setAmount(value)}
+                                value={value}
+                            />)
+                        }
                     </View>
-                    <Button titleStyle={styles.textButton} buttonStyle={styles.buttonModal} onPress={handlePressButton} title='Aceptar' color={styles.buttonModal.color} />
+                    <Button
+                        titleStyle={styles.textButton}
+                        buttonStyle={styles.buttonModal}
+                        onPress={handlePressButton}
+                        title='Aceptar'
+                        color={styles.buttonModal.color}
+                        loading={loading}
+                        disabled={loading}
+                    />
                 </View>
             </View>
         </Modal>
@@ -103,7 +145,7 @@ const styles = StyleSheet.create({
     },
     buttonModal: {
         marginTop: 20,
-        height: 35,
+        height: 38,
         alignSelf: "center",
         borderRadius: 10,
         color: "#FFCDDD",
@@ -114,7 +156,6 @@ const styles = StyleSheet.create({
         columnGap: 0
     },
     tip: {
-        // backgroundColor: "#FFF",
         color: "#FDCD03",
         width: 50,
         height: 50,
