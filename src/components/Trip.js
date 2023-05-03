@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { supabase } from "../services/supabase";
 import TripContainer from "./TripContainer";
-import { Button } from "react-native-elements";
+import { Input, Button } from "@rneui/themed";
 import { ScrollView } from "react-native-gesture-handler";
+import { fonts } from "@rneui/base";
+import UserContext from "../context/UserContext";
 
 export default function Trip() {
+  const { userData } = useContext(UserContext);
   const [trip, setTrip] = useState([]);
+  const [stat, setStat] = useState([{}])
 
   useEffect(() => {
     const getTrip = async () => {
@@ -16,15 +20,29 @@ export default function Trip() {
         .order("done_on", { ascending: false })
         .limit(5);
       setTrip(data);
+      console.log(data)
     };
     getTrip();
+
+  
+    const getUserStats = async () => {
+      const { data, error } = await supabase.rpc("getStats", {userid: userData.id,})
+      setStat(data)
+      console.log(data)
+    }
+    getUserStats()
+    
   }, []);
+
+
+
 
   const filterTrips = (range) => {
     const getFilterTrip = async () => {
       const { data, error } = await supabase.rpc(range, { rowstoshow: 15 });
       console.log(data);
       setTrip(data);
+      console.log(error)
     };
     getFilterTrip();
   };
@@ -36,30 +54,55 @@ export default function Trip() {
         <View style={styles.filterButons}>
           <Button
             title="Hoy"
-            color="#841584"
             onPress={() => filterTrips("getTripsToday")}
+            color="#FFFFFF"
+            titleStyle={{ color: "#000000"}}
           />
           <Button
             title="Semana"
-            color="#841584"
             onPress={() => filterTrips("getTripsThisWeek")}
+            color="#FFFFFF"
+            titleStyle={{ color: "#000000" }}
           />
           <Button
             title="Mes"
-            color="#841584"
+            color="#FFFFFF"
+            titleStyle={{ color: "#000000" }}
             onPress={() => filterTrips("getTripsThisMonth")}
           />
           <Button
             title="Año"
-            color="#841584"
+            color="#FFFFFF"
+            titleStyle={{ color: "#000000" }}
             onPress={() => filterTrips("getTripsThisYear")}
           />
         </View>
       </View>
-      <View style={styles.details}>
-        <Text></Text>
+      <View style={styles.statsSection}>
+        <View style={styles.statsButtons}>
+          <Button
+            title={stat.trip_count + " Viajes"}
+            color="#B762C1"
+            titleStyle={{ color: "#FFFFFF" }}
+          />
+          <Button
+            title="23 horas en línea"
+            color="#B762C1"
+            titleStyle={{ color: "#FFFFFF" }}
+          />
+          <Button
+            title={stat.total_cost + " Gastado"}
+            color="#B762C1"
+            titleStyle={{ color: "#FFFFFF" }}
+          />
+          <Button
+            title={stat.debt + " Debiendo"}
+            color="#B762C1"
+            titleStyle={{ color: "#FFFFFF" }}
+          />
+        </View>
       </View>
-      <ScrollView bounces={false} >
+      <ScrollView bounces={false}>
         <View style={styles.tripSection}>
           {trip.map((trips, index) => {
             return (
@@ -96,14 +139,28 @@ const styles = StyleSheet.create({
     padding: 0,
     height: 230,
   },
+  statsSection: {
+    alignItems: "flex-start",
+    justifyContent: "center",
+    backgroundColor: "#B762C1",
+    padding: 0,
+    height: 100,
+    zIndex: 1,
+  },
   filterButons: {
     flexDirection: "row",
     gap: 40,
     marginLeft: 10,
     marginTop: 20,
   },
+  statsButtons: {
+    flexDirection: "row",
+    maxWidth: "27%",
+    margin: "2%",
+  },
   tripSection: {
     backgroundColor: "#FFF",
-    marginTop: 0
+    marginTop: 20,
+    zIndex: 2,
   },
 });
