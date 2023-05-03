@@ -32,10 +32,8 @@ export default function Message() {
       eventType: "broadcast",
       filter: { event: userData.id },
       callback: (response) => {
-        console.log("aaaa", response)
         setName(response.payload.from.name)
         setIdImage(response.payload.from.idImage)
-        console.log(idImage)
         setMessages((latestMessages) => [
           ...latestMessages,
           { message: response.payload.message, from: response.payload.from },

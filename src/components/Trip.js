@@ -20,17 +20,15 @@ export default function Trip() {
         .order("done_on", { ascending: false })
         .limit(5);
       setTrip(data);
+      console.log(data)
     };
     getTrip();
 
   
     const getUserStats = async () => {
-      const { data, error } = await supabase.rpc("getStats", {
-        userid: userData.id,
-      });
-  
+      const { data, error } = await supabase.rpc("getStats", {userid: userData.id,})
       setStat(data)
-      console.log(stat)
+      console.log(data)
     }
     getUserStats()
     

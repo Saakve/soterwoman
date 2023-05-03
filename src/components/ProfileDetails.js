@@ -38,19 +38,15 @@ const ChangePassword = ({ onPress, userData }) => {
         setErrorMessage("Contraseña actual no coincide");
         return;
       }
-
        try {
          validateNewPassword(newPassword, newPasswordValidation);
        } catch (error) {
-         console.log("soy el maldito", error);
          setErrorMessage(error);
          return;
        }
 
     const { dataNewPassword, errorNewPassword } =
       await supabase.auth.updateUser({ password: newPassword });
-    console.log("PASSWORD", dataNewPassword, errorNewPassword);
-
     onPress();
   };
   return (
@@ -168,30 +164,24 @@ export default function ProfileDetails() {
       setErrorMessage(error);
       return;
     }
-
-    console.log("DE TODO", { name, phone });
+    
     const { data, error } = await supabase
       .from("profile")
       .update({ name: name, phone: phone })
       .eq("id", userData.id)
       .select();
-    console.log("PROFILE", data, error);
     const { data: dataDriver, error: errorDriver } = await supabase
       .from("driver")
       .update({ drivinglicense: drivingLicense, city: city })
       .eq("id", userData.id)
       .select();
-    console.log("CONDUCTOR", dataDriver, errorDriver);
     const { data: dataPassenger, error: errorPassenger } = await supabase
       .from("passenger")
       .update({ emergencyphone: emergencyPhone })
       .eq("id", userData.id)
       .select();
-    console.log("PASAJERO", dataPassenger, errorPassenger);
-
     const { data: dataEmail, error: errorMail } =
       await supabase.auth.updateUser({ email });
-    console.log("EMAIL", dataEmail, errorMail);
   };
 
   return page === 1 ? (

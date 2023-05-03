@@ -16,7 +16,7 @@ export function ModalReport({visible = false, onPress = () => {}, userToReport})
     onPress();
   };
 
-  const handleCheck = async () => {
+  const handleReport = async () => {
     setShow(false);
     onPress();
     const { data, error } = await supabase.from("report").insert({
@@ -75,10 +75,10 @@ export function ModalReport({visible = false, onPress = () => {}, userToReport})
               color={styles.buttonCancel.color}
             />
             <Button
-              buttonStyle={styles.buttonCheck}
-              onPress={handleCheck}
+              buttonStyle={styles.buttonReport}
+              onPress={handleReport}
               title={<Icon name="check" size={20} color={"#FFF"} />}
-              color={styles.buttonCheck.color}
+              color={styles.buttonReport.color}
             />
           </View>
         </View>
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     color: "red",
     paddingHorizontal: 20,
   },
-  buttonCheck: {
+  buttonReport: {
     marginTop: 20,
     height: 35,
     alignSelf: "flex-end",
