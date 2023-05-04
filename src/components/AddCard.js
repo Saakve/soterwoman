@@ -1,6 +1,6 @@
 import { useConfirmSetupIntent, createToken } from "@stripe/stripe-react-native"
 import { useContext } from "react"
-import { createFirstDriverCard, createFirstPassengerPaymentMethod, createPassengerPaymentMethod } from "../services/stripe"
+import { createFirstDriverCard, createFirstPassengerPaymentMethod, createPassengerPaymentMethod, updatePassengerPaymentMethod } from "../services/stripe"
 
 import UserContext from "../context/UserContext"
 import { createDriverCard } from "../services/stripe"
@@ -99,7 +99,7 @@ export function AddCard({ navigation }) {
             clientSecret = client_secret
         }
 
-        const { error } = await confirmSetupIntent(clientSecret, {
+        const { setupIntent: { paymentMethod }, error } = await confirmSetupIntent(clientSecret, {
             paymentMethodType: 'Card',
             paymentMethodData: {
                 billingDetails: {
@@ -111,8 +111,15 @@ export function AddCard({ navigation }) {
             }
         })
 
-        if (error) handleError(error)
-        else navigation.goBack()
+        if (error) {
+            handleError(error)
+            return
+        }
+
+        const { id, customerId } = paymentMethod
+        await updatePassengerPaymentMethod({ idCustomer: customerId, idPaymentMethod: id, isDefault: true })
+
+        navigation.goBack()
     }
 
     const handleSavePaymentMethod = async ({ name, postalCode }) => {

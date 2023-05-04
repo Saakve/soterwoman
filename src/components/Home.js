@@ -5,7 +5,6 @@ import UserContext from "../context/UserContext";
 import SignInLikeContext from "../context/SingInLikeContext";
 import { ModalRating } from "./ModalRating";
 import { makeChannel } from "../services/makeChannel";
-import { Icon } from "react-native-elements";
 import { ModalTip } from './ModalTip'
 
 function Home({ navigation }) {
@@ -19,9 +18,7 @@ function Home({ navigation }) {
 
   useEffect(() => {
     if (dataIsLoaded && !userData.idUserType) {
-      console.log(signInLike);
-      if (signInLike === "passenger")
-        navigation.navigate("CompletePassengerProfile");
+      if (signInLike === "passenger") navigation.navigate("CompletePassengerProfile");
       if (signInLike === "driver") navigation.navigate("CompleteDriverProfile");
     }
   }, [dataIsLoaded]);
@@ -47,19 +44,19 @@ function Home({ navigation }) {
     });
   };
 
-    return (
-        <View style={styles.container}>
-            <ModalTip visible={userData.idUserType === 2} driverToSendTip={"acct_1N3CV3FauMmYefG2"}/> 
-            <ModalRating visible={false} userToRate={'afcfc3f6-4854-4976-88e8-57a8480fdd09'} />
-            <Text>Bienvenido a mi app</Text>
-            <Text>Id:   {userData.id}</Text>
-            <Text>Name: {userData.name}</Text>
-            <Text>Email: {userData.email}</Text>
-            <Text>Phone: {userData.phone}</Text>
-            <Button title='Cerrar Sesión' onPress={() => signOut()} />
-            <Button title='Solicitar viajes' onPress={sendRequest} />
-        </View>
-    )
+  return (
+    <View style={styles.container}>
+      <ModalTip visible={userData.idUserType === 2} driverToSendTip={"acct_1N3CV3FauMmYefG2"} />
+      <ModalRating visible={false} userToRate={'afcfc3f6-4854-4976-88e8-57a8480fdd09'} />
+      <Text>Bienvenido a mi app</Text>
+      <Text>Id:   {userData.id}</Text>
+      <Text>Name: {userData.name}</Text>
+      <Text>Email: {userData.email}</Text>
+      <Text>Phone: {userData.phone}</Text>
+      <Button title='Cerrar Sesión' onPress={() => signOut()} />
+      <Button title='Solicitar viajes' onPress={sendRequest} />
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({

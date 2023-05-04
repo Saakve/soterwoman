@@ -1,5 +1,21 @@
 const BASE_URL = 'https://divine-cloud-1237.fly.dev'
 
+export async function payoffDebt({ idCustomer, idAccount, amount }) {
+    try {
+        const response = await fetch(`${BASE_URL}/payoff-debt/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ idCustomer, idAccount, amount })
+        })
+
+        return await response.json()
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 export async function createTipIntent({ idCustomer, idAccount, amount }) {
     try {
         const response = await fetch(`${BASE_URL}/create-tip-intent/`, {
@@ -85,9 +101,28 @@ export async function getDriverCards({ id }) {
     }
 }
 
+export async function getDriverDefaultCard({ id }) {
+    try {
+        const response = await fetch(`${BASE_URL}/accounts/${id}/cards/default`)
+        return await response.json()
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 export async function getPassengerPaymentMethods({ id }) {
     try {
         const response = await fetch(`${BASE_URL}/customers/${id}/payment-methods`)
+        return await response.json()
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function getPassengerDefaultPaymentMethod({ id }) {
+    try {
+        const response = await fetch(`${BASE_URL}/customers/${id}/payment-methods/default`)
+        console.log(id)
         return await response.json()
     } catch (error) {
         console.error(error)

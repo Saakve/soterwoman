@@ -1,16 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Alert } from "react-native";
 import { supabase } from "../services/supabase";
 import TripContainer from "./TripContainer";
-import { Input, Button } from "@rneui/themed";
+import { Button } from "@rneui/themed";
 import { ScrollView } from "react-native-gesture-handler";
-import { fonts } from "@rneui/base";
 import UserContext from "../context/UserContext";
+import { ModalPayOffDebt } from "./ModalPayOffDebt";
 
 export default function Trip() {
   const { userData } = useContext(UserContext);
   const [trip, setTrip] = useState([]);
   const [stat, setStat] = useState([{}])
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     const getTrip = async () => {
@@ -18,24 +19,22 @@ export default function Trip() {
         .from("trip")
         .select()
         .order("done_on", { ascending: false })
-        .limit(5);
-      setTrip(data);
+        .limit(5)
+      setTrip(data)
       console.log(data)
-    };
-    getTrip();
+    }
+    getTrip()
 
-  
+  }, [])
+
+  useEffect(() => {
     const getUserStats = async () => {
-      const { data, error } = await supabase.rpc("getStats", {userid: userData.id,})
+      const { data, error } = await supabase.rpc("getStats", { userid: userData.id, })
       setStat(data)
       console.log(data)
     }
     getUserStats()
-    
-  }, []);
-
-
-
+  }, [showModal])
 
   const filterTrips = (range) => {
     const getFilterTrip = async () => {
@@ -43,12 +42,22 @@ export default function Trip() {
       console.log(data);
       setTrip(data);
       console.log(error)
-    };
-    getFilterTrip();
-  };
+    }
+    getFilterTrip()
+  }
+
+  const handlePayOff = async () => {
+    if (stat.debt === "$0.00") {
+      Alert.alert("Felicidades", "No debes nada, sigue así")
+      return
+    }
+
+    setShowModal(true)
+  }
 
   return (
     <View style={styles.container}>
+      <ModalPayOffDebt visible={showModal} onPress={() => setShowModal(false)} amount={stat.debt} />
       <View style={styles.filterSection}>
         <Text style={[styles.title]}>Mis viajes</Text>
         <View style={styles.filterButons}>
@@ -56,7 +65,7 @@ export default function Trip() {
             title="Hoy"
             onPress={() => filterTrips("getTripsToday")}
             color="#FFFFFF"
-            titleStyle={{ color: "#000000"}}
+            titleStyle={{ color: "#000000" }}
           />
           <Button
             title="Semana"
@@ -99,6 +108,7 @@ export default function Trip() {
             title={stat.debt + " Debiendo"}
             color="#B762C1"
             titleStyle={{ color: "#FFFFFF" }}
+            onPress={handlePayOff}
           />
         </View>
       </View>
