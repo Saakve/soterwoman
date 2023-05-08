@@ -4,8 +4,8 @@ import { useContext, useEffect } from 'react'
 import UserContext from '../context/UserContext'
 import SignInLikeContext from "../context/SingInLikeContext"
 import useCurrentLocation from '../hooks/useCurrentLocation'
-import { ToggleOnService } from './ToggleOnService'
-import { ModalReport } from './ModalReport'
+import { ToggleOnService } from '../components/ToggleOnService'
+import { ModalReport } from '../components/ModalReport'
 
 function HomeDriver({ navigation }) {
     const {location, loading} = useCurrentLocation()

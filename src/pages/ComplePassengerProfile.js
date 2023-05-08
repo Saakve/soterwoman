@@ -3,7 +3,7 @@ import { ScrollView } from "react-native-gesture-handler"
 import { View, Text, StyleSheet, Dimensions } from "react-native"
 import { Button } from "@rneui/base"
 
-import { InputStyled } from "./InputStyled"
+import { InputStyled } from "../components/InputStyled"
 import { validateEmergencyPhone, validateName, validatePhone } from "../utils/validateInputs"
 import UserContext from "../context/UserContext"
 import { completePassengerProfile } from "../services/completeProfiles"

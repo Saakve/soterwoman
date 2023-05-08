@@ -11,7 +11,7 @@ import { makeChannel } from "../services/makeChannel";
 import UserContext from "../context/UserContext";
 import { supabase } from "../services/supabase";
 import { Input, Button } from "@rneui/themed";
-import Avatar from "./Avatar";
+import Avatar from "../components/Avatar";
 
 export default function Message() {
   const [channel, setChannel] = useState(null);

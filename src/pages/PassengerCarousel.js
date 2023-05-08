@@ -1,46 +1,47 @@
-import { Button } from "@rneui/base"
-import { useEffect, useState } from "react"
-import { View, Text, StyleSheet, Image, Dimensions } from "react-native"
-import { getData, storeData } from "../utils/manageDataOnDevice"
-import { AuthHome } from "./AuthHome"
+import { Button } from "@rneui/base";
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
+import { getData, storeData } from "../utils/manageDataOnDevice";
+import { SignButtons } from "../components/SignButtons";
 
-const HEADERS = ['Ofrece un viaje seguro', 'Incrementa tus ingresos', 'Manten tu ritmo']
+const HEADERS = ['Toma un viaje seguro', 'Del destino a tu casa', 'Siempre Unidas']
 const DESCRIPTIONS = [
-    'Se una de nuestras conductoras y ayudanos en ofrecer un servicio donde todas llegemos a casa.',
-    'Aprovecha tu vehiculo y conviertete en nuestra socia, ofrecemos buen retorno monetario por cada viaje.',
-    'Aprovecha tus tiempos libres traslandando a las clientas de la app sin afectar tu tiempo laboral.'
+    'Para mayor seguridad todas nuestras conductoras están capacitadas en caso de emergencia.',
+    'Todos nuestros viajes están controlados en tiempo real por lo que siempre sabrás donde estás.',
+    'Sabemos lo importante que es para ti estar segura por lo que todas nuestras conductoras son mujeres como tú.'
 ]
 const { height } = Dimensions.get('window')
 
-export function DriverCarousel({ navigation, route }) {
+
+export function PassengerCarousel({ navigation, route }) {
     const [page, setPage] = useState(route.params?.page || 0)
 
     const handleOnPress = () => {
-        navigation.push('DriverCarousel', { page: page + 1 })
-    }
-
-    const getImage = () => {
-        if (page === 0) return require('../../assets/Driver_1.png')
-        if (page === 1) return require('../../assets/Driver_2.png')
-        if (page === 2) return require('../../assets/Driver_3.png')
+        navigation.push('PassengerCarousel', { page: page + 1 })
     }
 
     useEffect(() => {
         if(route.params?.animation) navigation.setOptions({ animation: route.params.animation })
 
         const hasBeenViewed = async () => {
-            const value = await getData('DriverCarouselviewed')
+            const value = await getData('PassengerCarouselviewed')
             if (value) {
-                setPage(2) 
+                setPage(2)
             } else if (page === 2) {
-                await storeData('DriverCarouselviewed', 'y')
+                await storeData('PassengerCarouselviewed', 'y')
             }
         }
         hasBeenViewed()
     }, [])
 
+    const getImage = () => {
+        if (page === 0) return require('../../assets/Passenger_1.png')
+        if (page === 1) return require('../../assets/Passenger_2.png')
+        if (page === 2) return require('../../assets/Passenger_3.png')
+    }
+
     return (
-        <View style={styles.container} >
+        <View style={styles.container}>
             <View style={styles.content}>
                 <Image
                     source={getImage()}
@@ -55,7 +56,7 @@ export function DriverCarousel({ navigation, route }) {
                 {
                     page === 2
                         ?
-                        <AuthHome navigation={navigation} userType={'driver'}/>
+                        <SignButtons navigation={navigation} userType={'passenger'}/>
                         :
                         <Button
                             type="solid"

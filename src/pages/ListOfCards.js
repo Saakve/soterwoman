@@ -2,7 +2,7 @@ import { StyleSheet, View, Text } from "react-native";
 import { deleteDriverCard, deletePassengerPaymentMethod, getDriverCards, getPassengerPaymentMethods, updateDriverCard, updatePassengerPaymentMethod } from "../services/stripe";
 import { useState, useContext, useCallback } from "react";
 import { FlatList } from "react-native-gesture-handler";
-import { Card } from "./Card";
+import { Card } from "../components/Card";
 import UserContext from "../context/UserContext";
 import { Button } from "@rneui/base";
 import { useFocusEffect } from "@react-navigation/native";

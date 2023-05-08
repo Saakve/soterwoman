@@ -3,12 +3,12 @@ import { View, StyleSheet, ScrollView, Text, Dimensions } from "react-native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { Button } from "@rneui/base"
 
-import { InputStyled } from "./InputStyled.js"
-import { GoBackButton } from "../components/GoBackButton"
-import { validateDrivingLicense, validateName, validatePhone, validateVehicleInputs } from "../utils/validateInputs"
-import UserContext from "../context/UserContext"
-import { validateCity } from "../utils/validateInputs"
-import { completeDriverProfile } from "../services/completeProfiles"
+import { InputStyled } from "../components/InputStyled.js"
+import { GoBackButton } from "../components/GoBackButton.js"
+import { validateDrivingLicense, validateName, validatePhone, validateVehicleInputs } from "../utils/validateInputs.js"
+import UserContext from "../context/UserContext.js"
+import { validateCity } from "../utils/validateInputs.js"
+import { completeDriverProfile } from "../services/completeProfiles.js"
 
 const Stack = createNativeStackNavigator()
 const AllInfoContex = createContext(null)

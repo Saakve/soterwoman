@@ -1,14 +1,14 @@
 import { Home } from "../components/Home";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { HomeDriver } from "./HomeDriver";
-import ProfileDetails from "./ProfileDetails";
-import Trip from "./Trip";
-import VehicleDetails from "./VehicleDetails";
+import { HomeDriver } from "../pages/HomeDriver";
+import ProfileDetails from "../pages/ProfileDetails";
+import Trip from "../pages/Trip";
+import VehicleDetails from "../pages/VehicleDetails";
 import { Cards } from "./Cards";
 import { useContext } from "react";
 import UserContext from "../context/UserContext";
-import Message from "./Message";
-import Call from "./Call";
+import Message from "../pages/Message";
+import Call from "../pages/Call";
 
 const Drawer = createDrawerNavigator();
 

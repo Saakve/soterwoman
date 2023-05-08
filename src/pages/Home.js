@@ -3,9 +3,9 @@ import { supabase } from "../services/supabase";
 import { useContext, useEffect, useState } from "react";
 import UserContext from "../context/UserContext";
 import SignInLikeContext from "../context/SingInLikeContext";
-import { ModalRating } from "./ModalRating";
+import { ModalRating } from "../components/ModalRating";
 import { makeChannel } from "../services/makeChannel";
-import { ModalTip } from './ModalTip'
+import { ModalTip } from '../components/ModalTip'
 
 function Home({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext);

@@ -4,7 +4,7 @@ import { createFirstDriverCard, createFirstPassengerPaymentMethod, createPasseng
 
 import UserContext from "../context/UserContext"
 import { createDriverCard } from "../services/stripe"
-import { FormCard } from "./FormCard"
+import { FormCard } from "../components/FormCard"
 import { supabase } from "../services/supabase"
 import { Alert } from "react-native"
 

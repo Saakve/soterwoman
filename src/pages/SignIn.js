@@ -5,7 +5,7 @@ import { Button } from "@rneui/base"
 import { useSignInWithProvider } from "../hooks/useSignInWithProvider"
 import { useSignInWithEmail } from "../hooks/useSignInWithEmail"
 
-import { InputStyled } from "./InputStyled"
+import { InputStyled } from "../components/InputStyled"
 import { validateFormatEmailAndPassword } from "../utils/validateInputs"
 import SignInLikeContext from "../context/SingInLikeContext"
 

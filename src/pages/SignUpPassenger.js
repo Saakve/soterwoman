@@ -3,8 +3,8 @@ import { ScrollView } from "react-native-gesture-handler"
 import { View, Text, Alert, StyleSheet, Dimensions } from "react-native"
 import { Button } from "@rneui/base"
 
-import { InputStyled } from "./InputStyled"
-import { ModalAfterSignUP } from "./ModalAfterSignUp"
+import { InputStyled } from "../components/InputStyled"
+import { ModalAfterSignUP } from "../components/ModalAfterSignUp"
 import { useSignUp } from "../hooks/useSignUp"
 import { validatePassengerInputs } from "../utils/validateInputs"
 

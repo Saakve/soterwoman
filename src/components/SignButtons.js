@@ -1,7 +1,7 @@
 import { Button } from "@rneui/base";
 import { StyleSheet, View, Text } from "react-native";
 
-export function AuthHome({ navigation, userType }) {
+export function SignButtons({ navigation, userType }) {
 
     const moveToSignIn = () => navigation.navigate('SignIn', { userType })
     const moveToSignUp = userType === 'passenger' ? () => navigation.navigate('SignUpPassenger') : () => navigation.navigate('SignUpDriver')

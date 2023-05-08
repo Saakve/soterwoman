@@ -4,10 +4,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { Button } from "@rneui/base"
 
 import { useSignUp } from "../hooks/useSignUp"
-import { InputStyled } from "./InputStyled.js"
+import { InputStyled } from "../components/InputStyled.js"
 import { GoBackButton } from "../components/GoBackButton"
 import { validateDriverInputs, validateVehicleInputs } from "../utils/validateInputs"
-import { ModalAfterSignUP } from "./ModalAfterSignUp"
+import { ModalAfterSignUP } from "../components/ModalAfterSignUp"
 
 const Stack = createNativeStackNavigator()
 const AllInfoContex = createContext(null)

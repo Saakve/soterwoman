@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { FormCard } from "./FormCard";
+import { FormCard } from "../components/FormCard";
 import UserContext from "../context/UserContext";
 import { updateDriverCard, updatePassengerPaymentMethod } from "../services/stripe";
 
