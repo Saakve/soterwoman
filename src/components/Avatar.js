@@ -1,10 +1,11 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { supabase } from "../services/supabase";
-import { StyleSheet, View, Alert, Image, Button } from "react-native";
+import { StyleSheet, View, Alert, Image, Button, ActivityIndicator } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
+import { Icon } from "@rneui/base";
 
-export default function Thumbnail({ name, url, size = 150, onUpload }) {
+export default function Avatar({ name, url, size = 150, onUpload }) {
     const [uploading, setUploading] = useState(false)
     const [avatarUrl, setaAvatarUrl] = useState(null)
     const avatarSize = { height: size, width: size}
@@ -49,7 +50,6 @@ export default function Thumbnail({ name, url, size = 150, onUpload }) {
             await onUpload(filePath)
 
         } catch (error) {
-          //  console.log(error)
             if (isCancel(error)) console.warn('cancelled')
             else if (isInProgress(error)) console.warn('multiple pickers were opened, only the last will be considered')
             else if (error instanceof Error) Alert.alert(error.message)
@@ -71,29 +71,33 @@ export default function Thumbnail({ name, url, size = 150, onUpload }) {
           : <View style={[avatarSize, styles.avatar, styles.noImage]} />
         } 
         <View>
-          <Button
-            title={uploading ? 'Uploading ...' : 'Upload'}
+          {!uploading ? 
+          <Icon
+            name={"edit"}
             onPress={uploadAvatar}
-            disabled={uploading}
-          />
+            disabled={uploading}/> 
+            : 
+          <ActivityIndicator size="small" color="#0000ff" />
+          }
         </View>
       </View>
     )
 }
 
 const styles = StyleSheet.create({
-    avatar: {
-      borderRadius: 5,
-      overflow: 'hidden',
-      maxWidth: '100%',
-    },
-    image: {
-      objectFit: 'cover',
-      paddingTop: 0,
-    },
-    noImage: {
-      backgroundColor: '#333',
-      border: '1px solid rgb(200, 200, 200)',
-      borderRadius: 5,
-    },
-  })    
+  avatar: {
+    overflow: "hidden",
+  },
+  image: {
+    marginTop: 10,
+    objectFit: "cover",
+    borderRadius: 100,
+    maxWidth: "30%",
+    maxHeight: "80%",
+  },
+  noImage: {
+    backgroundColor: "#333",
+    border: "1px solid rgb(200, 200, 200)",
+    borderRadius: 5,
+  },
+});    

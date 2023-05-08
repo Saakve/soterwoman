@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import Thumbnail from "./Thumbnail";
+import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
+import Thumbnail from "./Avatar";
 import { supabase } from "../services/supabase";
 import UserContext from "../context/UserContext";
 import { Input, Button } from "@rneui/themed";
@@ -15,6 +15,7 @@ import {
   validateNewPassword,
 } from "../utils/validateInputs";
 import { InputStyled } from "./InputStyled.js";
+import { FlatList } from "react-native-gesture-handler";
 
 const ChangePassword = ({ onPress, userData }) => {
   const [password, setPassword] = useState("");
@@ -37,19 +38,15 @@ const ChangePassword = ({ onPress, userData }) => {
         setErrorMessage("Contraseña actual no coincide");
         return;
       }
-
        try {
          validateNewPassword(newPassword, newPasswordValidation);
        } catch (error) {
-         console.log("soy el maldito", error);
          setErrorMessage(error);
          return;
        }
 
     const { dataNewPassword, errorNewPassword } =
       await supabase.auth.updateUser({ password: newPassword });
-    console.log("PASSWORD", dataNewPassword, errorNewPassword);
-
     onPress();
   };
   return (
@@ -58,14 +55,6 @@ const ChangePassword = ({ onPress, userData }) => {
         <Thumbnail
           name={userData?.name}
           url={userData?.idImage}
-          onUpload={async (url) => {
-            const { data, error } = await supabase
-              .from("profile")
-              .update({ idImage: url })
-              .eq("id", userData.id);
-            console.log(data);
-            console.log(error);
-          }}
         />
       </View>
       <InputStyled
@@ -101,7 +90,12 @@ const ChangePassword = ({ onPress, userData }) => {
         placeholder="Contraseña"
         inputMode="text"
       />
-      <Button title="Guardar" onPress={handleOnPress} />
+      <Button
+        title="Guardar cambios"
+        style={styles.button}
+        color="#8946A6"
+        onPress={handleOnPress}
+      />
     </View>
   );
 };
@@ -170,49 +164,37 @@ export default function ProfileDetails() {
       setErrorMessage(error);
       return;
     }
-
-    console.log("DE TODO", { name, phone });
+    
     const { data, error } = await supabase
       .from("profile")
       .update({ name: name, phone: phone })
       .eq("id", userData.id)
       .select();
-    console.log("PROFILE", data, error);
     const { data: dataDriver, error: errorDriver } = await supabase
       .from("driver")
       .update({ drivinglicense: drivingLicense, city: city })
       .eq("id", userData.id)
       .select();
-    console.log("CONDUCTOR", dataDriver, errorDriver);
     const { data: dataPassenger, error: errorPassenger } = await supabase
       .from("passenger")
       .update({ emergencyphone: emergencyPhone })
       .eq("id", userData.id)
       .select();
-    console.log("PASAJERO", dataPassenger, errorPassenger);
-
     const { data: dataEmail, error: errorMail } =
       await supabase.auth.updateUser({ email });
-    console.log("EMAEL", dataEmail, errorMail);
   };
 
   return page === 1 ? (
-    <View style={styles.container}>
-      <View style={styles.avatarSection}>
-        <Thumbnail
-          name={userData?.name}
-          url={userData?.idImage}
-          onUpload={async (url) => {
-            const { data, error } = await supabase
-              .from("profile")
-              .update({ idImage: url })
-              .eq("id", userData.id);
-            console.log(data);
-            console.log(error);
-          }}
-        />
-      </View>
-      <View style={styles.detailsSection}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.detailsSection}>
+        <View style={styles.avatarSection}>
+          <Thumbnail
+            name={userData?.name}
+            url={userData?.idImage}
+            style={styles.avatar}
+          />
+        </View>
+
         <InputStyled
           leftIcon={<Icon name="person" size={30} />}
           value={name}
@@ -304,9 +286,17 @@ export default function ProfileDetails() {
             setPage(2);
           }}
         />
-        {save ? <Button title="Save" onPress={updateData} /> : null}
-      </View>
-    </View>
+        {save ? (
+          <Button
+            style={styles.button}
+            //buttonStyle={{marginBottom: 60, marginTop: 20}}
+            color="#8946A6"
+            title="Guardar cambios"
+            onPress={updateData}
+          />
+        ) : null}
+      </ScrollView>
+    </SafeAreaView>
   ) : (
     <ChangePassword
       style={styles.changePassword}
@@ -321,25 +311,28 @@ export default function ProfileDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#B762C1",
   },
   avatarSection: {
-    paddingTop: 100,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#B762C1",
+    marginBottom: 20,
+    padding: "1%",
+    height: "20%"
   },
   detailsSection: {
     flex: 1,
-    backgroundColor: "white",
-    paddingTop: 20,
+    backgroundColor: "white"
   },
-  Button: {
-      width: 335,
-      borderColor: "black",
-      borderWidth: 1,
-      borderRadius: 5,
-      alignSelf: "center",
-    },
+  button: {
+    marginTop: 5,
+    color: "#8946A6",
+    width: 330,
+    height: 50,
+    alignSelf: "center",
+    borderRadius: 10,
+  },
   changePassword: {
     marginTop: 500,
   },

@@ -11,56 +11,91 @@ import { makeChannel } from "../services/makeChannel";
 import UserContext from "../context/UserContext";
 import { supabase } from "../services/supabase";
 import { Input, Button } from "@rneui/themed";
-import Thumbnail from "./Thumbnail";
+import Avatar from "./Avatar";
 
 export default function Message() {
   const [channel, setChannel] = useState(null);
-  const [messages, setMessages] = useState(["INICIAL"]);
-  const [message, setMessage ] = useState("")
+  const [messages, setMessages] = useState([{ message: "Inicial", from: 1 }]);
+  const [message, setMessage] = useState("");
+  const [name, setName] = useState("")
+  const [idImage, setIdImage] = useState("")
+
   const { userData } = useContext(UserContext);
+  const userType =
+    userData.idUserType !== 1
+      ? "d3089cf9-5e52-4347-b094-70d4c6545677"
+      : "afcfc3f6-4854-4976-88e8-57a8480fdd09";
 
-    useEffect(() => {
-      const channel = makeChannel({
-        channelName: "messages",
-        eventType: "broadcast",
-        filter: { event: userData.id },
-        callback: (response) =>
-          setMessages((latestMessages) => [
-            ...latestMessages,
-            response.payload,
-          ])
-      })
+  useEffect(() => {
+    const channel = makeChannel({
+      channelName: "messages",
+      eventType: "broadcast",
+      filter: { event: userData.id },
+      callback: (response) => {
+        setName(response.payload.from.name)
+        setIdImage(response.payload.from.idImage)
+        setMessages((latestMessages) => [
+          ...latestMessages,
+          { message: response.payload.message, from: response.payload.from },
+        ]);
+      } 
+    });
 
-      setChannel(channel);
-      console.log("LISTENING");
+    setChannel(channel);
+    console.log("LISTENING");
 
-      return () => supabase.removeChannel(channel);
-    }, [supabase]);
+    return () => supabase.removeChannel(channel);
+  }, [supabase]);
 
-    const sendMessage = async () => {
-      await channel.send({
-        type: "broadcast",
-        event: userData.id, //id del usuario 
-        payload: message,
-      });
-      console.log(message)
-    };
+  //console.log("SI SOY YO", messages);
+
+  const sendMessage = async () => {
+    setMessages((latestMessages) => [
+      ...latestMessages,
+      { message, from: {idUserType: userData.idUserType} },
+    ]);
+    await channel.send({
+      type: "broadcast",
+      event: userType,
+      payload: { message, from: {idUserType: userData.idUserType, idImage: userData.idImage, name: userData.name}},
+    });
+    setMessage("");
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.avatarSection}>
-        <Thumbnail
-          name={userData?.name}
-          url={userData?.idImage}
+        <Avatar name={name} 
+        url={idImage} />
+      </View>
+      <View style={styles.messageContainer}>
+        <FlatList
+          data={messages}
+          style={styles.messages}
+          renderItem={({ item }) =>
+            item.from.idUserType !== userData.idUserType ? (
+              <View style={styles.messageDestinSection}>
+                <Button
+                  style={styles.messageDestin}
+                  title={item.message}
+                  color="#EFEFF4"
+                  titleStyle={styles.contentMessageDestin}
+                />
+              </View>
+            ) : (
+              <View style={styles.messageOriginSection}>
+                <Button
+                  style={styles.messageOrigin}
+                  title={item.message}
+                  color="#EA99D5"
+                  titleStyle={styles.contentMessageOrigin}
+                />
+              </View>
+            )
+          }
+          keyExtractor={(item) => item.id}
         />
       </View>
-      <View style={styles.header}>
-      </View>
-      <FlatList
-        style={styles.messageList}
-        data={messages}
-        keyExtractor={(item) => item.id}
-      />
       <View style={styles.inputContainer}>
         <Input
           style={styles.input}
@@ -82,48 +117,53 @@ export default function Message() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#B762C1",
   },
   avatarSection: {
-    paddingTop: 100,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#B762C1",
-  },
-  header: {
-    backgroundColor: "#B762C1",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerText: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 20,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  chatContainer: {
-    flex: 1,
-    paddingHorizontal: 10,
-    paddingTop: 10,
+    paddingTop: "10%",
+    paddingHorizontal: "15%",
+    height: "15%",
   },
   messageContainer: {
-    marginBottom: 20,
+    backgroundColor: "#FFFFFF",
+    flex: 1,
+  },
+  messageDestinSection: {
     alignItems: "flex-start",
+    width: "100%",
   },
-  message: {
+  messageOriginSection: {
+    alignItems: "flex-end",
+    width: "100%",
+  },
+  messageOrigin: {
+    padding: 5,
+    backgroundColor: "#EA99D5",
+    color: "#FFFFFF",
+    maxWidth: "50%",
+    marginTop: 20,
+    marginRight: "3%",
+    borderRadius: 12,
+  },
+  contentMessageOrigin: {
+    textAlign: "left",
+    fontSize: 17,
+  },
+  messageDestin: {
     padding: 10,
-    backgroundColor: "#f2f2f2",
-    borderRadius: 10,
+    backgroundColor: "#EFEFF4",
+    marginTop: 20,
+    marginLeft: "3%",
+    maxWidth: "50%",
+    textAlign: "left",
+    borderRadius: 12,
   },
-  messageText: {
-    fontSize: 16,
-    color: "#333",
+  contentMessageDestin: {
+    textAlign: "left",
+    fontSize: 17,
+    color: "#000000",
   },
   inputContainer: {
     flexDirection: "row",
@@ -132,6 +172,7 @@ const styles = StyleSheet.create({
     borderTopColor: "#B762C1",
     paddingVertical: 10,
     paddingHorizontal: 30,
+    backgroundColor: "#FFFFFF",
   },
   input: {
     flex: 1,
@@ -148,4 +189,3 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
 });
-
