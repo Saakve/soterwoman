@@ -4,7 +4,6 @@ import { HomeDriver } from "./HomeDriver";
 import ProfileDetails from "./ProfileDetails";
 import Trip from "./Trip";
 import VehicleDetails from "./VehicleDetails";
-import { Payment } from "./Payment";
 import { Cards } from "./Cards";
 import { useContext } from "react";
 import UserContext from "../context/UserContext";
