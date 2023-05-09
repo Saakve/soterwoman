@@ -232,6 +232,43 @@ CREATE POLICY "Anyone can update their own avatar"
   );
 
 --Functions and Triggers
+CREATE OR REPLACE FUNCTION public."getStats" (
+  IN userid UUID,
+  OUT total_cost MONEY,
+  OUT trip_count INTEGER,
+  OUT debt MONEY,
+  OUT profile_id UUID
+) AS $$
+BEGIN
+IF (SELECT idusertype FROM profile WHERE profile.id = userid) = 1 THEN 
+  SELECT SUM(cost) INTO total_cost
+    FROM trip
+   WHERE iddriver = userid;
+
+    SELECT COUNT(*) INTO trip_count
+    FROM trip
+   WHERE iddriver = userid;
+
+     SELECT profile.debt INTO debt
+    FROM profile
+   WHERE id = userid;
+
+ELSE 
+  SELECT  SUM(cost) INTO total_cost
+    FROM trip
+   WHERE idpassenger = userid;
+
+    SELECT COUNT(*) INTO trip_count
+    FROM trip
+   WHERE idpassenger = userid;
+
+     SELECT profile.debt INTO debt
+    FROM profile
+   WHERE id = userid;
+END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION public."getVehicleFromIdDriver"(iddriver UUID)
 RETURNS SETOF vehicle AS $$
 BEGIN
