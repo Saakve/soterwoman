@@ -14,7 +14,8 @@ CREATE TABLE profile (
   usagetime INT NOT NULL DEFAULT 0 CHECK (usagetime >= 0),
   debt MONEY NOT NULL DEFAULT MONEY(0) CHECK (debt >= MONEY(0)),
   idimage VARCHAR(50) DEFAULT NULL,
-  idusertype SMALLINT DEFAULT NULL REFERENCES usertype
+  idusertype SMALLINT DEFAULT NULL REFERENCES usertype,
+  idstripe VARCHAR DEFAULT NULL
 );
 
 CREATE TABLE vehicle (
@@ -283,12 +284,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION public."equalPassword" (userid UUID, passwordToValidate VARCHAR)
+CREATE OR REPLACE FUNCTION public."equalPassword" (passwordToValidate VARCHAR)
 RETURNS boolean AS $$
 BEGIN
   IF EXISTS ( 
     SELECT 1 FROM auth.users 
-    WHERE id = userid 
+    WHERE id = auth.uid()
     AND encrypted_password = crypt(passwordToValidate, encrypted_password)) 
   THEN
     RETURN TRUE;
