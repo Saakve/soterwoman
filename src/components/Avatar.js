@@ -7,7 +7,7 @@ import { Icon } from "@rneui/base"
 import { supabase } from "../services/supabase"
 import UserContext from "../context/UserContext"
 
-export default function Avatar({ name, url, size = 150, onUpload = () => { } }) {
+export default function Avatar({ name, url, size = 100, onUpload = () => { } }) {
   const { userData, setUserData } = useContext(UserContext)
   const [uploading, setUploading] = useState(false)
   const [avatarUrl, setaAvatarUrl] = useState(null)
@@ -82,12 +82,13 @@ export default function Avatar({ name, url, size = 150, onUpload = () => { } }) 
           ? <Image source={{ uri: avatarUrl }} accessibilityLabel="Avatar" style={[avatarSize, styles.avatar, styles.image]} />
           : <View style={[avatarSize, styles.avatar, styles.noImage]} />
       }
-      <View>
+      <View style={styles.icon}>
         {!uploading ?
           <Icon
             name={"edit"}
             onPress={uploadAvatar}
-            disabled={uploading} />
+            disabled={uploading}
+          />
           :
           <ActivityIndicator size="small" color="#0000ff" />
         }
@@ -103,13 +104,21 @@ const styles = StyleSheet.create({
   image: {
     marginTop: 10,
     objectFit: "cover",
-    borderRadius: 100,
-    maxWidth: "30%",
-    maxHeight: "80%",
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: "#D6D6D6",
   },
   noImage: {
     backgroundColor: "#333",
     border: "1px solid rgb(200, 200, 200)",
-    borderRadius: 5,
+    borderRadius: 50,
   },
+  icon : {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#FFCDDD",
+    borderRadius: 50,
+    padding: 2
+  }
 });    

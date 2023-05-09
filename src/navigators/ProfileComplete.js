@@ -5,12 +5,12 @@ import { Cards } from "./Cards";
 
 import { Home } from "../pages/Home";
 import { HomeDriver } from "../pages/HomeDriver";
-import ProfileDetails from "../pages/ProfileDetails";
 import Trip from "../pages/Trip";
 import VehicleDetails from "../pages/VehicleDetails";
 import UserContext from "../context/UserContext";
 import Message from "../pages/Message";
 import Call from "../pages/Call";
+import { Profile } from "./Profile";
 
 const Drawer = createDrawerNavigator();
 
@@ -27,7 +27,7 @@ function ProfileComplete() {
         >
             <Drawer.Screen name="Home" component={Home} />
             <Drawer.Screen name="HomeDriver" component={HomeDriver} />
-            <Drawer.Screen name="Profile" component={ProfileDetails} />
+            <Drawer.Screen name="Profile" component={Profile} />
             <Drawer.Screen name="Vehicle" component={VehicleDetails} />
             <Drawer.Screen name="Trip" component={Trip} />
             <Drawer.Screen name="Cards" component={Cards} options={{

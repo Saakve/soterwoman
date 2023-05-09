@@ -12,100 +12,23 @@ import {
   validateEmergencyPhone,
   validateName,
   validatePhone,
-  validateNewPassword,
 } from "../utils/validateInputs";
 import { InputStyled } from "../components/InputStyled.js";
+import { ModalSuccessfulProfileUpdate } from "../components/ModalSuccesfulProfileUpdate";
 
-const ChangePassword = ({ onPress, userData }) => {
-  const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newPasswordValidation, setNewPasswordValidation] = useState("");
-  const [errorMessage, setErrorMessage] = useState(null);
-
-  const handleOnPress = async () => {
-    setErrorMessage(null);
-    if (newPassword !== newPasswordValidation) {
-      setErrorMessage("Contraseñas diferentes");
-      return;
-    }
-    const { data, error } = await supabase.rpc("equalPassword", { passwordtovalidate: password })
-    console.log(data, error);
-    if (!data) {
-      setErrorMessage("Contraseña actual no coincide");
-      return;
-    }
-    try {
-      validateNewPassword(newPassword, newPasswordValidation);
-    } catch (error) {
-      setErrorMessage(error);
-      return;
-    }
-
-    const { dataNewPassword, errorNewPassword } =
-      await supabase.auth.updateUser({ password: newPassword });
-    onPress();
-  };
-  return (
-    <View>
-      <View style={styles.avatarSection}>
-        <Thumbnail
-          name={userData?.name}
-          url={userData?.idImage}
-        />
-      </View>
-      <InputStyled
-        name="password"
-        secureTextEntry
-        label="Contraseña actual"
-        onChangeText={(password) => {
-          setPassword(password);
-        }}
-        inputMode="text"
-        placeholder="Contraseña actual"
-        errorMessage={errorMessage}
-      />
-      <InputStyled
-        name="newpassword"
-        secureTextEntry
-        label="Nueva contraseña"
-        onChangeText={(newPassword) => {
-          setNewPassword(newPassword);
-        }}
-        errorMessage={errorMessage}
-        placeholder="Contraseña"
-        inputMode="text"
-      />
-      <InputStyled
-        label="Nueva contraseña"
-        name="newpasswordvalidation"
-        secureTextEntry
-        onChangeText={(newPasswordValidation) => {
-          setNewPasswordValidation(newPasswordValidation);
-        }}
-        errorMessage={errorMessage}
-        placeholder="Contraseña"
-        inputMode="text"
-      />
-      <Button
-        title="Guardar cambios"
-        style={styles.button}
-        color="#8946A6"
-        onPress={handleOnPress}
-      />
-    </View>
-  );
-};
-
-export default function ProfileDetails() {
+export default function ProfileDetails({ navigation }) {
   const { userData } = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
+  const [updated, setUpdated] = useState(false);
   const [save, setSave] = useState(false);
-  const [page, setPage] = useState(1);
   const [email, setEmail] = useState(userData.email);
   const [name, setName] = useState(userData.name);
   const [phone, setPhone] = useState(userData.phone);
   const [emergencyPhone, setEmergencyPhone] = useState(emergencyPhone);
   const [drivingLicense, setDrivingLicense] = useState(drivingLicense);
   const [city, setCity] = useState(city);
+  
+
   const [errorMessage, setErrorMessage] = useState(null);
   const [validatedDrivingLicense, setValidatedDrivingLicense] = useState(
     validatedDrivingLicense
@@ -138,6 +61,7 @@ export default function ProfileDetails() {
 
   const updateData = async () => {
     setErrorMessage(null);
+    setLoading(true)
     try {
       validateName(name);
 
@@ -156,7 +80,6 @@ export default function ProfileDetails() {
         validateEmergencyPhone(emergencyPhone);
       }
     } catch (error) {
-      console.log("soy el maldito", error);
       setErrorMessage(error);
       return;
     }
@@ -166,31 +89,37 @@ export default function ProfileDetails() {
       .update({ name: name, phone: phone })
       .eq("id", userData.id)
       .select();
-    const { data: dataDriver, error: errorDriver } = await supabase
+    const { error: errorDriver } = await supabase
       .from("driver")
       .update({ drivinglicense: drivingLicense, city: city })
       .eq("id", userData.id)
       .select();
-    const { data: dataPassenger, error: errorPassenger } = await supabase
+    const { error: errorPassenger } = await supabase
       .from("passenger")
       .update({ emergencyphone: emergencyPhone })
       .eq("id", userData.id)
       .select();
-    const { data: dataEmail, error: errorMail } =
-      await supabase.auth.updateUser({ email });
+    const { error: errorMail } = await supabase.auth.updateUser({ email });
+
+    setUpdated(true)
+    setLoading(false)
+    setSave(false)
   };
 
-  return page === 1 ? (
+  const moveToChangePassword = () => {
+    navigation.navigate('ChangePassword')
+  }
+
+  return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.detailsSection}>
-        <View style={styles.avatarSection}>
+      <ModalSuccessfulProfileUpdate visible={updated} onPress={() => setUpdated(false)} />
+      <View style={styles.avatarSection}>
           <Thumbnail
             name={userData?.name}
             url={userData?.idImage}
-            style={styles.avatar}
           />
         </View>
-
+      <ScrollView style={styles.detailsSection}>
         <InputStyled
           leftIcon={<Icon name="person" size={30} />}
           value={name}
@@ -278,42 +207,32 @@ export default function ProfileDetails() {
           title="Contraseña"
           value={userData.name}
           secureTextEntry
-          onChangeText={() => {
-            setPage(2);
-          }}
+          onPressIn={moveToChangePassword}
         />
         {save ? (
           <Button
-            style={styles.button}
+            buttonStyle={styles.button}
             color="#8946A6"
             title="Guardar cambios"
             onPress={updateData}
+            loading={loading}
           />
         ) : null}
       </ScrollView>
     </SafeAreaView>
-  ) : (
-    <ChangePassword
-      style={styles.changePassword}
-      onPress={() => {
-        setPage(1);
-      }}
-      userData={userData}
-    />
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#B762C1",
+    backgroundColor: "#FFF",
   },
   avatarSection: {
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#B762C1",
     marginBottom: 20,
-    padding: "1%",
     height: "20%"
   },
   detailsSection: {
@@ -327,8 +246,5 @@ const styles = StyleSheet.create({
     height: 50,
     alignSelf: "center",
     borderRadius: 10,
-  },
-  changePassword: {
-    marginTop: 500,
-  },
+  }
 });

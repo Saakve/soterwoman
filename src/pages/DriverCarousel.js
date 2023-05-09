@@ -49,7 +49,6 @@ export function DriverCarousel({ navigation, route }) {
                 />
                 <Text style={styles.header}>{HEADERS[page]}</Text>
                 <Text style={styles.description}>{DESCRIPTIONS[page]}</Text>
-                <Text style={styles.text}>{page}</Text>
             </View>
             <View style={styles.bttcontainer}>
                 {
