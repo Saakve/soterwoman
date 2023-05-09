@@ -3,7 +3,7 @@ import { StyleSheet, View, SafeAreaView, ScrollView } from "react-native";
 import Thumbnail from "../components/Avatar";
 import { supabase } from "../services/supabase";
 import UserContext from "../context/UserContext";
-import { Input, Button } from "@rneui/themed";
+import { Button } from "@rneui/themed";
 import { Icon } from "react-native-elements";
 import {
   validateCity,
@@ -15,7 +15,6 @@ import {
   validateNewPassword,
 } from "../utils/validateInputs";
 import { InputStyled } from "../components/InputStyled.js";
-import { FlatList } from "react-native-gesture-handler";
 
 const ChangePassword = ({ onPress, userData }) => {
   const [password, setPassword] = useState("");
@@ -24,26 +23,26 @@ const ChangePassword = ({ onPress, userData }) => {
   const [errorMessage, setErrorMessage] = useState(null);
 
   const handleOnPress = async () => {
-    setErrorMessage(null);    
-      if (newPassword !== newPasswordValidation) {
-        setErrorMessage("Contraseñas diferentes");
-        return;
-      }
-      const { data, error } = await supabase.rpc("equalPassword", {
-        userid: userData.id,
-        passwordtovalidate: password,
-      });
-      console.log(data, error);
-      if (!data) {
-        setErrorMessage("Contraseña actual no coincide");
-        return;
-      }
-       try {
-         validateNewPassword(newPassword, newPasswordValidation);
-       } catch (error) {
-         setErrorMessage(error);
-         return;
-       }
+    setErrorMessage(null);
+    if (newPassword !== newPasswordValidation) {
+      setErrorMessage("Contraseñas diferentes");
+      return;
+    }
+    const { data, error } = await supabase.rpc("equalPassword", {
+      userid: userData.id,
+      passwordtovalidate: password,
+    });
+    console.log(data, error);
+    if (!data) {
+      setErrorMessage("Contraseña actual no coincide");
+      return;
+    }
+    try {
+      validateNewPassword(newPassword, newPasswordValidation);
+    } catch (error) {
+      setErrorMessage(error);
+      return;
+    }
 
     const { dataNewPassword, errorNewPassword } =
       await supabase.auth.updateUser({ password: newPassword });
@@ -164,7 +163,7 @@ export default function ProfileDetails() {
       setErrorMessage(error);
       return;
     }
-    
+
     const { data, error } = await supabase
       .from("profile")
       .update({ name: name, phone: phone })
@@ -289,7 +288,6 @@ export default function ProfileDetails() {
         {save ? (
           <Button
             style={styles.button}
-            //buttonStyle={{marginBottom: 60, marginTop: 20}}
             color="#8946A6"
             title="Guardar cambios"
             onPress={updateData}

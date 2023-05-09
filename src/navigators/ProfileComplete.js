@@ -1,11 +1,13 @@
-import { Home } from "../components/Home";
+import { useContext } from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
+
+import { Cards } from "./Cards";
+
+import { Home } from "../pages/Home";
 import { HomeDriver } from "../pages/HomeDriver";
 import ProfileDetails from "../pages/ProfileDetails";
 import Trip from "../pages/Trip";
 import VehicleDetails from "../pages/VehicleDetails";
-import { Cards } from "./Cards";
-import { useContext } from "react";
 import UserContext from "../context/UserContext";
 import Message from "../pages/Message";
 import Call from "../pages/Call";

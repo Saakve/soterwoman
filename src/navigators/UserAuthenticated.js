@@ -1,8 +1,10 @@
-import { UserContextProvider } from "../context/UserContext"
-import { CompletePassengerProfile } from "../components/ComplePassengerProfile"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { ProfileComplete } from "../components/ProfileComplete"
-import { CompleteDriverProfile } from "../components/CompleteDriverProfile"
+
+import { UserContextProvider } from "../context/UserContext"
+
+import { ProfileComplete } from "../navigators/ProfileComplete"
+import { CompletePassengerProfile } from "../pages/ComplePassengerProfile"
+import { CompleteDriverProfile } from "../pages/CompleteDriverProfile"
 
 const Stack = createNativeStackNavigator()
 

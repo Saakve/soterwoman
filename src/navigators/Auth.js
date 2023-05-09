@@ -1,10 +1,10 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
-import { SignIn } from "../components/SignIn"
-import { PassengerCarousel } from "../components/PassengerCarousel"
-import { DriverCarousel } from "../components/DriverCarousel"
-import { SignUpPassenger } from "../components/SignUpPassenger"
-import { SignUpDriver } from "../components/SignUpDriver"
+import { SignIn } from "../pages/SignIn"
+import { PassengerCarousel } from "../pages/PassengerCarousel"
+import { DriverCarousel } from "../pages/DriverCarousel"
+import { SignUpPassenger } from "../pages/SignUpPassenger"
+import { SignUpDriver } from "../pages/SignUpDriver"
 import { GoBackButton } from "../components/GoBackButton"
 
 const Stack = createNativeStackNavigator()

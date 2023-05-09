@@ -9,8 +9,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import * as SplashScreen from 'expo-splash-screen'
 import { useFonts } from 'expo-font'
 
-import { Auth } from './src/pages/Auth'
-import { UserAuthenticated } from './src/pages/UserAuthenticated'
+import { Auth } from './src/navigators/Auth'
+import { UserAuthenticated } from './src/navigators/UserAuthenticated'
 import { useIsSignIn } from './src/hooks/useIsSignIn'
 import { SignInLikeContextProvider } from './src/context/SingInLikeContext'
 
