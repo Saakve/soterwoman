@@ -28,10 +28,7 @@ const ChangePassword = ({ onPress, userData }) => {
       setErrorMessage("Contraseñas diferentes");
       return;
     }
-    const { data, error } = await supabase.rpc("equalPassword", {
-      userid: userData.id,
-      passwordtovalidate: password,
-    });
+    const { data, error } = await supabase.rpc("equalPassword", { passwordtovalidate: password })
     console.log(data, error);
     if (!data) {
       setErrorMessage("Contraseña actual no coincide");
