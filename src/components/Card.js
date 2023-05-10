@@ -58,11 +58,11 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         flexDirection: "column",
         shadowColor: "#111",
-        shadowOpacity: 12,
-        shadowRadius: 12,
+        shadowOpacity: 1,
+        shadowRadius: 5,
         shadowOffset: {
-            height: 30,
-            width: 50
+            height: 0,
+            width: 0.0
         },
         elevation: 5
     },
