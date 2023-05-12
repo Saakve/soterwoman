@@ -7,7 +7,7 @@ import { Icon } from "@rneui/base"
 import { supabase } from "../services/supabase"
 import UserContext from "../context/UserContext"
 
-export default function Avatar({ name, url, size = 100, onUpload = () => { } }) {
+export default function Avatar({ name, url, size = 100, onUpload = () => { }, editable = true }) {
   const { userData, setUserData } = useContext(UserContext)
   const [uploading, setUploading] = useState(false)
   const [avatarUrl, setaAvatarUrl] = useState(null)
@@ -82,17 +82,20 @@ export default function Avatar({ name, url, size = 100, onUpload = () => { } }) 
           ? <Image source={{ uri: avatarUrl }} accessibilityLabel="Avatar" style={[avatarSize, styles.avatar, styles.image]} />
           : <View style={[avatarSize, styles.avatar, styles.noImage]} />
       }
-      <View style={styles.icon}>
-        {!uploading ?
-          <Icon
-            name={"edit"}
-            onPress={uploadAvatar}
-            disabled={uploading}
-          />
-          :
-          <ActivityIndicator size="small" color="#0000ff" />
-        }
-      </View>
+      {
+        editable
+          ? <View style={styles.icon}>
+            {!uploading
+              ? <Icon
+                name={"edit"}
+                onPress={uploadAvatar}
+                disabled={uploading}
+              />
+              : <ActivityIndicator size="small" color="#0000ff" />
+            }
+          </View>
+          : null
+      }
     </View>
   )
 }
@@ -113,7 +116,7 @@ const styles = StyleSheet.create({
     border: "1px solid rgb(200, 200, 200)",
     borderRadius: 50,
   },
-  icon : {
+  icon: {
     position: "absolute",
     bottom: 0,
     right: 0,

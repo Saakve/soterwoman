@@ -23,8 +23,8 @@ export default function Message() {
   const { userData } = useContext(UserContext);
   const userType =
     userData.idUserType !== 1
-      ? "d3089cf9-5e52-4347-b094-70d4c6545677"
-      : "afcfc3f6-4854-4976-88e8-57a8480fdd09";
+      ? "d8b9b8fc-b361-45b9-99a9-f442a4a941ab"
+      : "34791dce-3781-4fb8-9188-82ed10020071";
 
   useEffect(() => {
     const channel = makeChannel({
@@ -47,8 +47,6 @@ export default function Message() {
     return () => supabase.removeChannel(channel);
   }, [supabase]);
 
-  //console.log("SI SOY YO", messages);
-
   const sendMessage = async () => {
     setMessages((latestMessages) => [
       ...latestMessages,
@@ -65,8 +63,11 @@ export default function Message() {
   return (
     <View style={styles.container}>
       <View style={styles.avatarSection}>
-        <Avatar name={name} 
-        url={idImage} />
+        <Avatar
+          name={name} 
+          url={idImage}
+          editable={false}
+        />
       </View>
       <View style={styles.messageContainer}>
         <FlatList
@@ -93,7 +94,7 @@ export default function Message() {
               </View>
             )
           }
-          keyExtractor={(item) => item.id}
+          keyExtractor={(_,index) => index}
         />
       </View>
       <View style={styles.inputContainer}>
@@ -122,8 +123,6 @@ const styles = StyleSheet.create({
   avatarSection: {
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: "10%",
-    paddingHorizontal: "15%",
     height: "15%",
   },
   messageContainer: {
