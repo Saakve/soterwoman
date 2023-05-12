@@ -123,10 +123,10 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         shadowColor: "#111",
         shadowOpacity: 12,
-        shadowRadius: 12,
+        shadowRadius: 5,
         shadowOffset: {
-            height: 30,
-            width: 50
+            height: 0,
+            width: 1
         },
         elevation: 5
     },
