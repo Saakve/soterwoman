@@ -57,19 +57,24 @@ CREATE TABLE tripstatus (
   name VARCHAR(50) NOT NULL CHECK (CHAR_LENGTH(name) > 3)
 );
 
-INSERT INTO tripstatus (name) VALUES ('completo');
-INSERT INTO tripstatus (name) VALUES ('cancelado');
+INSERT INTO tripstatus (name) VALUES ('Draft');
+INSERT INTO tripstatus (name) VALUES ('Pending');
+INSERT INTO tripstatus (name) VALUES ('Confirmed');
+INSERT INTO tripstatus (name) VALUES ('Completed');
+INSERT INTO tripstatus (name) VALUES ('Cancelled');
 
 CREATE TABLE trip (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  startingpoint VARCHAR(255) NOT NULL CHECK (CHAR_LENGTH(startingpoint) > 3),
-  endpoint VARCHAR(255) NOT NULL CHECK (CHAR_LENGTH(endpoint) > 3),
+  name_startingpoint VARCHAR(255) NOT NULL CHECK (CHAR_LENGTH(name_startingpoint) > 3),
+  name_endpoint VARCHAR(255) NOT NULL CHECK (CHAR_LENGTH(name_endpoint) > 3),
+  startingpoint GEOGRAPHY(POINT) NOT NULL,
+  endpoint GEOGRAPHY(POINT) NOT NULL,
   done_on TIMESTAMPTZ DEFAULT NOW(),
   took INTERVAL NOT NULL DEFAULT '0 seconds'::INTERVAL CHECK (took >= '0 seconds'::INTERVAL),
   children SMALLINT NOT NULL DEFAULT 0 CHECK (children >= 0 AND children <= 3),
   cost MONEY NOT NULL DEFAULT MONEY(0) CHECK (cost >= MONEY(0)),
   idpassenger UUID NOT NULL REFERENCES passenger,
-  iddriver UUID NOT NULL REFERENCES driver,
+  iddriver UUID REFERENCES driver,
   idstatus SMALLINT REFERENCES tripstatus
 );
 
@@ -139,10 +144,24 @@ CREATE POLICY "Trips are viewable by users who made them"
     auth.uid() = idpassenger OR auth.uid() = iddriver
   );
 
+CREATE POLICY "Trips with status draft, pending and confirmed are viewable by drivers" 
+  ON trip FOR SELECT TO authenticated 
+  USING (
+    EXISTS (SELECT 1 FROM driver WHERE id = auth.uid())
+    AND idstatus < 3
+  );
+
 CREATE POLICY "Trips are updated by users who made them" 
   ON trip FOR UPDATE TO authenticated 
   USING (
     auth.uid() = idpassenger OR auth.uid() = iddriver
+  );
+
+CREATE POLICY "Trips with status draft, pending and confirmed are updated by drivers" 
+  ON trip FOR UPDATE TO authenticated 
+  USING (
+    EXISTS (SELECT 1 FROM driver WHERE id = auth.uid())
+    AND idstatus < 3
   );
 
 CREATE POLICY "Users can update their own profiles" 
@@ -233,6 +252,17 @@ CREATE POLICY "Anyone can update their own avatar"
   );
 
 --Functions and Triggers
+CREATE OR REPLACE FUNCTION public."getNearbyTrips"(long float, lat float, range float) 
+RETURNS SETOF trip AS $$
+BEGIN
+  RETURN QUERY 
+  SELECT * FROM trip 
+  WHERE st_distance(startingpoint, st_point(long, lat)::geography) < range;
+
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION public."getStats" (
   IN userid UUID,
   OUT total_cost MONEY,
