@@ -1,4 +1,4 @@
 export default {
-    "DRIVER": 1,
-    "PASSENGER" : 2 
+  DRIVER: 1,
+  PASSENGER: 2
 }

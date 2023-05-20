@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from 'react'
 
 import {
   SafeAreaView,
@@ -7,27 +7,28 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-} from "react-native";
+  Alert
+} from 'react-native'
 
-import call from "react-native-phone-call";
+import call from 'react-native-phone-call'
 
 export default function Call () {
-  const [phone, setPhone] = useState("9999999999");
+  const [phone, setPhone] = useState('9999999999')
 
   const triggerCall = () => {
     // Check for perfect 10 digit length
-    if (phone.length != 10) {
-      alert("Please insert correct contact number");
-      return;
+    if (phone.length !== 10) {
+      Alert.alert('Please insert correct contact number')
+      return
     }
 
     const args = {
       number: phone,
-      prompt: true,
-    };
+      prompt: true
+    }
     // Make a call
-    call(args).catch(console.error);
-  };
+    call(args).catch(console.error)
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -36,8 +37,8 @@ export default function Call () {
         <TextInput
           value={phone}
           onChangeText={(phone) => setPhone(phone)}
-          placeholder={"Enter Conatct Number to Call"}
-          keyboardType="numeric"
+          placeholder='Enter Conatct Number to Call'
+          keyboardType='numeric'
           style={styles.textInput}
         />
         <TouchableOpacity
@@ -49,41 +50,40 @@ export default function Call () {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-  );
+  )
 };
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 10,
-    textAlign: "center",
+    textAlign: 'center'
   },
   titleText: {
     fontSize: 22,
-    textAlign: "center",
-    fontWeight: "bold",
+    textAlign: 'center',
+    fontWeight: 'bold'
   },
   titleTextsmall: {
     marginVertical: 8,
-    fontSize: 16,
+    fontSize: 16
   },
   buttonStyle: {
-    justifyContent: "center",
+    justifyContent: 'center',
     marginTop: 15,
     padding: 10,
-    backgroundColor: "#8ad24e",
+    backgroundColor: '#8ad24e'
   },
   buttonTextStyle: {
-    color: "#fff",
-    textAlign: "center",
+    color: '#fff',
+    textAlign: 'center'
   },
   textInput: {
     height: 40,
-    borderColor: "gray",
+    borderColor: 'gray',
     borderWidth: 1,
-    width: "100%",
-    paddingHorizontal: 10,
-  },
-});
+    width: '100%',
+    paddingHorizontal: 10
+  }
+})

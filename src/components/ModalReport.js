@@ -1,53 +1,51 @@
-import { View, Text, StyleSheet, Modal } from "react-native";
-import { Button } from "@rneui/base";
-import { useContext, useState } from "react";
-import { supabase } from "../services/supabase";
-import { TextInput } from "react-native-gesture-handler";
-import { Icon } from "react-native-elements";
-import UserContext from "../context/UserContext";
+import { View, Text, StyleSheet, Modal } from 'react-native'
+import { Button } from '@rneui/base'
+import { useContext, useState } from 'react'
+import { supabase } from '../services/supabase'
+import { TextInput } from 'react-native-gesture-handler'
+import { Icon } from 'react-native-elements'
+import UserContext from '../context/UserContext'
 
-export function ModalReport({visible = false, onPress = () => {}, userToReport}) {
-  const [description, setDescription] = useState("");
-  const [show, setShow] = useState(visible);
-  const { userData } = useContext(UserContext);
+export function ModalReport ({ visible = false, onPress = () => {}, userToReport }) {
+  const [description, setDescription] = useState('')
+  const [show, setShow] = useState(visible)
+  const { userData } = useContext(UserContext)
 
   const handleCancel = async () => {
-    setShow(false);
-    onPress();
-  };
+    setShow(false)
+    onPress()
+  }
 
   const handleReport = async () => {
-    setShow(false);
-    onPress();
-    const { data, error } = await supabase.from("report").insert({
-      description: description,
+    setShow(false)
+    onPress()
+    const { error } = await supabase.from('report').insert({
+      description,
       idpassenger: userToReport,
-      iddriver: userData.id,
-    });
+      iddriver: userData.id
+    })
 
-    console.log(error);
+    console.log(error)
     subtractRating()
-
-  };
+  }
 
   const subtractRating = async () => {
     const { data, error } = await supabase
-      .from("profile")
-      .select("rating")
-      .eq("id", userToReport);
+      .from('profile')
+      .select('rating')
+      .eq('id', userToReport)
     if (data[0].rating === 0) {
-      if (error) console.log(error);
-      return;
+      if (error) console.log(error)
     } else {
-      const { error } = await supabase.from("profile").update({ rating: data[0].rating - 1 })
-        .eq("id", userToReport)
-        .select();
-      if (error) console.log(error);
-    }  
-  };
+      const { error } = await supabase.from('profile').update({ rating: data[0].rating - 1 })
+        .eq('id', userToReport)
+        .select()
+      if (error) console.log(error)
+    }
+  }
 
   return (
-    <Modal animationType="fade" transparent={true} visible={show}>
+    <Modal animationType='fade' transparent visible={show}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <View style={styles.modalTitle}>
@@ -62,95 +60,95 @@ export function ModalReport({visible = false, onPress = () => {}, userToReport})
               numberOfLines={10}
               maxLength={300}
               onChangeText={(description) => {
-                setDescription(description);
+                setDescription(description)
               }}
-              placeholder="Escribe tu comentario"
+              placeholder='Escribe tu comentario'
             />
           </View>
           <View style={styles.modalButtons}>
             <Button
               buttonStyle={styles.buttonCancel}
               onPress={handleCancel}
-              title={<Icon name="cancel" size={20} color={"#FFF"} />}
+              title={<Icon name='cancel' size={20} color='#FFF' />}
               color={styles.buttonCancel.color}
             />
             <Button
               buttonStyle={styles.buttonReport}
               onPress={handleReport}
-              title={<Icon name="check" size={20} color={"#FFF"} />}
+              title={<Icon name='check' size={20} color='#FFF' />}
               color={styles.buttonReport.color}
             />
           </View>
         </View>
       </View>
     </Modal>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: "30%",
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: '30%'
   },
   modalView: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 5,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: '#000',
     paddingBottom: 20,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 2
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 5
   },
   modalTitle: {
-    backgroundColor: "#B762C1",
-    padding: 20,
+    backgroundColor: '#B762C1',
+    padding: 20
   },
   modalText: {
-    fontFamily: "OpenSans-Regular",
+    fontFamily: 'OpenSans-Regular',
     fontSize: 16,
     marginBottom: 15,
-    textAlign: "center",
+    textAlign: 'center',
     marginHorizontal: 20,
     width: 220,
-    color: "#FFF",
+    color: '#FFF'
   },
   modalTextInput: {
     padding: 20,
     height: 200,
     width: 220,
     borderWidth: 1,
-    borderColor: "#C8C8C8",
+    borderColor: '#C8C8C8'
   },
   modalDescription: {
     height: 220,
     maxWidth: 220,
-    paddingTop: 20,
+    paddingTop: 20
   },
   modalButtons: {
-    flexDirection: "row",
-    gap: 60,
+    flexDirection: 'row',
+    gap: 60
   },
   buttonCancel: {
     marginTop: 20,
     height: 35,
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     borderRadius: 10,
-    color: "red",
-    paddingHorizontal: 20,
+    color: 'red',
+    paddingHorizontal: 20
   },
   buttonReport: {
     marginTop: 20,
     height: 35,
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     borderRadius: 10,
-    color: "green",
-    paddingHorizontal: 20,
-  },
-});
+    color: 'green',
+    paddingHorizontal: 20
+  }
+})

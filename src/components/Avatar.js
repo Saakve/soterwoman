@@ -1,20 +1,20 @@
-import { useState, useEffect, useContext } from "react"
-import { StyleSheet, View, Image, ActivityIndicator } from "react-native"
+import { useState, useEffect, useContext } from 'react'
+import { StyleSheet, View, Image, ActivityIndicator } from 'react-native'
 
-import * as DocumentPicker from "expo-document-picker"
-import { Icon } from "@rneui/base"
+import * as DocumentPicker from 'expo-document-picker'
+import { Icon } from '@rneui/base'
 
-import { supabase } from "../services/supabase"
-import UserContext from "../context/UserContext"
+import { supabase } from '../services/supabase'
+import UserContext from '../context/UserContext'
 
-export default function Avatar({ name, url, size = 100, onUpload = () => { }, editable = true }) {
+export default function Avatar ({ url, size = 100, onUpload = () => { }, editable = true }) {
   const { userData, setUserData } = useContext(UserContext)
   const [uploading, setUploading] = useState(false)
   const [avatarUrl, setaAvatarUrl] = useState(null)
   const avatarSize = { height: size, width: size }
 
   const updateUserIdImage = async (idImage) => {
-    const { error } = await supabase.from("profile").update({ idimage: idImage }).eq("id", userData.id)
+    const { error } = await supabase.from('profile').update({ idimage: idImage }).eq('id', userData.id)
 
     if (error) {
       console.log(error)
@@ -44,13 +44,13 @@ export default function Avatar({ name, url, size = 100, onUpload = () => { }, ed
       setUploading(true)
 
       const file = await DocumentPicker.getDocumentAsync({
-        type: 'image/*',
+        type: 'image/*'
       })
 
       const photo = {
         uri: file.uri,
         type: file.mimeType,
-        name: file.name,
+        name: file.name
       }
 
       const formData = new FormData()
@@ -63,7 +63,6 @@ export default function Avatar({ name, url, size = 100, onUpload = () => { }, ed
 
       await updateUserIdImage(filePath)
       onUpload()
-
     } catch (error) {
       console.log(error)
     } finally {
@@ -79,7 +78,7 @@ export default function Avatar({ name, url, size = 100, onUpload = () => { }, ed
     <View>
       {
         avatarUrl
-          ? <Image source={{ uri: avatarUrl }} accessibilityLabel="Avatar" style={[avatarSize, styles.avatar, styles.image]} />
+          ? <Image source={{ uri: avatarUrl }} accessibilityLabel='Avatar' style={[avatarSize, styles.avatar, styles.image]} />
           : <View style={[avatarSize, styles.avatar, styles.noImage]} />
       }
       {
@@ -87,12 +86,11 @@ export default function Avatar({ name, url, size = 100, onUpload = () => { }, ed
           ? <View style={styles.icon}>
             {!uploading
               ? <Icon
-                name={"edit"}
-                onPress={uploadAvatar}
-                disabled={uploading}
-              />
-              : <ActivityIndicator size="small" color="#0000ff" />
-            }
+                  name='edit'
+                  onPress={uploadAvatar}
+                  disabled={uploading}
+                />
+              : <ActivityIndicator size='small' color='#0000ff' />}
           </View>
           : null
       }
@@ -102,26 +100,26 @@ export default function Avatar({ name, url, size = 100, onUpload = () => { }, ed
 
 const styles = StyleSheet.create({
   avatar: {
-    overflow: "hidden",
+    overflow: 'hidden'
   },
   image: {
     marginTop: 10,
-    objectFit: "cover",
+    objectFit: 'cover',
     borderRadius: 50,
     borderWidth: 1,
-    borderColor: "#D6D6D6",
+    borderColor: '#D6D6D6'
   },
   noImage: {
-    backgroundColor: "#333",
-    border: "1px solid rgb(200, 200, 200)",
-    borderRadius: 50,
+    backgroundColor: '#333',
+    border: '1px solid rgb(200, 200, 200)',
+    borderRadius: 50
   },
   icon: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: "#FFCDDD",
+    backgroundColor: '#FFCDDD',
     borderRadius: 50,
     padding: 2
   }
-});    
+})
