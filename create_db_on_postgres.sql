@@ -148,7 +148,7 @@ CREATE POLICY "Trips with status draft, pending and confirmed are viewable by dr
   ON trip FOR SELECT TO authenticated 
   USING (
     EXISTS (SELECT 1 FROM driver WHERE id = auth.uid())
-    AND idstatus < 3
+    AND idstatus < 4
   );
 
 CREATE POLICY "Trips are updated by users who made them" 
@@ -161,7 +161,7 @@ CREATE POLICY "Trips with status draft, pending and confirmed are updated by dri
   ON trip FOR UPDATE TO authenticated 
   USING (
     EXISTS (SELECT 1 FROM driver WHERE id = auth.uid())
-    AND idstatus < 3
+    AND idstatus < 4
   );
 
 CREATE POLICY "Users can update their own profiles" 
