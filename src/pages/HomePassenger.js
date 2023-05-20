@@ -15,10 +15,6 @@ function HomePassenger({ navigation }) {
   const { signInLike } = useContext(SignInLikeContext);
   const [channel, setChannel] = useState(null);
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-  };
-
   useEffect(() => {
     if (dataIsLoaded && !userData.idUserType) {
       if (signInLike === "passenger") navigation.navigate("CompletePassengerProfile");
@@ -56,7 +52,6 @@ function HomePassenger({ navigation }) {
       <Text>Name: {userData.name}</Text>
       <Text>Email: {userData.email}</Text>
       <Text>Phone: {userData.phone}</Text>
-      <Button title='Cerrar Sesión' onPress={() => signOut()} />
       <Button title='Solicitar viajes' onPress={sendRequest} />
     </View>
   )

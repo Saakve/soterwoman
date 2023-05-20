@@ -12,15 +12,10 @@ function HomeDriver({ navigation }) {
     const { userData, dataIsLoaded } = useContext(UserContext)
     const { signInLike } = useContext(SignInLikeContext)
 
-    const signOut = async () => {
-        const { error } = await supabase.auth.signOut()
-    }
-
     console.log(location)
 
     useEffect(() => {
         if (dataIsLoaded && !userData.idUserType) { 
-            console.log(signInLike)
             if(signInLike === 'passenger') navigation.navigate('CompletePassengerProfile')
             if(signInLike === 'driver') navigation.navigate('CompleteDriverProfile')
         }
@@ -38,7 +33,6 @@ function HomeDriver({ navigation }) {
         <Text>Name: {userData.name}</Text>
         <Text>Email: {userData.email}</Text>
         <Text>Phone: {userData.phone}</Text>
-        <Button title="Cerrar Sesión" onPress={() => signOut()} />
       </View>
     );
 }
