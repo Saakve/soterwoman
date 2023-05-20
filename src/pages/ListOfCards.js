@@ -1,11 +1,16 @@
-import { StyleSheet, View, Text } from 'react-native'
-import { deleteDriverCard, deletePassengerPaymentMethod, getDriverCards, getPassengerPaymentMethods, updateDriverCard, updatePassengerPaymentMethod } from '../services/stripe'
 import { useState, useContext, useCallback } from 'react'
-import { FlatList } from 'react-native-gesture-handler'
-import { Card } from '../components/Card'
-import UserContext from '../context/UserContext'
-import { Button } from '@rneui/base'
+import { StyleSheet, View, Text } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
+import { FlatList } from 'react-native-gesture-handler'
+import { Button } from '@rneui/base'
+
+import { deleteDriverCard, deletePassengerPaymentMethod, getDriverCards, getPassengerPaymentMethods, updateDriverCard, updatePassengerPaymentMethod } from '../services/stripe'
+
+import { Card } from '../components/Card'
+
+import UserContext from '../context/UserContext'
+
+import userType from '../utils/userType'
 
 export function ListOfCards ({ navigation }) {
   const [cards, setCards] = useState(null)
@@ -18,7 +23,7 @@ export function ListOfCards ({ navigation }) {
       const fetchCards = async () => {
         let cards
 
-        if (idUserType === 1) {
+        if (idUserType === userType.DRIVER) {
           cards = await getDriverCards({ id: idStripe })
         } else {
           cards = await getPassengerPaymentMethods({ id: idStripe })
@@ -41,7 +46,7 @@ export function ListOfCards ({ navigation }) {
 
     setCards(newCards)
 
-    if (idUserType === 1) await updateDriverCard({ idAccount: idStripe, idCard: id, isDefault: true })
+    if (idUserType === userType.DRIVER) await updateDriverCard({ idAccount: idStripe, idCard: id, isDefault: true })
     else await updatePassengerPaymentMethod({ idCustomer: idStripe, idPaymentMethod: id, isDefault: true })
   }
 
@@ -52,7 +57,7 @@ export function ListOfCards ({ navigation }) {
     setCards(newCards)
 
     let status
-    if (idUserType === 1) {
+    if (idUserType === userType.DRIVER) {
       status = await deleteDriverCard({ idAccount: idStripe, idCard: id })
     } else {
       status = await deletePassengerPaymentMethod({ idCustomer: idStripe, idPaymentMethod: id })
