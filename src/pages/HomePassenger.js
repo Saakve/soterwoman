@@ -1,13 +1,16 @@
-import { StyleSheet, Text, View, Button } from "react-native";
-import { supabase } from "../services/supabase";
 import { useContext, useEffect, useState } from "react";
+import { StyleSheet, Text, View, Button } from "react-native";
+
+import { supabase } from "../services/supabase";
+import { makeChannel } from "../services/makeChannel";
+
 import UserContext from "../context/UserContext";
 import SignInLikeContext from "../context/SingInLikeContext";
+
 import { ModalRating } from "../components/ModalRating";
-import { makeChannel } from "../services/makeChannel";
 import { ModalTip } from '../components/ModalTip'
 
-function Home({ navigation }) {
+function HomePassenger({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext);
   const { signInLike } = useContext(SignInLikeContext);
   const [channel, setChannel] = useState(null);
@@ -68,4 +71,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { Home };
+export { HomePassenger };
