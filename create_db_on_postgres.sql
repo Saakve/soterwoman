@@ -252,12 +252,76 @@ CREATE POLICY "Anyone can update their own avatar"
   );
 
 --Functions and Triggers
-CREATE OR REPLACE FUNCTION public."getNearbyTrips"(long float, lat float, range float) 
-RETURNS SETOF trip AS $$
+CREATE OR REPLACE FUNCTION public."getTrips"(rowsToShow INTEGER) 
+RETURNS TABLE (
+  id BIGINT,
+  name_startingpoint VARCHAR,
+  name_endpoint VARCHAR,
+  startingpoint TEXT,
+  endpoint TEXT,
+  done_on TIMESTAMPTZ,
+  took INTERVAL,
+  children SMALLINT,
+  cost MONEY,
+  idpassenger UUID,
+  iddriver UUID,
+  idstatus SMALLINT
+) AS $$
 BEGIN
-  RETURN QUERY 
-  SELECT * FROM trip 
-  WHERE st_distance(startingpoint, st_point(long, lat)::geography) < range;
+  RETURN QUERY
+  SELECT
+    trip.id,
+    trip.name_startingpoint,
+    trip.name_endpoint,
+    REGEXP_REPLACE(st_astext(trip.startingpoint), '[^0-9\.\s-]','','g') as startingpoint,
+    REGEXP_REPLACE(st_astext(trip.endpoint), '[^0-9\.\s-]','','g') as endpoint,
+    trip.done_on,
+    trip.took,
+    trip.children,
+    trip.cost,
+    trip.idpassenger,
+    trip.iddriver,
+    trip.idstatus
+  FROM trip
+  ORDER BY trip.done_on DESC
+  LIMIT rowsToShow;
+
+  RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION public."getNearbyTrips"(long float, lat float, range float)
+RETURNS TABLE (
+  id BIGINT,
+  name_startingpoint VARCHAR,
+  name_endpoint VARCHAR,
+  startingpoint TEXT,
+  endpoint TEXT,
+  done_on TIMESTAMPTZ,
+  took INTERVAL,
+  children SMALLINT,
+  cost MONEY,
+  idpassenger UUID,
+  iddriver UUID,
+  idstatus SMALLINT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    trip.id,
+    trip.name_startingpoint,
+    trip.name_endpoint,
+    REGEXP_REPLACE(st_astext(trip.startingpoint), '[^0-9\.\s-]','','g') as startingpoint,
+    REGEXP_REPLACE(st_astext(trip.endpoint), '[^0-9\.\s-]','','g') as endpoint,
+    trip.done_on,
+    trip.took,
+    trip.children,
+    trip.cost,
+    trip.idpassenger,
+    trip.iddriver,
+    trip.idstatus
+  FROM trip
+  WHERE st_distance(trip.startingpoint, st_point(long, lat)::geography) < range;
 
   RETURN;
 END;

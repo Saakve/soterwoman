@@ -1,33 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Switch } from 'react-native-elements'
-import { supabase } from '../services/supabase'
-import { makeChannel } from '../services/makeChannel'
 
-export function ToggleOnService () {
+export function ToggleOnService({ onToggle = () => {}}) {
   const [onService, setOnService] = useState(false)
-  const [tripRequests, setTripRequest] = useState([])
-  const [channel, setChannel] = useState(null)
 
   const toggleSwitch = () => {
+    onToggle(!onService)
     setOnService(previousState => !previousState)
   }
-
-  useEffect(() => {
-    if (onService) {
-      const channel = makeChannel({
-        eventType: 'broadcast',
-        channelName: 'trips',
-        filter: { event: 'request' },
-        callback: response => setTripRequest(prevTripRequests => [...prevTripRequests, response.payload])
-      })
-      setChannel(channel)
-    } else if (channel) {
-      supabase.removeChannel(channel)
-    }
-  }, [onService])
-
-  console.log(tripRequests)
 
   const left = onService ? '51%' : '0%'
 
@@ -46,11 +27,12 @@ export function ToggleOnService () {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: '9%',
-    right: 30
+    top: '7%',
+    right: 30,
+    zIndex: 1
   },
   switch: {
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0)',
     transform: [{ scale: 1.5 }],
     zIndex: -1
   },

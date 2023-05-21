@@ -10,7 +10,7 @@ export default function useCurrentLocation () {
       longitudeDelta: 0.01
     }
   })
-  const [loading, setLoading] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     const getCurrenLocation = async () => {
@@ -20,7 +20,6 @@ export default function useCurrentLocation () {
       else console.log('Permisos no concedidos')
 
       const loc = await Location.getCurrentPositionAsync()
-
       const codeFormatAdress = await Location.reverseGeocodeAsync({
         latitude: loc.coords.latitude,
         longitude: loc.coords.longitude
@@ -28,11 +27,11 @@ export default function useCurrentLocation () {
 
       loc.name = codeFormatAdress[0].name
       setLocation(loc)
-      setLoading(true)
+      setLoaded(true)
     }
 
     getCurrenLocation()
   }, [])
 
-  return { location, loading }
+  return { location, loaded }
 };
