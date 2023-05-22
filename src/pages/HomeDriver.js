@@ -35,7 +35,7 @@ function HomeDriver({ navigation }) {
       range: 5000
     })
 
-    const filteredData = data.filter(trip => trip.idstatus !== tripStatus.CONFIRMED)
+    const filteredData = data.filter(trip => (trip.idstatus !== tripStatus.CONFIRMED || trip.iddriver === userData.id))
 
     const trips = filteredData.map(({
       id,
@@ -88,9 +88,36 @@ function HomeDriver({ navigation }) {
     }
   }
 
+  const handleCancelledTrip = async (trip) => {
+    const { error } = await supabase.from('trip').update({
+      idstatus: tripStatus.DRAFT,
+      iddriver: null 
+    }).eq('id', trip.id)
+    if (error) console.log('selectTripOnDB', error)
+  }
+
+  const handleConfirmedTrip = async (trip) => {
+    const { error } = await supabase.from('trip').update({
+      idstatus: tripStatus.CONFIRMED,
+      iddriver: userData.id
+    }).eq('id', trip.id)
+    if (error) console.log('selectTripOnDB', error)
+  }
+
+  const selectTripOnDB = async (trip) => {
+    const { error } = await supabase.from('trip').update({ idstatus: tripStatus.PENDING }).eq('id', trip.id)
+    if (error) console.log('selectTripOnDB ', error)
+  }
+
   return (
     <View style={styles.container}>
-      <MapContainer currentLocation={location} trips={trips} />
+      <MapContainer 
+        currentLocation={location}
+        trips={trips}
+        onSelectedTrip={selectTripOnDB}
+        onConfirmedTrip={handleConfirmedTrip}
+        onCancelledTrip={handleCancelledTrip}
+      />
       <ToggleOnService onToggle={handleToggle} />
       <ModalReport
         visible={false}

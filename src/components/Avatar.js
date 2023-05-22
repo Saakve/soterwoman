@@ -7,7 +7,7 @@ import { Icon } from '@rneui/base'
 import { supabase } from '../services/supabase'
 import UserContext from '../context/UserContext'
 
-export default function Avatar ({ url, size = 100, onUpload = () => { }, editable = true }) {
+export default function Avatar ({ url, size = 100, onUpload = () => { }, editable = true, style = {} }) {
   const { userData, setUserData } = useContext(UserContext)
   const [uploading, setUploading] = useState(false)
   const [avatarUrl, setaAvatarUrl] = useState(null)
@@ -78,7 +78,7 @@ export default function Avatar ({ url, size = 100, onUpload = () => { }, editabl
     <View>
       {
         avatarUrl
-          ? <Image source={{ uri: avatarUrl }} accessibilityLabel='Avatar' style={[avatarSize, styles.avatar, styles.image]} />
+          ? <Image source={{ uri: avatarUrl }} accessibilityLabel='Avatar' style={[avatarSize, styles.avatar, styles.image, style]} />
           : <View style={[avatarSize, styles.avatar, styles.noImage]} />
       }
       {
