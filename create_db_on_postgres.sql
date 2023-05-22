@@ -52,6 +52,17 @@ CREATE TABLE servicetype (
   price MONEY NOT NULL CHECK (price > MONEY(0))
 );
 
+INSERT INTO servicetype (name, price) VALUES ('clásico', 50.0);
+INSERT INTO servicetype (name, price) VALUES ('emergencia', 60.0);
+
+CREATE TABLE paymentmethodtype (
+  id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  name VARCHAR(50) NOT NULL CHECK (CHAR_LENGTH(name) > 3)
+);
+
+INSERT INTO paymentmethodtype (name) VALUES ('tarjeta');
+INSERT INTO paymentmethodtype (name) VALUES ('efectivo');
+
 CREATE TABLE tripstatus (
   id SMALLINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   name VARCHAR(50) NOT NULL CHECK (CHAR_LENGTH(name) > 3)
@@ -75,7 +86,9 @@ CREATE TABLE trip (
   cost MONEY NOT NULL DEFAULT MONEY(0) CHECK (cost >= MONEY(0)),
   idpassenger UUID NOT NULL REFERENCES passenger,
   iddriver UUID REFERENCES driver,
-  idstatus SMALLINT REFERENCES tripstatus
+  idstatus SMALLINT REFERENCES tripstatus,
+  idservicetype SMALLINT REFERENCES servicetype,
+  idpaymentmethodtype SMALLINT REFERENCES paymentmethodtype
 );
 
 --Enable RLS on all tables; 
@@ -86,6 +99,7 @@ ALTER TABLE vehicle ENABLE ROW LEVEL SECURITY;
 ALTER TABLE passenger ENABLE ROW LEVEL SECURITY;
 ALTER TABLE report ENABLE ROW LEVEL SECURITY;
 ALTER TABLE servicetype ENABLE ROW LEVEL SECURITY;
+ALTER TABLE paymentmethodtype ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trip ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tripstatus ENABLE ROW LEVEL SECURITY;
 
@@ -104,6 +118,12 @@ CREATE POLICY "Trip status are viawable by everyone"
 
 CREATE POLICY "Service types are viawable by everyone"
   ON servicetype FOR SELECT TO authenticated
+  USING (
+    true
+  );
+
+CREATE POLICY "Payment method types are viawable by everyone"
+  ON paymentmethodtype FOR SELECT TO authenticated
   USING (
     true
   );
@@ -303,7 +323,9 @@ RETURNS TABLE (
   cost MONEY,
   idpassenger UUID,
   iddriver UUID,
-  idstatus SMALLINT
+  idstatus SMALLINT,
+  idservicetype SMALLINT,
+  idpaymentmethodtype SMALLINT
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -319,7 +341,9 @@ BEGIN
     trip.cost,
     trip.idpassenger,
     trip.iddriver,
-    trip.idstatus
+    trip.idstatus,
+    trip.idservicetype,
+    trip.idpaymentmethodtype
   FROM trip
   WHERE st_distance(trip.startingpoint, st_point(long, lat)::geography) < range;
 
@@ -394,10 +418,36 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE OR REPLACE FUNCTION public."getTripsToday"(rowsToShow INTEGER) 
-RETURNS SETOF trip AS $$
+RETURNS TABLE (
+  id BIGINT,
+  name_startingpoint VARCHAR,
+  name_endpoint VARCHAR,
+  startingpoint TEXT,
+  endpoint TEXT,
+  done_on TIMESTAMPTZ,
+  took INTERVAL,
+  children SMALLINT,
+  cost MONEY,
+  idpassenger UUID,
+  iddriver UUID,
+  idstatus SMALLINT
+) AS $$
 BEGIN
-  RETURN QUERY 
-  SELECT * FROM trip
+  RETURN QUERY
+  SELECT
+    trip.id,
+    trip.name_startingpoint,
+    trip.name_endpoint,
+    REGEXP_REPLACE(st_astext(trip.startingpoint), '[^0-9\.\s-]','','g') as startingpoint,
+    REGEXP_REPLACE(st_astext(trip.endpoint), '[^0-9\.\s-]','','g') as endpoint,
+    trip.done_on,
+    trip.took,
+    trip.children,
+    trip.cost,
+    trip.idpassenger,
+    trip.iddriver,
+    trip.idstatus
+  FROM trip
   WHERE date(trip.done_on) = current_date
   ORDER BY trip.done_on DESC
   LIMIT rowsToShow;
@@ -406,13 +456,39 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION public."getTripsThisWeek"(rowsToShow INTEGER) 
-RETURNS SETOF trip AS $$
+RETURNS TABLE (
+  id BIGINT,
+  name_startingpoint VARCHAR,
+  name_endpoint VARCHAR,
+  startingpoint TEXT,
+  endpoint TEXT,
+  done_on TIMESTAMPTZ,
+  took INTERVAL,
+  children SMALLINT,
+  cost MONEY,
+  idpassenger UUID,
+  iddriver UUID,
+  idstatus SMALLINT
+) AS $$
 BEGIN
   RETURN QUERY
-  SELECT * FROM trip
-  WHERE date_part('year', done_on) = date_part('year', CURRENT_DATE) 
-  AND date_part('week', done_on ) = date_part('week', CURRENT_TIMESTAMP)
-  ORDER BY done_on DESC 
+  SELECT
+    trip.id,
+    trip.name_startingpoint,
+    trip.name_endpoint,
+    REGEXP_REPLACE(st_astext(trip.startingpoint), '[^0-9\.\s-]','','g') as startingpoint,
+    REGEXP_REPLACE(st_astext(trip.endpoint), '[^0-9\.\s-]','','g') as endpoint,
+    trip.done_on,
+    trip.took,
+    trip.children,
+    trip.cost,
+    trip.idpassenger,
+    trip.iddriver,
+    trip.idstatus
+  FROM trip
+  WHERE date_part('year', trip.done_on) = date_part('year', CURRENT_DATE) 
+  AND date_part('week', trip.done_on ) = date_part('week', CURRENT_TIMESTAMP)
+  ORDER BY trip.done_on DESC 
   LIMIT rowsToShow;
 
   RETURN;
@@ -420,27 +496,78 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION public."getTripsThisMonth"(rowsToShow INTEGER) 
-RETURNS SETOF trip AS $$
+RETURNS TABLE (
+  id BIGINT,
+  name_startingpoint VARCHAR,
+  name_endpoint VARCHAR,
+  startingpoint TEXT,
+  endpoint TEXT,
+  done_on TIMESTAMPTZ,
+  took INTERVAL,
+  children SMALLINT,
+  cost MONEY,
+  idpassenger UUID,
+  iddriver UUID,
+  idstatus SMALLINT
+) AS $$
 BEGIN
-  RETURN QUERY 
-  SELECT * FROM trip 
-  WHERE date_part('year', done_on) = date_part('year', CURRENT_DATE)
-  AND date_part('month', done_on ) = date_part('month', CURRENT_TIMESTAMP)
-  ORDER BY done_on DESC
+  RETURN QUERY
+  SELECT
+    trip.id,
+    trip.name_startingpoint,
+    trip.name_endpoint,
+    REGEXP_REPLACE(st_astext(trip.startingpoint), '[^0-9\.\s-]','','g') as startingpoint,
+    REGEXP_REPLACE(st_astext(trip.endpoint), '[^0-9\.\s-]','','g') as endpoint,
+    trip.done_on,
+    trip.took,
+    trip.children,
+    trip.cost,
+    trip.idpassenger,
+    trip.iddriver,
+    trip.idstatus
+  FROM trip
+  WHERE date_part('year', trip.done_on) = date_part('year', CURRENT_DATE)
+  AND date_part('month', trip.done_on ) = date_part('month', CURRENT_TIMESTAMP)
+  ORDER BY trip.done_on DESC
   LIMIT rowsToShow;
-  
+
   RETURN;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION public."getTripsThisYear"(rowsToShow INTEGER) 
-RETURNS SETOF trip AS $$
+RETURNS TABLE (
+  id BIGINT,
+  name_startingpoint VARCHAR,
+  name_endpoint VARCHAR,
+  startingpoint TEXT,
+  endpoint TEXT,
+  done_on TIMESTAMPTZ,
+  took INTERVAL,
+  children SMALLINT,
+  cost MONEY,
+  idpassenger UUID,
+  iddriver UUID,
+  idstatus SMALLINT
+) AS $$
 BEGIN
   RETURN QUERY
-  SELECT *
+  SELECT
+    trip.id,
+    trip.name_startingpoint,
+    trip.name_endpoint,
+    REGEXP_REPLACE(st_astext(trip.startingpoint), '[^0-9\.\s-]','','g') as startingpoint,
+    REGEXP_REPLACE(st_astext(trip.endpoint), '[^0-9\.\s-]','','g') as endpoint,
+    trip.done_on,
+    trip.took,
+    trip.children,
+    trip.cost,
+    trip.idpassenger,
+    trip.iddriver,
+    trip.idstatus
   FROM trip
-  WHERE date_part('year', done_on) = date_part('year', CURRENT_DATE)
-  ORDER BY done_on DESC
+  WHERE date_part('year', trip.done_on) = date_part('year', CURRENT_DATE)
+  ORDER BY trip.done_on DESC
   LIMIT rowsToShow;
 
   RETURN;
