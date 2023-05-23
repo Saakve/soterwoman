@@ -9,11 +9,15 @@ import SignInLikeContext from '../context/SingInLikeContext'
 
 import { ModalRating } from '../components/ModalRating'
 import { ModalTip } from '../components/ModalTip'
+import { PassengerMapContainer } from '../components/PassengerMapContainer'
+import useCurrentLocation from '../hooks/useCurrentLocation'
+import { SearchBar } from '../components/SearchBar'
 
 function HomePassenger ({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext)
   const { signInLike } = useContext(SignInLikeContext)
   const [channel, setChannel] = useState(null)
+  const { location, loaded } = useCurrentLocation();
 
   useEffect(() => {
     if (dataIsLoaded && !userData.idUserType) {
@@ -45,16 +49,20 @@ function HomePassenger ({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ModalTip visible={userData.idUserType === 2} driverToSendTip='acct_1N3CV3FauMmYefG2' />
-      <ModalRating visible={false} userToRate='afcfc3f6-4854-4976-88e8-57a8480fdd09' />
-      <Text>Bienvenido a mi app</Text>
-      <Text>Id:   {userData.id}</Text>
-      <Text>Name: {userData.name}</Text>
-      <Text>Email: {userData.email}</Text>
-      <Text>Phone: {userData.phone}</Text>
-      <Button title='Solicitar viajes' onPress={sendRequest} />
+      <PassengerMapContainer currentLocation={location} />
+    
+
+      <ModalTip
+        visible={userData.idUserType === 2}
+        driverToSendTip="acct_1N3CV3FauMmYefG2"
+      />
+      <ModalRating
+        visible={false}
+        userToRate="afcfc3f6-4854-4976-88e8-57a8480fdd09"
+      />
+      <Button title="Solicitar viajes" onPress={sendRequest} /> 
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
