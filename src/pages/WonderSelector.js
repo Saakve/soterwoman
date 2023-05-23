@@ -1,15 +1,18 @@
-import { View, StyleSheet, Text } from "react-native";
-import { WONDER_TYPE } from "../Constants/wonderTypes";
+import { View, StyleSheet } from "react-native";
 import WonderType from "../components/WonderType";
 import { TripPoints } from "../components/TripPoints";
+import { WONDER_TYPE } from "../constants/wonderTypes";
 
-export default function WonderSelector({ origin, destination}) {
+export default function WonderSelector({ origin, destination, onSelectWonder = () => {} }) {
+
   return (
     <View style={styles.selector}>
       <TripPoints nameStartingpoint={origin} nameEndpoint={destination}/>
-      {WONDER_TYPE.map((name = {}, index) => (
-        <WonderType key={index} name={name}/>
-      ))}
+      <View>
+        {WONDER_TYPE.map((name = {}, index) => (
+          <WonderType key={index} name={name} onPress={onSelectWonder}/>
+        ))}
+      </View>
     </View>
   );
 }
@@ -17,7 +20,7 @@ export default function WonderSelector({ origin, destination}) {
 const styles = StyleSheet.create({
   selector: {
     width: "100%",
-    height: "25%",
+    height: "26%",
     position: "absolute",
     backgroundColor: "#fff",
     alignItems: "flex-start",

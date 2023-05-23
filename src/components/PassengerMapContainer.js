@@ -4,12 +4,27 @@ import { SearchBar } from "./SearchBar";
 import { useState } from "react";
 import MapViewDirections from "react-native-maps-directions";
 import WonderSelector from "../pages/WonderSelector";
+import PayChildrenSelector from "../pages/PayChildrenSelector";
 
 export function PassengerMapContainer({currentLocation}) {
   const [searchLocation, setSearchLocation] = useState(null)
+  const [showWonderSelector, setShowWonderSelector] = useState(false)
+  const [showPaySelector, setShowPaySelector] = useState(false);
 
   const handleSearch = (searchLocation) => {
-    setSearchLocation(searchLocation)       
+    setSearchLocation(searchLocation) 
+    setShowWonderSelector(true)
+  }
+
+  
+  const handleSelectWonder = () => {
+    setShowWonderSelector(false);
+    setShowPaySelector(true)
+  }
+
+  const handleReturnSelector = () => {
+     setShowPaySelector(false);
+     setShowWonderSelector(true);
   }
 
   return (
@@ -68,10 +83,18 @@ export function PassengerMapContainer({currentLocation}) {
         )}
       </MapView>
       <SearchBar currentLocation={currentLocation} onSearch={handleSearch} />
-      {searchLocation && (
+      {showWonderSelector && (
         <WonderSelector
           origin={currentLocation.name}
           destination={searchLocation.name}
+          onSelectWonder={handleSelectWonder}
+        />
+      )}
+      {showPaySelector && (
+        <PayChildrenSelector
+          origin={currentLocation.name}
+          destination={searchLocation.name}
+          onReturn={handleReturnSelector}
         />
       )}
     </View>

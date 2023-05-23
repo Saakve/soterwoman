@@ -1,18 +1,24 @@
-import { View, StyleSheet, Text } from "react-native";
-import { Icon } from "@rneui/base";
+import { View, StyleSheet } from "react-native";
+import { Icon, Button } from "@rneui/base";
 
-export default function WonderType({ name }) {
+export default function WonderType({ name, onPress = () => {} }) {
   return (
     <View style={styles.wondertypes}>
-      <Icon
-        style={styles.wondertypes_icons}
-        name="car-side"
-        type="font-awesome-5"
-        color="#242E42"
-      />
       <View style={styles.wondertypes_data}>
-          <Text style={styles.wonderType}>{name.name}</Text>
-          <Text style={styles.price}>{name.price}</Text>
+        <Button
+          icon={
+            <Icon
+              style={styles.wondertypes_data_icons}
+              name="car-side"
+              type="font-awesome-5"
+              color="#242E42"
+            />
+          }
+          title={`${name.name} ${name.price}`}
+          titleStyle={{ color: "#111" }}
+          buttonStyle={styles.button}
+          onPress={onPress}
+        />
       </View>
     </View>
   );
@@ -22,17 +28,17 @@ const styles = StyleSheet.create({
   wondertypes: {
     flexDirection: "row",
   },
-  wondertypes_icons: {
-    marginHorizontal: "5%",
-  },
   wondertypes_data: {
     flexDirection: "row",
   },
-  wonderType: {
-    fontSize: 20,
+  wondertypes_data_icons: {
+    marginHorizontal: "5%",
   },
-  price: {
-    marginHorizontal: "10%",
-    fontSize: 20,
+  button: {
+    borderRadius: 10,
+    width: 250,
+    height: 40,
+    margin: "1%",
+    backgroundColor: "#FFF",
   },
 });
