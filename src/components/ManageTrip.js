@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react"
 import { StyleSheet, Text, View } from "react-native"
+import { useNavigation } from "@react-navigation/native"
 import Call from 'react-native-phone-call'
-
 import { Button, Icon } from "@rneui/base"
 
 import Avatar from "./Avatar"
 
 import { supabase } from "../services/supabase"
-import { useNavigation } from "@react-navigation/native"
 
 export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTrip = () => { } }) {
   const [passenger, setPassenger] = useState(null)
@@ -28,7 +27,9 @@ export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTr
   }
 
   const displayMessage = () => {
-    navigation.navigate('Message')
+    navigation.navigate('Message', {
+      toUser: passenger 
+    })
   }
 
   useEffect(() => {

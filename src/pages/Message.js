@@ -12,18 +12,12 @@ import { supabase } from '../services/supabase'
 import { Input, Button } from '@rneui/themed'
 import Avatar from '../components/Avatar'
 
-export default function Message () {
+export default function Message({ route }) {
+  const { toUser } = route.params
   const [channel, setChannel] = useState(null)
-  const [messages, setMessages] = useState([{ message: 'Inicial', from: 1 }])
+  const [messages, setMessages] = useState([])
   const [message, setMessage] = useState('')
-  const [name, setName] = useState('')
-  const [idImage, setIdImage] = useState('')
-
   const { userData } = useContext(UserContext)
-  const userType =
-    userData.idUserType !== 1
-      ? 'd8b9b8fc-b361-45b9-99a9-f442a4a941ab'
-      : '34791dce-3781-4fb8-9188-82ed10020071'
 
   useEffect(() => {
     const channel = makeChannel({
@@ -31,8 +25,6 @@ export default function Message () {
       eventType: 'broadcast',
       filter: { event: userData.id },
       callback: (response) => {
-        setName(response.payload.from.name)
-        setIdImage(response.payload.from.idImage)
         setMessages((latestMessages) => [
           ...latestMessages,
           { message: response.payload.message, from: response.payload.from }
@@ -47,15 +39,19 @@ export default function Message () {
   }, [supabase])
 
   const sendMessage = async () => {
+    if (!message.length) return
+
     setMessages((latestMessages) => [
       ...latestMessages,
       { message, from: { idUserType: userData.idUserType } }
     ])
+
     await channel.send({
       type: 'broadcast',
-      event: userType,
-      payload: { message, from: { idUserType: userData.idUserType, idImage: userData.idImage, name: userData.name } }
+      event: toUser.id,
+      payload: { message, from: { idUserType: userData.idUserType } }
     })
+
     setMessage('')
   }
 
@@ -63,8 +59,8 @@ export default function Message () {
     <View style={styles.container}>
       <View style={styles.avatarSection}>
         <Avatar
-          name={name}
-          url={idImage}
+          name={toUser.name}
+          url={toUser.idimage}
           editable={false}
         />
       </View>
@@ -83,7 +79,7 @@ export default function Message () {
                     titleStyle={styles.contentMessageDestin}
                   />
                 </View>
-                )
+              )
               : (
                 <View style={styles.messageOriginSection}>
                   <Button
@@ -93,7 +89,7 @@ export default function Message () {
                     titleStyle={styles.contentMessageOrigin}
                   />
                 </View>
-                )}
+              )}
           keyExtractor={(_, index) => index}
         />
       </View>
