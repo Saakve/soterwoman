@@ -3,13 +3,15 @@ import { StyleSheet, View, Dimensions } from 'react-native'
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps'
 
 import { TripSelector } from './TripSelector'
+import { ManageTrip } from './ManageTrip';
 
 export function MapContainer({ currentLocation, trips, onCancelledTrip, onConfirmedTrip, onSelectedTrip }) {
   const [showSelector, setShowSelector] = useState(false)
+  const [showManageTrip, setShowManageTrip] = useState(false)
   const [tripSelected, setTripSelected] = useState(null)
 
   const handleMarkerPress = async (id) => {
-    if(tripSelected) {
+    if (tripSelected) {
       await handleCancelledTrip(tripSelected)
     }
 
@@ -19,15 +21,16 @@ export function MapContainer({ currentLocation, trips, onCancelledTrip, onConfir
   }
 
   const handleCancelledTrip = async (trip) => {
-    setShowSelector(false)
-    setTripSelected(null)
+    if (showSelector) setShowSelector(false)
+    if (trip) setTripSelected(null)
+    if (showManageTrip) setShowManageTrip(false)
     onCancelledTrip(trip)
   }
 
   const handleConfirmedTrip = async (trip) => {
     setShowSelector(false)
-    setTripSelected(null)
     onConfirmedTrip(trip)
+    setShowManageTrip(true)
   }
 
   const handleSelectedTrip = async (trip) => {
@@ -70,12 +73,21 @@ export function MapContainer({ currentLocation, trips, onCancelledTrip, onConfir
             : null
         }
       </MapView>
-      {showSelector &&
+      {
+        showSelector &&
         <TripSelector
           trip={tripSelected}
           onCancelledTrip={handleCancelledTrip}
           onConfirmedTrip={handleConfirmedTrip}
           onSelectedTrip={handleSelectedTrip}
+        />
+      }
+      {
+        showManageTrip &&
+        <ManageTrip
+          trip={tripSelected}
+          onCancelledTrip={handleCancelledTrip}
+          onArriveOriginTrip={(trip) => console.log('MANAGE:', trip)}
         />
       }
     </View>
