@@ -1,42 +1,7 @@
-import { useState } from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native'
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps'
 
-import { TripSelector } from './TripSelector'
-import { ManageTrip } from './ManageTrip';
-
-export function MapContainer({ currentLocation, trips, onCancelledTrip, onConfirmedTrip, onSelectedTrip }) {
-  const [showSelector, setShowSelector] = useState(false)
-  const [showManageTrip, setShowManageTrip] = useState(false)
-  const [tripSelected, setTripSelected] = useState(null)
-
-  const handleMarkerPress = async (id) => {
-    if (tripSelected) {
-      await handleCancelledTrip(tripSelected)
-    }
-
-    const [trip] = trips.filter(trip => trip.id === id)
-    setTripSelected(trip)
-    setShowSelector(true)
-  }
-
-  const handleCancelledTrip = async (trip) => {
-    if (showSelector) setShowSelector(false)
-    if (trip) setTripSelected(null)
-    if (showManageTrip) setShowManageTrip(false)
-    onCancelledTrip(trip)
-  }
-
-  const handleConfirmedTrip = async (trip) => {
-    setShowSelector(false)
-    onConfirmedTrip(trip)
-    setShowManageTrip(true)
-  }
-
-  const handleSelectedTrip = async (trip) => {
-    setShowSelector(true)
-    onSelectedTrip(trip)
-  }
+export function MapContainer({ currentLocation, trips, onMarkerPress }) {
 
   return (
     <View style={styles.container}>
@@ -68,28 +33,11 @@ export function MapContainer({ currentLocation, trips, onCancelledTrip, onConfir
               }}
               title='TripRequest'
               pinColor='red'
-              onPress={() => handleMarkerPress(id)}
+              onPress={() => onMarkerPress(id)}
             />)
             : null
         }
       </MapView>
-      {
-        showSelector &&
-        <TripSelector
-          trip={tripSelected}
-          onCancelledTrip={handleCancelledTrip}
-          onConfirmedTrip={handleConfirmedTrip}
-          onSelectedTrip={handleSelectedTrip}
-        />
-      }
-      {
-        showManageTrip &&
-        <ManageTrip
-          trip={tripSelected}
-          onCancelledTrip={handleCancelledTrip}
-          onArriveOriginTrip={(trip) => console.log('MANAGE:', trip)}
-        />
-      }
     </View>
   )
 }

@@ -13,14 +13,23 @@ import { supabase } from '../services/supabase'
 import useCurrentLocation from '../hooks/useCurrentLocation'
 
 import tripStatus from '../utils/tripStatus'
+import useCurrentLocationUpdateListener from '../hooks/useListenCurrentLocationUpdates'
+import { ManageTrip } from '../components/ManageTrip'
+import { TripSelector } from '../components/TripSelector'
 
 function HomeDriver({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext)
   const { signInLike } = useContext(SignInLikeContext)
-  const [trips, setTrips] = useState([])
+
   const { location, loaded } = useCurrentLocation()
+  const locationListener = useCurrentLocationUpdateListener()
+
+  const [trips, setTrips] = useState([])
+  const [tripSelected, setTripSelected] = useState(null)
+  const [showSelector, setShowSelector] = useState(false)
+  const [showManageTrip, setShowManageTrip] = useState(false)
+
   const channel = useRef(null)
-  const interval = useRef(null)
 
   useEffect(() => {
     if (dataIsLoaded && !userData.idUserType) {
@@ -36,7 +45,7 @@ function HomeDriver({ navigation }) {
       range: 5000
     })
 
-    const filteredData = data.filter(trip => (trip.idstatus < tripStatus.PENDING || trip.iddriver === userData.id))
+    const filteredData = data.filter(trip => (trip.iddriver === userData.id || trip.idstatus < tripStatus.PENDING))
 
     const trips = filteredData.map(({
       id,
@@ -84,20 +93,31 @@ function HomeDriver({ navigation }) {
   }
 
   const sendCurrentLocation = () => {
-    interval.current = setInterval(() => {
+    locationListener.subscribe(({ coords }) => {
+      console.log(coords.latitude, coords.longitude)
       channel.current.send({
         type: 'broadcast',
         event: userData.id,
         payload: {
-          longitude: location.coords.latitude,
-          longitude: location.coords.longitude,
+          longitude: coords.latitude,
+          longitude: coords.longitude,
         }
       })
-    }, 1000)
+    })
   }
 
   const stopSendingCurrentLocation = () => {
-    clearInterval(interval.current)
+    locationListener.remove()
+  }
+
+  const handleMarkerPress = async (id) => {
+    if (tripSelected) {
+      await handleCancelledTrip(tripSelected)
+    }
+
+    const [trip] = trips.filter(trip => trip.id === id)
+    setTripSelected(trip)
+    setShowSelector(true)
   }
 
   const handleToggle = (onService) => {
@@ -113,6 +133,10 @@ function HomeDriver({ navigation }) {
   }
 
   const handleCancelledTrip = async (trip) => {
+    if (showManageTrip) setShowManageTrip(false)
+    if (showSelector) setShowSelector(false)
+    if (tripSelected) setTripSelected(null)
+
     const { error } = await supabase.from('trip').update({
       idstatus: tripStatus.DRAFT,
       iddriver: null
@@ -121,6 +145,8 @@ function HomeDriver({ navigation }) {
   }
 
   const handleConfirmedTrip = async (trip) => {
+    setShowSelector(false)
+    setShowManageTrip(true)
     const { error } = await supabase.from('trip').update({
       idstatus: tripStatus.CONFIRMED,
       iddriver: userData.id
@@ -138,11 +164,26 @@ function HomeDriver({ navigation }) {
       <MapContainer
         currentLocation={location}
         trips={trips}
-        onSelectedTrip={selectTripOnDB}
-        onConfirmedTrip={handleConfirmedTrip}
-        onCancelledTrip={handleCancelledTrip}
+        onMarkerPress={handleMarkerPress}
       />
       <ToggleOnService onToggle={handleToggle} />
+      {
+        showSelector &&
+        <TripSelector
+          trip={tripSelected}
+          onCancelledTrip={handleCancelledTrip}
+          onConfirmedTrip={handleConfirmedTrip}
+          onSelectedTrip={selectTripOnDB}
+        />
+      }
+      {
+        showManageTrip &&
+        <ManageTrip
+          trip={tripSelected}
+          onCancelledTrip={handleCancelledTrip}
+          onArriveOriginTrip={(trip) => console.log('MANAGE:', trip)}
+        />
+      }
       <ModalReport
         visible={false}
         userToReport='afcfc3f6-4854-4976-88e8-57a8480fdd09'
