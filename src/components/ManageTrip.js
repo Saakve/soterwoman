@@ -10,6 +10,7 @@ import { supabase } from "../services/supabase"
 
 export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTrip = () => { } }) {
   const [passenger, setPassenger] = useState(null)
+  const [arrived, setArrived] = useState(false)
   const navigation = useNavigation()
 
   const fetchPassenger = async () => {
@@ -103,7 +104,11 @@ export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTr
           title={'¡Ya llegué!'}
           buttonStyle={styles.button}
           color="#4CE5B1"
-          onPressOut={() => onArriveOriginTrip(trip)}
+          onPressOut={() => {
+            onArriveOriginTrip(trip)
+            setArrived(true)
+          }}
+          disabled={arrived}
         />
       </View>
     </View>

@@ -9,7 +9,7 @@ import { supabase } from "../services/supabase"
 import serviceType from "../utils/serviceType"
 import paymentMethodType from "../utils/paymentMethodType"
 
-export function TripSelector({ trip, onCancelledTrip = () => { }, onConfirmedTrip = () => { }, onSelectedTrip = () => { } }) {
+export function TripSelector({ trip, distanceToOrigin, timeToOrigin, onCancelledTrip = () => { }, onConfirmedTrip = () => { }, onSelectedTrip = () => { } }) {
   const [passenger, setPassenger] = useState(null)
   const [counter, setCounter] = useState(30)
   const interval = useRef(null)
@@ -99,8 +99,8 @@ export function TripSelector({ trip, onCancelledTrip = () => { }, onConfirmedTri
           <Text style={styles.timetext}>{counter}</Text>
         </View>
         <Text style={styles.text}>MÉTODO {'\n'}{trip.idPaymentmethodType === paymentMethodType.CARD ? 'Tarjeta' : 'Efectivo'}</Text>
-        <Text style={styles.text}>DISTANCIA {'\n'}{trip.cost}</Text>
-        <Text style={styles.text}>TIEMPO {'\n'}{trip.cost}</Text>
+        <Text style={styles.text}>DISTANCIA {'\n'}{distanceToOrigin.toFixed(3)} Km</Text>
+        <Text style={styles.text}>TIEMPO {'\n'}{Math.ceil(timeToOrigin)} min</Text>
         <Text style={styles.text}>PRECIO {'\n'}{trip.cost}</Text>
       </View>
       <View style={styles.buttons}>

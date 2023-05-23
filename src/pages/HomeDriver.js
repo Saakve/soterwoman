@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
+import MapViewDirections from 'react-native-maps-directions'
 
 import UserContext from '../context/UserContext'
 import SignInLikeContext from '../context/SingInLikeContext'
@@ -7,15 +8,17 @@ import SignInLikeContext from '../context/SingInLikeContext'
 import { ModalReport } from '../components/ModalReport'
 import { MapContainer } from '../components/MapContainer'
 import { ToggleOnService } from '../components/ToggleOnService'
-
-import { supabase } from '../services/supabase'
-
-import useCurrentLocation from '../hooks/useCurrentLocation'
-
-import tripStatus from '../utils/tripStatus'
-import useCurrentLocationUpdateListener from '../hooks/useListenCurrentLocationUpdates'
 import { ManageTrip } from '../components/ManageTrip'
 import { TripSelector } from '../components/TripSelector'
+
+import { supabase } from '../services/supabase'
+import { getNearbyTrips } from '../services/getNearbyTrips'
+
+import useCurrentLocation from '../hooks/useCurrentLocation'
+import useCurrentLocationUpdateListener from '../hooks/useListenCurrentLocationUpdates'
+
+import tripStatus from '../utils/tripStatus'
+import { TripMarkers } from '../components/TripMarkers'
 
 function HomeDriver({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext)
@@ -28,6 +31,8 @@ function HomeDriver({ navigation }) {
   const [tripSelected, setTripSelected] = useState(null)
   const [showSelector, setShowSelector] = useState(false)
   const [showManageTrip, setShowManageTrip] = useState(false)
+  const [timeToOrigin, setTimeToOrigin] = useState(0)
+  const [distanceToOrigin, setDistanceToOrigin] = useState(0)
 
   const channel = useRef(null)
 
@@ -39,44 +44,11 @@ function HomeDriver({ navigation }) {
   }, [dataIsLoaded])
 
   const fetchTrips = async () => {
-    const { data } = await supabase.rpc('getNearbyTrips', {
-      lat: location.coords.latitude,
-      long: location.coords.longitude,
+    const trips = await getNearbyTrips({
+      idUser: userData.id,
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
       range: 5000
-    })
-
-    const filteredData = data.filter(trip => (trip.iddriver === userData.id || trip.idstatus < tripStatus.PENDING))
-
-    const trips = filteredData.map(({
-      id,
-      children,
-      cost,
-      endpoint,
-      startingpoint,
-      idpassenger,
-      idstatus,
-      name_endpoint,
-      name_startingpoint,
-      idservicetype,
-      idpaymentmethodtype
-    }) => {
-
-      const [spLongitude, spLatitude] = startingpoint.split(' ')
-      const [epLongitude, epLatitude] = endpoint.split(' ')
-
-      return ({
-        id,
-        children,
-        cost,
-        endpoint: { longitude: Number(epLongitude), latitude: Number(epLatitude) },
-        startingpoint: { longitude: Number(spLongitude), latitude: Number(spLatitude) },
-        idPassenger: idpassenger,
-        idStatus: idstatus,
-        nameEndpoint: name_endpoint,
-        nameStartingpoint: name_startingpoint,
-        idServicetype: idservicetype,
-        idPaymentmethodType: idpaymentmethodtype
-      })
     })
 
     setTrips(trips)
@@ -110,6 +82,20 @@ function HomeDriver({ navigation }) {
     locationListener.remove()
   }
 
+  const handleToggle = (onService) => {
+    if (onService && loaded) {
+      fetchTrips() // fetch initial trips
+      listenTripChanges()
+      sendCurrentLocation()
+    } else if (!onService) {
+      setShowSelector(false)
+      setTripSelected(false)
+      stopSendingCurrentLocation()
+      if (channel.current) supabase.removeChannel(channel.current)
+      setTrips([])
+    }
+  }
+
   const handleMarkerPress = async (id) => {
     if (tripSelected) {
       await handleCancelledTrip(tripSelected)
@@ -118,18 +104,6 @@ function HomeDriver({ navigation }) {
     const [trip] = trips.filter(trip => trip.id === id)
     setTripSelected(trip)
     setShowSelector(true)
-  }
-
-  const handleToggle = (onService) => {
-    if (onService && loaded) {
-      fetchTrips() // fetch initial trips
-      listenTripChanges()
-      sendCurrentLocation()
-    } else if (!onService) {
-      stopSendingCurrentLocation()
-      if (channel.current) supabase.removeChannel(channel.current)
-      setTrips([])
-    }
   }
 
   const handleCancelledTrip = async (trip) => {
@@ -141,7 +115,7 @@ function HomeDriver({ navigation }) {
       idstatus: tripStatus.DRAFT,
       iddriver: null
     }).eq('id', trip.id)
-    if (error) console.log('selectTripOnDB', error)
+    if (error) console.log('handleCancelledTrip', error)
   }
 
   const handleConfirmedTrip = async (trip) => {
@@ -151,11 +125,14 @@ function HomeDriver({ navigation }) {
       idstatus: tripStatus.CONFIRMED,
       iddriver: userData.id
     }).eq('id', trip.id)
-    if (error) console.log('selectTripOnDB', error)
+    if (error) console.log('handleConfirmedTrip', error)
   }
 
   const selectTripOnDB = async (trip) => {
-    const { error } = await supabase.from('trip').update({ idstatus: tripStatus.PENDING }).eq('id', trip.id)
+    const { error } = await supabase.from('trip').update({
+      idstatus: tripStatus.PENDING,
+      iddriver: userData.id
+    }).eq('id', trip.id)
     if (error) console.log('selectTripOnDB ', error)
   }
 
@@ -163,9 +140,35 @@ function HomeDriver({ navigation }) {
     <View style={styles.container}>
       <MapContainer
         currentLocation={location}
-        trips={trips}
-        onMarkerPress={handleMarkerPress}
-      />
+      >
+        {
+          !!trips.length &&
+          <TripMarkers
+            trips={trips}
+            onPress={handleMarkerPress}
+          />
+        }
+        {
+          tripSelected &&
+          <MapViewDirections
+            origin={{
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            }}
+            destination={{
+              latitude: tripSelected.startingpoint.latitude,
+              longitude: tripSelected.startingpoint.longitude,
+            }}
+            apikey={"AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0"}
+            strokeWidth={6}
+            strokeColor="#FDCD03"
+            onReady={({distance, duration}) => {
+              setDistanceToOrigin(distance)
+              setTimeToOrigin(duration)
+            }}
+          />
+        }
+      </MapContainer>
       <ToggleOnService onToggle={handleToggle} />
       {
         showSelector &&
@@ -174,6 +177,8 @@ function HomeDriver({ navigation }) {
           onCancelledTrip={handleCancelledTrip}
           onConfirmedTrip={handleConfirmedTrip}
           onSelectedTrip={selectTripOnDB}
+          timeToOrigin={timeToOrigin}
+          distanceToOrigin={distanceToOrigin}
         />
       }
       {

@@ -1,8 +1,7 @@
 import { StyleSheet, View, Dimensions } from 'react-native'
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps'
 
-export function MapContainer({ currentLocation, trips, onMarkerPress }) {
-
+export function MapContainer({ currentLocation, children }) {
   return (
     <View style={styles.container}>
       <MapView
@@ -22,21 +21,7 @@ export function MapContainer({ currentLocation, trips, onMarkerPress }) {
         }}
         mapType='standard'
       >
-        {
-          trips.length > 0
-            ? trips.map(({ id, startingpoint: { latitude, longitude } }) => <Marker
-              key={id}
-              draggable={false}
-              coordinate={{
-                latitude,
-                longitude
-              }}
-              title='TripRequest'
-              pinColor='red'
-              onPress={() => onMarkerPress(id)}
-            />)
-            : null
-        }
+        { children }
       </MapView>
     </View>
   )
