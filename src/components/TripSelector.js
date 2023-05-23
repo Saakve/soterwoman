@@ -6,6 +6,8 @@ import { Button, Icon } from "@rneui/base"
 import Avatar from "./Avatar"
 
 import { supabase } from "../services/supabase"
+import serviceType from "../utils/serviceType"
+import paymentMethodType from "../utils/paymentMethodType"
 
 export function TripSelector({ trip, onCancelledTrip = () => { }, onConfirmedTrip = () => { }, onSelectedTrip = () => { } }) {
   const [passenger, setPassenger] = useState(null)
@@ -62,7 +64,7 @@ export function TripSelector({ trip, onCancelledTrip = () => { }, onConfirmedTri
               type='font-awesome-5'
               color='#242E42'
             />
-            <Text style={styles.text}>Wonder Clásico</Text>
+            <Text style={styles.text}>Wonder {trip.idServicetype === serviceType.CLASSIC ? 'Clásico' : 'Emergencia'} </Text>
           </View>
           <View style={styles.children}>
             <Icon
@@ -96,7 +98,7 @@ export function TripSelector({ trip, onCancelledTrip = () => { }, onConfirmedTri
         <View style={styles.time}>
           <Text style={styles.timetext}>{counter}</Text>
         </View>
-        <Text style={styles.text}>MÉTODO {'\n'}{trip.cost}</Text>
+        <Text style={styles.text}>MÉTODO {'\n'}{trip.idPaymentmethodType === paymentMethodType.CARD ? 'Tarjeta' : 'Efectivo'}</Text>
         <Text style={styles.text}>DISTANCIA {'\n'}{trip.cost}</Text>
         <Text style={styles.text}>TIEMPO {'\n'}{trip.cost}</Text>
         <Text style={styles.text}>PRECIO {'\n'}{trip.cost}</Text>

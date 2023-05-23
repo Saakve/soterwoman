@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 import UserContext from '../context/UserContext'
@@ -19,7 +19,8 @@ function HomeDriver({ navigation }) {
   const { signInLike } = useContext(SignInLikeContext)
   const [trips, setTrips] = useState([])
   const { location, loaded } = useCurrentLocation()
-  const [channel, setChannel] = useState(null)
+  const channel = useRef(null)
+  const interval = useRef(null)
 
   useEffect(() => {
     if (dataIsLoaded && !userData.idUserType) {
@@ -35,7 +36,7 @@ function HomeDriver({ navigation }) {
       range: 5000
     })
 
-    const filteredData = data.filter(trip => (trip.idstatus !== tripStatus.CONFIRMED || trip.iddriver === userData.id))
+    const filteredData = data.filter(trip => (trip.idstatus < tripStatus.PENDING || trip.iddriver === userData.id))
 
     const trips = filteredData.map(({
       id,
@@ -46,7 +47,9 @@ function HomeDriver({ navigation }) {
       idpassenger,
       idstatus,
       name_endpoint,
-      name_startingpoint
+      name_startingpoint,
+      idservicetype,
+      idpaymentmethodtype
     }) => {
 
       const [spLongitude, spLatitude] = startingpoint.split(' ')
@@ -61,7 +64,9 @@ function HomeDriver({ navigation }) {
         idPassenger: idpassenger,
         idStatus: idstatus,
         nameEndpoint: name_endpoint,
-        nameStartingpoint: name_startingpoint
+        nameStartingpoint: name_startingpoint,
+        idServicetype: idservicetype,
+        idPaymentmethodType: idpaymentmethodtype
       })
     })
 
@@ -69,21 +74,40 @@ function HomeDriver({ navigation }) {
   }
 
   const listenTripChanges = () => {
-    const channel = supabase
+    const newChannel = supabase
       .channel('trips')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trip' }, fetchTrips)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'trip' }, fetchTrips)
       .subscribe()
 
-    setChannel(channel)
+    channel.current = newChannel
+  }
+
+  const sendCurrentLocation = () => {
+    interval.current = setInterval(() => {
+      channel.current.send({
+        type: 'broadcast',
+        event: userData.id,
+        payload: {
+          longitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        }
+      })
+    }, 1000)
+  }
+
+  const stopSendingCurrentLocation = () => {
+    clearInterval(interval.current)
   }
 
   const handleToggle = (onService) => {
     if (onService && loaded) {
       fetchTrips() // fetch initial trips
       listenTripChanges()
+      sendCurrentLocation()
     } else if (!onService) {
-      if (channel) supabase.removeChannel(channel)
+      stopSendingCurrentLocation()
+      if (channel.current) supabase.removeChannel(channel.current)
       setTrips([])
     }
   }
@@ -91,7 +115,7 @@ function HomeDriver({ navigation }) {
   const handleCancelledTrip = async (trip) => {
     const { error } = await supabase.from('trip').update({
       idstatus: tripStatus.DRAFT,
-      iddriver: null 
+      iddriver: null
     }).eq('id', trip.id)
     if (error) console.log('selectTripOnDB', error)
   }
@@ -111,7 +135,7 @@ function HomeDriver({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <MapContainer 
+      <MapContainer
         currentLocation={location}
         trips={trips}
         onSelectedTrip={selectTripOnDB}

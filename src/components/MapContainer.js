@@ -18,8 +18,6 @@ export function MapContainer({ currentLocation, trips, onCancelledTrip, onConfir
     setShowSelector(true)
   }
 
-  console.log(showSelector)
-
   const handleCancelledTrip = async (trip) => {
     setShowSelector(false)
     setTripSelected(null)
