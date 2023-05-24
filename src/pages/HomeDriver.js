@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState, useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
 import MapViewDirections from 'react-native-maps-directions'
+import { Marker } from 'react-native-maps'
 
 import UserContext from '../context/UserContext'
 import SignInLikeContext from '../context/SingInLikeContext'
@@ -10,6 +11,8 @@ import { MapContainer } from '../components/MapContainer'
 import { ToggleOnService } from '../components/ToggleOnService'
 import { ManageTrip } from '../components/ManageTrip'
 import { TripSelector } from '../components/TripSelector'
+import { TripMarkers } from '../components/TripMarkers'
+import { ModalWaitingPassenger } from '../components/ModalWaitingPassenger'
 
 import { supabase } from '../services/supabase'
 import { getNearbyTrips } from '../services/getNearbyTrips'
@@ -18,10 +21,7 @@ import useCurrentLocation from '../hooks/useCurrentLocation'
 import useCurrentLocationUpdateListener from '../hooks/useListenCurrentLocationUpdates'
 
 import tripStatus from '../utils/tripStatus'
-import { TripMarkers } from '../components/TripMarkers'
-import { Marker } from 'react-native-maps'
 import { distanceBetweenCoords } from '../utils/distanceBetweenCoords'
-import { ModalWaitingPassenger } from '../components/ModalWaitingPassenger'
 
 function HomeDriver({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext)
@@ -40,10 +40,16 @@ function HomeDriver({ navigation }) {
     latitude: location.coords.latitude,
     longitude: location.coords.longitude
   })
-  const [arrivedToOrigin, setArrivedToOrigin] = useState(false)
+  const [arrivedToStartingpoint, setArrivedToStartingpoint] = useState(false)
+  const [arrivedToEndpoint, setArrivedToEndpoint] = useState(true)
   const [showWaitingModal, setShowWaitingModal] = useState(false)
+  const [showRouteToEndpoint, setShowRouteToEndpoint] = useState(false)
+  const [showRouteToStartingpoint, setShowRouteToStartingpoint] = useState(false)
+  const [showOnTravelCard, setShowOnTravelCard] = useState(false)
 
-  const channel = useRef(null)
+  const tripsChannel = useRef(null)
+  const locationChannel = useRef(null)
+
 
   useEffect(() => {
     if (dataIsLoaded && !userData.idUserType) {
@@ -53,17 +59,22 @@ function HomeDriver({ navigation }) {
   }, [dataIsLoaded])
 
   useEffect(() => {
-    if(tripSelected && showManageTrip && !arrivedToOrigin ) {
+    if (tripSelected && showManageTrip && !arrivedToStartingpoint) {
       const distance = distanceBetweenCoords(tripSelected.startingpoint, currentLocation)
       console.log(distance)
-      if(distance <= 20) setArrivedToOrigin(true)
+      if (distance <= 20) setArrivedToStartingpoint(true)
     }
   }, [currentLocation])
 
-  const handleArriveTrip = (trip) => {
-    console.log('MANAGE:', trip)
-    setShowWaitingModal(true)
-  }
+  useEffect(() => {
+    if (tripSelected && showRouteToEndpoint && !arrivedToEndpoint) {
+      const distance = distanceBetweenCoords(tripSelected.endpoint, currentLocation)
+      console.log(distance)
+      if (distance <= 20) setArrivedToEndpoint(true)
+    }
+  }, [currentLocation])
+
+  console.log(trips.length)
 
   const fetchTrips = async () => {
     const trips = await getNearbyTrips({
@@ -83,17 +94,20 @@ function HomeDriver({ navigation }) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'trip' }, fetchTrips)
       .subscribe()
 
-    channel.current = newChannel
+    tripsChannel.current = newChannel
   }
 
   const sendCurrentLocation = () => {
+    const newlocationChannel = supabase.channel('driver-location').subscribe()
+    locationChannel.current = newlocationChannel
+
     locationListener.subscribe(({ coords }) => {
       setCurrentLocation({
-        latitude:coords.latitude,
+        latitude: coords.latitude,
         longitude: coords.longitude
       })
 
-      channel.current.send({
+      locationChannel.current.send({
         type: 'broadcast',
         event: userData.id,
         payload: {
@@ -108,6 +122,11 @@ function HomeDriver({ navigation }) {
     locationListener.remove()
   }
 
+  const stopListeningTripChanges = () => {
+    if (tripsChannel.current) supabase.removeChannel(tripsChannel.current)
+    tripsChannel.current = null
+  }
+
   const handleToggle = (onService) => {
     if (onService && loaded) {
       fetchTrips() // fetch initial trips
@@ -117,7 +136,7 @@ function HomeDriver({ navigation }) {
       setShowSelector(false)
       setTripSelected(false)
       stopSendingCurrentLocation()
-      if (channel.current) supabase.removeChannel(channel.current)
+      stopListeningTripChanges()
       setTrips([])
     }
   }
@@ -130,6 +149,7 @@ function HomeDriver({ navigation }) {
     const [trip] = trips.filter(trip => trip.id === id)
     setTripSelected(trip)
     setShowSelector(true)
+    setShowRouteToStartingpoint(true)
   }
 
   const handleCancelledTrip = async (trip) => {
@@ -162,6 +182,27 @@ function HomeDriver({ navigation }) {
     if (error) console.log('selectTripOnDB ', error)
   }
 
+  const handleArriveTrip = async (trip) => {
+    const { error } = await supabase.from('trip').update({
+      idstatus: tripStatus.ARRIVED
+    }).eq('id', trip.id)
+    if (error) console.log('handleArriveTrip', error)
+    setShowWaitingModal(true)
+  }
+
+  const startTrip = async () => {
+    const { error } = await supabase.from('trip').update({
+      idstatus: tripStatus.STARTED
+    }).eq('id', tripSelected.id)
+    if (error) console.log('startTrip', error)
+    stopListeningTripChanges()
+    setShowManageTrip(false)
+    setShowRouteToStartingpoint(false)
+    setTrips([])
+    setShowRouteToEndpoint(true)
+    setShowOnTravelCard(true)
+  }
+
   return (
     <View style={styles.container}>
       <MapContainer
@@ -175,7 +216,7 @@ function HomeDriver({ navigation }) {
           />
         }
         {
-          tripSelected &&
+          showRouteToStartingpoint && tripSelected &&
           <MapViewDirections
             origin={{
               latitude: location.coords.latitude,
@@ -193,6 +234,40 @@ function HomeDriver({ navigation }) {
               setTimeToOrigin(duration)
             }}
           />
+        }
+        {
+          showRouteToEndpoint && tripSelected &&
+          <>
+            <MapViewDirections
+              origin={{
+                latitude: tripSelected.startingpoint.latitude,
+                longitude: tripSelected.startingpoint.longitude
+              }}
+              destination={{
+                latitude: tripSelected.endpoint.latitude,
+                longitude: tripSelected.endpoint.longitude
+              }}
+              apikey={"AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0"}
+              strokeWidth={6}
+              strokeColor="#B762C1"
+            />
+            <Marker
+              coordinate={{
+                latitude: tripSelected.startingpoint.latitude,
+                longitude: tripSelected.startingpoint.longitude
+              }}
+              title='Inicio'
+              pinColor='#8946A6'
+            />
+            <Marker
+              coordinate={{
+                latitude: tripSelected.endpoint.latitude,
+                longitude: tripSelected.endpoint.longitude
+              }}
+              title='Final'
+              pinColor='#8946A6'
+            />
+          </>
         }
         <Marker
           coordinate={{
@@ -221,7 +296,7 @@ function HomeDriver({ navigation }) {
           trip={tripSelected}
           onCancelledTrip={handleCancelledTrip}
           onArriveOriginTrip={handleArriveTrip}
-          arrived={arrivedToOrigin}
+          arrived={arrivedToStartingpoint}
         />
       }
       <ModalReport
@@ -230,7 +305,7 @@ function HomeDriver({ navigation }) {
       />
       <ModalWaitingPassenger
         visible={showWaitingModal}
-        onPress={() => console.log("PETE")}
+        onPress={startTrip}
       />
     </View>
   )
