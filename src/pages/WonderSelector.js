@@ -1,5 +1,5 @@
 import { View, StyleSheet, Text } from "react-native";
-import { WONDER_TYPE } from "../Constants/wonderTypes";
+import { WONDER_TYPE } from "../constants/wonderTypes";
 import WonderType from "../components/WonderType";
 import { TripPoints } from "../components/TripPoints";
 

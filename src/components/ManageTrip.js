@@ -8,9 +8,8 @@ import Avatar from "./Avatar"
 
 import { supabase } from "../services/supabase"
 
-export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTrip = () => { } }) {
+export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTrip = () => { }, arrived = false }) {
   const [passenger, setPassenger] = useState(null)
-  const [arrived, setArrived] = useState(false)
   const navigation = useNavigation()
 
   const fetchPassenger = async () => {
@@ -106,9 +105,8 @@ export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTr
           color="#4CE5B1"
           onPressOut={() => {
             onArriveOriginTrip(trip)
-            setArrived(true)
           }}
-          disabled={arrived}
+          disabled={!arrived}
         />
       </View>
     </View>

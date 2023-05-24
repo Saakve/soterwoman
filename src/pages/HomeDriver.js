@@ -19,6 +19,9 @@ import useCurrentLocationUpdateListener from '../hooks/useListenCurrentLocationU
 
 import tripStatus from '../utils/tripStatus'
 import { TripMarkers } from '../components/TripMarkers'
+import { Marker } from 'react-native-maps'
+import { distanceBetweenCoords } from '../utils/distanceBetweenCoords'
+import { ModalWaitingPassenger } from '../components/ModalWaitingPassenger'
 
 function HomeDriver({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext)
@@ -33,6 +36,12 @@ function HomeDriver({ navigation }) {
   const [showManageTrip, setShowManageTrip] = useState(false)
   const [timeToOrigin, setTimeToOrigin] = useState(0)
   const [distanceToOrigin, setDistanceToOrigin] = useState(0)
+  const [currentLocation, setCurrentLocation] = useState({
+    latitude: location.coords.latitude,
+    longitude: location.coords.longitude
+  })
+  const [arrivedToOrigin, setArrivedToOrigin] = useState(false)
+  const [showWaitingModal, setShowWaitingModal] = useState(false)
 
   const channel = useRef(null)
 
@@ -42,6 +51,19 @@ function HomeDriver({ navigation }) {
       if (signInLike === 'driver') navigation.navigate('CompleteDriverProfile')
     }
   }, [dataIsLoaded])
+
+  useEffect(() => {
+    if(tripSelected && showManageTrip && !arrivedToOrigin ) {
+      const distance = distanceBetweenCoords(tripSelected.startingpoint, currentLocation)
+      console.log(distance)
+      if(distance <= 20) setArrivedToOrigin(true)
+    }
+  }, [currentLocation])
+
+  const handleArriveTrip = (trip) => {
+    console.log('MANAGE:', trip)
+    setShowWaitingModal(true)
+  }
 
   const fetchTrips = async () => {
     const trips = await getNearbyTrips({
@@ -66,7 +88,11 @@ function HomeDriver({ navigation }) {
 
   const sendCurrentLocation = () => {
     locationListener.subscribe(({ coords }) => {
-      console.log(coords.latitude, coords.longitude)
+      setCurrentLocation({
+        latitude:coords.latitude,
+        longitude: coords.longitude
+      })
+
       channel.current.send({
         type: 'broadcast',
         event: userData.id,
@@ -162,12 +188,20 @@ function HomeDriver({ navigation }) {
             apikey={"AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0"}
             strokeWidth={6}
             strokeColor="#FDCD03"
-            onReady={({distance, duration}) => {
+            onReady={({ distance, duration }) => {
               setDistanceToOrigin(distance)
               setTimeToOrigin(duration)
             }}
           />
         }
+        <Marker
+          coordinate={{
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude
+          }}
+          title='Yo'
+          pinColor='#8946A6'
+        />
       </MapContainer>
       <ToggleOnService onToggle={handleToggle} />
       {
@@ -186,12 +220,17 @@ function HomeDriver({ navigation }) {
         <ManageTrip
           trip={tripSelected}
           onCancelledTrip={handleCancelledTrip}
-          onArriveOriginTrip={(trip) => console.log('MANAGE:', trip)}
+          onArriveOriginTrip={handleArriveTrip}
+          arrived={arrivedToOrigin}
         />
       }
       <ModalReport
         visible={false}
         userToReport='afcfc3f6-4854-4976-88e8-57a8480fdd09'
+      />
+      <ModalWaitingPassenger
+        visible={showWaitingModal}
+        onPress={() => console.log("PETE")}
       />
     </View>
   )
