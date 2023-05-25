@@ -20,7 +20,7 @@ export default function WonderSelector({ origin, destination, onSelectWonder = (
 const styles = StyleSheet.create({
   selector: {
     width: "100%",
-    height: "26%",
+    height: "35%",
     position: "absolute",
     backgroundColor: "#fff",
     alignItems: "flex-start",

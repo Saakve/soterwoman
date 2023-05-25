@@ -1,15 +1,37 @@
 import { StyleSheet, View, Dimensions } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { SearchBar } from "./SearchBar";
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import MapViewDirections from "react-native-maps-directions";
 import WonderSelector from "../pages/WonderSelector";
 import PayChildrenSelector from "../pages/PayChildrenSelector";
+import WaitSelector from "../pages/WaitSelector";
+import { ManageTripPassenger } from "./ManageTripPassenger";
+import { supabase } from "../services/supabase";
+import { makeChannel } from "../services/makeChannel";
+import UserContext from "../context/UserContext";
 
 export function PassengerMapContainer({currentLocation}) {
   const [searchLocation, setSearchLocation] = useState(null)
   const [showWonderSelector, setShowWonderSelector] = useState(false)
   const [showPaySelector, setShowPaySelector] = useState(false);
+  const [showWaitSelector, seShowWaitSelector] = useState(false);
+  const [showManageTrip, setShowManageTrip] = useState(false);
+  const [channel, setChannel] = useState(null);
+  const { userData, dataIsLoaded } = useContext(UserContext);
+
+    useEffect(() => {
+      const channel = makeChannel({
+        channelName: "trips",
+        eventType: "broadcast",
+        filter: { event: "accept" },
+        callback: (response) => console.log(response),
+      });
+      setChannel(channel);
+      console.log("LISTENING");
+
+      return () => supabase.removeChannel(channel);
+    }, [supabase]);
 
   const handleSearch = (searchLocation) => {
     setSearchLocation(searchLocation) 
@@ -18,13 +40,26 @@ export function PassengerMapContainer({currentLocation}) {
 
   
   const handleSelectWonder = () => {
-    setShowWonderSelector(false);
+    setShowWonderSelector(false)
     setShowPaySelector(true)
   }
 
-  const handleReturnSelector = () => {
-     setShowPaySelector(false);
-     setShowWonderSelector(true);
+  const handleConfirmTrip = () => {
+     const sendRequest = async () => {
+       await channel.send({
+         type: "broadcast",
+         event: "request",
+         payload: `Hola soy ${userData.name}`,
+       });
+     };
+     sendRequest()
+     setShowPaySelector(false)
+     seShowWaitSelector(true)
+  }
+
+  const handleCancel = () => {
+    seShowWaitSelector(false);
+    setShowManageTrip(true);
   }
 
   return (
@@ -94,7 +129,15 @@ export function PassengerMapContainer({currentLocation}) {
         <PayChildrenSelector
           origin={currentLocation.name}
           destination={searchLocation.name}
-          onReturn={handleReturnSelector}
+          onPress={handleConfirmTrip}
+        />
+      )}
+      {showWaitSelector && <WaitSelector onPress={handleCancel} />}
+      {showManageTrip && (
+        <ManageTripPassenger
+          onPress={handleCancel}
+          origin={currentLocation.name}
+          destination={searchLocation.name}
         />
       )}
     </View>

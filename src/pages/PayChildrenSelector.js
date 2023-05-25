@@ -6,27 +6,29 @@ import { useState } from "react";
 export default function PayChildrenSelector({
   origin,
   destination,
-  onReturn = () => {}
+  onPress = () => {}
 }) {
   const [childrenNumber, setChildrenNumber] = useState(0)
+  const MAX_CHILDREN_NUMBER = 3
+  const MIN_CHILDREN_NUMBER = 0;
 
   const addChildrens = () => {
-    setChildrenNumber(childrenNumber + 1)
+    const lastChildrenNumber = childrenNumber
+    childrenNumber < MAX_CHILDREN_NUMBER ?
+    setChildrenNumber(childrenNumber + 1) : setChildrenNumber(lastChildrenNumber)
+   console.log(lastChildrenNumber)
+
   }
 
   const substractChildrens = () => {
-      setChildrenNumber(childrenNumber - 1);
+    const lastChildrenNumber = childrenNumber
+    childrenNumber > MIN_CHILDREN_NUMBER ?
+      setChildrenNumber(childrenNumber - 1) : 
+      setChildrenNumber(lastChildrenNumber) 
   };
 
   return (
     <View style={styles.selector}>
-      <Icon
-        style={styles.selector_icons}
-        name="arrow-left"
-        type="font-awesome-5"
-        color="#111"
-        onPress={onReturn}
-      />
       <TripPoints nameStartingpoint={origin} nameEndpoint={destination} />
       <View style={styles.selector_payments}>
         <Button
@@ -64,27 +66,29 @@ export default function PayChildrenSelector({
           color="#F0C59D"
         />
 
-        <Text style={{ fontSize: 20 }}>Niños</Text>
-        <View style={styles.selector_setchildren}>
-          <Button
-            icon={
-              <Icon name="minus" type="font-awesome-5" color="#FFF" size={10} />
-            }
-            buttonStyle={styles.change_button}
-            onPress={substractChildrens}
-          />
-          <Text style={{ fontSize: 20 }}>{`${childrenNumber}`}</Text>
-          <Button
-            icon={
-              <Icon name="plus" type="font-awesome-5" color="#FFF" size={10} />
-            }
-            buttonStyle={styles.change_button}
-            onPress={addChildrens}
-          />
-        </View>
+        <Text style={{ fontSize: 18 }}>Niños</Text>
+        <Button
+          icon={
+            <Icon name="minus" type="font-awesome-5" color="#FFF" size={10} />
+          }
+          buttonStyle={styles.change_button}
+          onPress={substractChildrens}
+        />
+        <Text style={{ fontSize: 18 }}>{`${childrenNumber}`}</Text>
+        <Button
+          icon={
+            <Icon name="plus" type="font-awesome-5" color="#FFF" size={10} />
+          }
+          onPress={addChildrens}
+          buttonStyle={styles.change_button}
+        />
       </View>
       <View style={styles.confirm}>
-        <Button title={"Confirmar viaje"} buttonStyle={styles.button_confirm} />
+        <Button
+          title="Confirmar viaje"
+          buttonStyle={styles.button_confirm}
+          onPress={onPress}
+        />
       </View>
     </View>
   );
@@ -93,42 +97,49 @@ export default function PayChildrenSelector({
 const styles = StyleSheet.create({
   selector: {
     width: "100%",
-    height: "30%",
+    height: "35%",
     position: "absolute",
     backgroundColor: "#fff",
     alignItems: "flex-start",
-    bottom: Platform.select({ ios: "0%", android: "0%" }),
     justifyContent: "space-evenly",
+    bottom: Platform.select({ ios: "0%", android: "0%" }),
   },
-  selector_icons: {
-    marginHorizontal: "5%",
+
+  selector_payments: {
+    justifyContent: "flex-start",
+    flexDirection: "column-reverse",
+    flexWrap: "wrap",
+    alignItems: "baseline",
   },
   payment_icons: {
     marginHorizontal: "5%",
   },
   button: {
-    borderRadius: 10,
-    width: 300,
     height: 40,
-    margin: "1%",
     backgroundColor: "#FFF",
   },
   change_button: {
-    borderRadius: 10,
-    width: 60,
-    height: 30,
-    backgroundColor: "#8946A6",
+    backgroundColor: "#8946A6",    
+    borderRadius: 5 
   },
   selector_children: {
     flexDirection: "row",
     flexWrap: "wrap",
+    alignItems: "baseline",
+    justifyContent: "space-around",
+    width: 400,
   },
   selector_setchildren: {
     flexDirection: "row",
     flexWrap: "wrap",
-    columnGap: "20",
+    alignItems: "baseline",
   },
-  button_confirm: {
+  confirm: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%"
+  },
+   button_confirm: {
     borderRadius: 10,
     backgroundColor: "#8946A6",
   },

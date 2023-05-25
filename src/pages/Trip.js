@@ -117,8 +117,8 @@ export default function Trip () {
             return (
               <TripContainer
                 key={trips.id}
-                startingPoint={trips.startingpoint}
-                endPoint={trips.endpoint}
+                startingPoint={trips.name_startingpoint}
+                endPoint={trips.name_endpoint}
                 cost={trips.cost}
                 status={trips.idstatus}
               />

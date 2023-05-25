@@ -27,4 +27,7 @@ const styles = StyleSheet.create({
   nametrippoints: {
     justifyContent: "space-evenly",
   },
+  text: {
+    fontSize: 18
+  }
 });

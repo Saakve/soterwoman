@@ -1,10 +1,9 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { Icon, Button } from "@rneui/base";
 
 export default function WonderType({ name, onPress = () => {} }) {
   return (
     <View style={styles.wondertypes}>
-      <View style={styles.wondertypes_data}>
         <Button
           icon={
             <Icon
@@ -14,12 +13,12 @@ export default function WonderType({ name, onPress = () => {} }) {
               color="#242E42"
             />
           }
-          title={`${name.name} ${name.price}`}
+          title={`${name.name}`}
           titleStyle={{ color: "#111" }}
           buttonStyle={styles.button}
           onPress={onPress}
         />
-      </View>
+        <Text style={{fontSize: 18}}>{`${name.price}`}</Text>
     </View>
   );
 }
@@ -27,18 +26,17 @@ export default function WonderType({ name, onPress = () => {} }) {
 const styles = StyleSheet.create({
   wondertypes: {
     flexDirection: "row",
-  },
-  wondertypes_data: {
-    flexDirection: "row",
-  },
+    justifyContent: "space-between",
+    alignItems:"center",
+    width: 360
+    },
   wondertypes_data_icons: {
     marginHorizontal: "5%",
   },
   button: {
     borderRadius: 10,
-    width: 250,
+    maxWidth: 280,
     height: 40,
-    margin: "1%",
     backgroundColor: "#FFF",
   },
 });
