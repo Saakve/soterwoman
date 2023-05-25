@@ -43,8 +43,6 @@ export function ModalPayOffDebt ({ visible = false, onPress = () => { }, amount 
         card = await getPassengerDefaultPaymentMethod({ id: userData.idStripe })
       }
 
-      console.log(card)
-
       setCard(card)
     }
 

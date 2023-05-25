@@ -1,16 +1,20 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { StyleSheet, View, Text, Alert } from 'react-native'
-import { supabase } from '../services/supabase'
-import TripContainer from '../components/TripContainer'
-import { Button } from '@rneui/themed'
 import { ScrollView } from 'react-native-gesture-handler'
-import UserContext from '../context/UserContext'
+import { useFocusEffect } from '@react-navigation/native'
+import { Button } from '@rneui/themed'
+
+import { supabase } from '../services/supabase'
+
+import TripContainer from '../components/TripContainer'
 import { ModalPayOffDebt } from '../components/ModalPayOffDebt'
 
-export default function Trip () {
+import UserContext from '../context/UserContext'
+
+export default function Trip() {
   const { userData } = useContext(UserContext)
   const [trip, setTrip] = useState([])
-  const [stat, setStat] = useState([{}])
+  const [stat, setStats] = useState([{}])
   const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
@@ -26,21 +30,38 @@ export default function Trip () {
     getTrip()
   }, [])
 
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true
+
+      const fetchStats = async () => {
+        const { data } = await supabase.rpc('getStats', { userid: userData.id })
+        if (isActive) setStats(data)
+        console.log("FETCH FROM FOCUS")
+      }
+
+      fetchStats()
+
+      return () => { isActive = false }
+    }, [userData.id])
+  )
+
   useEffect(() => {
-    const getUserStats = async () => {
+    const fetchStats = async () => {
       const { data } = await supabase.rpc('getStats', { userid: userData.id })
-      setStat(data)
-      console.log(data)
+      setStats(data)
+      console.log("FETCH FROM EFFECT")
     }
-    getUserStats()
+    if (!showModal) fetchStats()
   }, [showModal])
 
   const filterTrips = (range) => {
     const getFilterTrip = async () => {
       const { data, error } = await supabase.rpc(range, { rowstoshow: 15 })
-      console.log(data)
+
+      if (error) console.log("filterTrips: ", error)
+
       setTrip(data)
-      console.log(error)
     }
     getFilterTrip()
   }
