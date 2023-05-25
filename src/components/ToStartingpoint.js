@@ -1,33 +1,27 @@
-import { useEffect, useRef, useState } from "react"
 import { StyleSheet, Text, View } from "react-native"
-
+import { useNavigation } from "@react-navigation/native"
+import Call from 'react-native-phone-call'
 import { Button, Icon } from "@rneui/base"
 
 import Avatar from "./Avatar"
 
-import serviceType from "../utils/serviceType"
-import paymentMethodType from "../utils/paymentMethodType"
+export function ToStartingpoint({ trip, passenger, onCancelledTrip = () => { }, onArriveOriginTrip = () => { }, arrived = false }) {
+  const navigation = useNavigation()
 
-export function TripSelector({ trip, passenger, distanceToOrigin, timeToOrigin, onCancelledTrip = () => { }, onConfirmedTrip = () => { }, onSelectedTrip = () => { } }) {
-  const [counter, setCounter] = useState(30)
-  const interval = useRef(null)
-
-  useEffect(() => {
-    if (counter === 0) {
-      clearInterval(interval.current)
-      onCancelledTrip(trip)
+  const triggerCall = () => {
+    const args = {
+      number: passenger.phone,
+      prompt: true
     }
-  }, [counter])
 
-  useEffect(() => {
-    onSelectedTrip(trip)
+    Call(args).catch(console.error)
+  }
 
-    interval.current = setInterval(() => {
-      setCounter(counter => --counter)
-    }, 1000)
-
-    return () => { clearInterval(interval.current) }
-  }, [])
+  const displayMessage = () => {
+    navigation.navigate('Message', {
+      toUser: passenger
+    })
+  }
 
   return (
     <View style={styles.selector}>
@@ -50,22 +44,21 @@ export function TripSelector({ trip, passenger, distanceToOrigin, timeToOrigin, 
           </View>
         </View>
         <View style={styles.tripdata}>
-          <View style={styles.servicetype}>
             <Icon
-              name='car-side'
+              name='comment-dots'
               type='font-awesome-5'
-              color='#242E42'
+              solid
+              color='#4252FF'
+              size={35}
+              onPressOut={displayMessage}
             />
-            <Text style={styles.text}>Wonder {trip.idServicetype === serviceType.CLASSIC ? 'Clásico' : 'Emergencia'} </Text>
-          </View>
-          <View style={styles.children}>
             <Icon
-              name='child'
+              name='phone'
               type='font-awesome'
-              color='#F0C59D'
+              color='#4CE5B1'
+              size={35}
+              onPressOut={triggerCall}
             />
-            <Text style={styles.text}>{trip.children}</Text>
-          </View>
         </View>
       </View>
       <View style={styles.trippoints}>
@@ -86,15 +79,6 @@ export function TripSelector({ trip, passenger, distanceToOrigin, timeToOrigin, 
           <Text style={styles.text}>{trip.nameEndpoint}</Text>
         </View>
       </View>
-      <View style={styles.footer}>
-        <View style={styles.time}>
-          <Text style={styles.timetext}>{counter}</Text>
-        </View>
-        <Text style={styles.text}>MÉTODO {'\n'}{trip.idPaymentmethodType === paymentMethodType.CARD ? 'Tarjeta' : 'Efectivo'}</Text>
-        <Text style={styles.text}>DISTANCIA {'\n'}{distanceToOrigin.toFixed(3)} Km</Text>
-        <Text style={styles.text}>TIEMPO {'\n'}{Math.ceil(timeToOrigin)} min</Text>
-        <Text style={styles.text}>PRECIO {'\n'}{trip.cost}</Text>
-      </View>
       <View style={styles.buttons}>
         <Button
           title={'Cancelar'}
@@ -103,10 +87,13 @@ export function TripSelector({ trip, passenger, distanceToOrigin, timeToOrigin, 
           onPressOut={() => onCancelledTrip(trip)}
         />
         <Button
-          title={'Aceptar'}
+          title={'¡Ya llegué!'}
           buttonStyle={styles.button}
           color="#4CE5B1"
-          onPressOut={() => onConfirmedTrip(trip)}
+          onPressOut={() => {
+            onArriveOriginTrip(trip)
+          }}
+          disabled={!arrived}
         />
       </View>
     </View>
@@ -116,13 +103,13 @@ export function TripSelector({ trip, passenger, distanceToOrigin, timeToOrigin, 
 const styles = StyleSheet.create({
   selector: {
     width: "100%",
-    height: "35%",
+    height: "25%",
     bottom: 0,
     position: "absolute",
     backgroundColor: "#FFF",
   },
   header: {
-    height: "25%",
+    height: "35%",
     backgroundColor: "#F7F7F7",
     flexDirection: "row",
     paddingHorizontal: "2%",
@@ -157,7 +144,8 @@ const styles = StyleSheet.create({
   },
   trippoints: {
     flexDirection: "row",
-    height: "30%"
+    height: "30%",
+    marginBottom: "2%"
   },
   icons: {
     marginHorizontal: "5%",
@@ -174,18 +162,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: 163,
     height: 50,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    marginBottom: "3%"
-  },
-  time: {
-    backgroundColor: "#FFCDDD",
-    width: "10%",
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center"
   },
   text: {
     color: "#111",

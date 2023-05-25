@@ -71,6 +71,8 @@ CREATE TABLE tripstatus (
 INSERT INTO tripstatus (name) VALUES ('Draft');
 INSERT INTO tripstatus (name) VALUES ('Pending');
 INSERT INTO tripstatus (name) VALUES ('Confirmed');
+INSERT INTO tripstatus (name) VALUES ('Arrived');
+INSERT INTO tripstatus (name) VALUES ('Started');
 INSERT INTO tripstatus (name) VALUES ('Completed');
 INSERT INTO tripstatus (name) VALUES ('Cancelled');
 

@@ -1,41 +1,9 @@
-import { useEffect, useState } from "react"
 import { StyleSheet, Text, View } from "react-native"
-import { useNavigation } from "@react-navigation/native"
-import Call from 'react-native-phone-call'
 import { Button, Icon } from "@rneui/base"
 
 import Avatar from "./Avatar"
 
-import { supabase } from "../services/supabase"
-
-export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTrip = () => { }, arrived = false }) {
-  const [passenger, setPassenger] = useState(null)
-  const navigation = useNavigation()
-
-  const fetchPassenger = async () => {
-    const { data: [passengerData] } = await supabase.from('profile').select('*').eq('id', trip.idPassenger)
-    setPassenger(passengerData)
-  }
-
-  const triggerCall = () => {
-    const args = {
-      number: passenger.phone,
-      prompt: true
-    }
-
-    Call(args).catch(console.error)
-  }
-
-  const displayMessage = () => {
-    navigation.navigate('Message', {
-      toUser: passenger 
-    })
-  }
-
-  useEffect(() => {
-    fetchPassenger()
-  }, [])
-
+export function ToEndpoint({ trip, passenger, onReport = () => { }, arrived = true, onArriveOriginTrip = () => { } }) {
   return (
     <View style={styles.selector}>
       <View style={styles.header}>
@@ -56,22 +24,26 @@ export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTr
             <Text style={styles.rating}>{passenger?.rating}</Text>
           </View>
         </View>
-        <View style={styles.tripdata}>
-            <Icon
-              name='comment-dots'
-              type='font-awesome-5'
-              solid
-              color='#4252FF'
-              size={35}
-              onPressOut={displayMessage}
+        <View style={styles.buttonscontainer}>
+          <Icon
+            name='exclamation-circle'
+            type='font-awesome'
+            color='#B10710'
+            size={35}
+            onPressOut={onReport}
+          />
+          {
+            arrived &&
+            <Button
+              title={'Terminar'}
+              buttonStyle={styles.button}
+              color="#4CE5B1"
+              onPressOut={() => {
+                onArriveOriginTrip(trip)
+              }}
+              disabled={!arrived}
             />
-            <Icon
-              name='phone'
-              type='font-awesome'
-              color='#4CE5B1'
-              size={35}
-              onPressOut={triggerCall}
-            />
+          }
         </View>
       </View>
       <View style={styles.trippoints}>
@@ -88,26 +60,9 @@ export function ManageTrip({ trip, onCancelledTrip = () => { }, onArriveOriginTr
           />
         </View>
         <View style={styles.nametrippoints}>
-          <Text style={styles.text}>{trip.nameStartingpoint}</Text>
           <Text style={styles.text}>{trip.nameEndpoint}</Text>
+          <Text style={styles.text}>{trip.nameStartingpoint}</Text>
         </View>
-      </View>
-      <View style={styles.buttons}>
-        <Button
-          title={'Cancelar'}
-          buttonStyle={styles.button}
-          color="#B10710"
-          onPressOut={() => onCancelledTrip(trip)}
-        />
-        <Button
-          title={'¡Ya llegué!'}
-          buttonStyle={styles.button}
-          color="#4CE5B1"
-          onPressOut={() => {
-            onArriveOriginTrip(trip)
-          }}
-          disabled={!arrived}
-        />
       </View>
     </View>
   )
@@ -123,13 +78,12 @@ const styles = StyleSheet.create({
   },
   header: {
     height: "35%",
-    backgroundColor: "#F7F7F7",
     flexDirection: "row",
     paddingHorizontal: "2%",
     alignItems: "center",
   },
   avatar: {
-    marginTop: 0
+    marginTop: 0,
   },
   userdata: {
     marginHorizontal: "5%",
@@ -142,10 +96,10 @@ const styles = StyleSheet.create({
     color: "#C8C7CC",
     paddingLeft: "2%"
   },
-  tripdata: {
+  buttonscontainer: {
     flex: 1,
     flexDirection: "row",
-    justifyContent: "space-evenly"
+    justifyContent: "space-around"
   },
   servicetype: {
     marginRight: "5%",
@@ -158,7 +112,8 @@ const styles = StyleSheet.create({
   trippoints: {
     flexDirection: "row",
     height: "30%",
-    marginBottom: "2%"
+    marginBottom: "2%",
+    flex: 1
   },
   icons: {
     marginHorizontal: "5%",
@@ -178,5 +133,6 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "#111",
+    fontSize: 16
   }
 })

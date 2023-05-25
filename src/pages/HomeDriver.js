@@ -9,10 +9,11 @@ import SignInLikeContext from '../context/SingInLikeContext'
 import { ModalReport } from '../components/ModalReport'
 import { MapContainer } from '../components/MapContainer'
 import { ToggleOnService } from '../components/ToggleOnService'
-import { ManageTrip } from '../components/ManageTrip'
+import { ToStartingpoint } from '../components/ToStartingpoint'
 import { TripSelector } from '../components/TripSelector'
 import { TripMarkers } from '../components/TripMarkers'
 import { ModalWaitingPassenger } from '../components/ModalWaitingPassenger'
+import { ToEndpoint } from '../components/ToEndpoint'
 
 import { supabase } from '../services/supabase'
 import { getNearbyTrips } from '../services/getNearbyTrips'
@@ -31,9 +32,10 @@ function HomeDriver({ navigation }) {
   const locationListener = useCurrentLocationUpdateListener()
 
   const [trips, setTrips] = useState([])
+  const [passenger, setPassenger] = useState(null)
   const [tripSelected, setTripSelected] = useState(null)
   const [showSelector, setShowSelector] = useState(false)
-  const [showManageTrip, setShowManageTrip] = useState(false)
+  const [showToStartingpoint, setShowToStartingpoint] = useState(false)
   const [timeToOrigin, setTimeToOrigin] = useState(0)
   const [distanceToOrigin, setDistanceToOrigin] = useState(0)
   const [currentLocation, setCurrentLocation] = useState({
@@ -45,11 +47,10 @@ function HomeDriver({ navigation }) {
   const [showWaitingModal, setShowWaitingModal] = useState(false)
   const [showRouteToEndpoint, setShowRouteToEndpoint] = useState(false)
   const [showRouteToStartingpoint, setShowRouteToStartingpoint] = useState(false)
-  const [showOnTravelCard, setShowOnTravelCard] = useState(false)
+  const [showToEndpoint, setShowToEndpoint] = useState(false)
 
   const tripsChannel = useRef(null)
   const locationChannel = useRef(null)
-
 
   useEffect(() => {
     if (dataIsLoaded && !userData.idUserType) {
@@ -59,9 +60,9 @@ function HomeDriver({ navigation }) {
   }, [dataIsLoaded])
 
   useEffect(() => {
-    if (tripSelected && showManageTrip && !arrivedToStartingpoint) {
+    if (tripSelected && showToStartingpoint && !arrivedToStartingpoint) {
       const distance = distanceBetweenCoords(tripSelected.startingpoint, currentLocation)
-      console.log(distance)
+      console.log("ToStartingpoint: ",distance)
       if (distance <= 20) setArrivedToStartingpoint(true)
     }
   }, [currentLocation])
@@ -69,12 +70,12 @@ function HomeDriver({ navigation }) {
   useEffect(() => {
     if (tripSelected && showRouteToEndpoint && !arrivedToEndpoint) {
       const distance = distanceBetweenCoords(tripSelected.endpoint, currentLocation)
-      console.log(distance)
+      console.log("ToEndpoint: ",distance)
       if (distance <= 20) setArrivedToEndpoint(true)
     }
   }, [currentLocation])
 
-  console.log(trips.length)
+  console.log("Cantidad de viajes", trips.length)
 
   const fetchTrips = async () => {
     const trips = await getNearbyTrips({
@@ -85,6 +86,11 @@ function HomeDriver({ navigation }) {
     })
 
     setTrips(trips)
+  }
+
+  const fetchPassenger = async (id) => {
+    const { data: [passengerData] } = await supabase.from('profile').select('*').eq('id', id)
+    return passengerData
   }
 
   const listenTripChanges = () => {
@@ -147,15 +153,18 @@ function HomeDriver({ navigation }) {
     }
 
     const [trip] = trips.filter(trip => trip.id === id)
+    const passenger = await fetchPassenger(trip.idPassenger)
+    setPassenger(passenger)
     setTripSelected(trip)
     setShowSelector(true)
     setShowRouteToStartingpoint(true)
   }
 
   const handleCancelledTrip = async (trip) => {
-    if (showManageTrip) setShowManageTrip(false)
+    if (showToStartingpoint) setShowToStartingpoint(false)
     if (showSelector) setShowSelector(false)
     if (tripSelected) setTripSelected(null)
+    if (passenger) setPassenger(null)
 
     const { error } = await supabase.from('trip').update({
       idstatus: tripStatus.DRAFT,
@@ -166,7 +175,7 @@ function HomeDriver({ navigation }) {
 
   const handleConfirmedTrip = async (trip) => {
     setShowSelector(false)
-    setShowManageTrip(true)
+    setShowToStartingpoint(true)
     const { error } = await supabase.from('trip').update({
       idstatus: tripStatus.CONFIRMED,
       iddriver: userData.id
@@ -196,11 +205,11 @@ function HomeDriver({ navigation }) {
     }).eq('id', tripSelected.id)
     if (error) console.log('startTrip', error)
     stopListeningTripChanges()
-    setShowManageTrip(false)
+    setShowToStartingpoint(false)
     setShowRouteToStartingpoint(false)
     setTrips([])
     setShowRouteToEndpoint(true)
-    setShowOnTravelCard(true)
+    setShowToEndpoint(true)
   }
 
   return (
@@ -283,6 +292,7 @@ function HomeDriver({ navigation }) {
         showSelector &&
         <TripSelector
           trip={tripSelected}
+          passenger={passenger}
           onCancelledTrip={handleCancelledTrip}
           onConfirmedTrip={handleConfirmedTrip}
           onSelectedTrip={selectTripOnDB}
@@ -291,12 +301,20 @@ function HomeDriver({ navigation }) {
         />
       }
       {
-        showManageTrip &&
-        <ManageTrip
+        showToStartingpoint &&
+        <ToStartingpoint
           trip={tripSelected}
+          passenger={passenger}
           onCancelledTrip={handleCancelledTrip}
           onArriveOriginTrip={handleArriveTrip}
           arrived={arrivedToStartingpoint}
+        />
+      }
+      {
+        showToEndpoint &&
+        <ToEndpoint
+          passenger={passenger}
+          trip={tripSelected}
         />
       }
       <ModalReport

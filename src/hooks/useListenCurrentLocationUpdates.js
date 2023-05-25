@@ -5,19 +5,23 @@ export default function useCurrentLocationUpdateListener() {
   const locationSubscription = useRef(null)
 
   const subscribe = async (callback) => {
-    if(locationSubscription.current) return
+    if (locationSubscription.current) return
 
-    const subscription = await Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.BestForNavigation
-      },
-      callback
-    )
+    const { status } = await Location.requestForegroundPermissionsAsync()
+    if (status === 'granted') {
+      const subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.BestForNavigation
+        },
+        callback
+      )
 
-    locationSubscription.current = subscription
+      locationSubscription.current = subscription
+    }
   }
 
   const remove = () => {
+    if(!locationSubscription.current) return
     locationSubscription.current.remove()
     locationSubscription.current = null
   }
