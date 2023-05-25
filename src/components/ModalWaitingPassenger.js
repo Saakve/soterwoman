@@ -1,17 +1,10 @@
-import { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, Modal, ActivityIndicator } from 'react-native'
 
 import { Button } from '@rneui/base'
 
 export function ModalWaitingPassenger({ visible = false, onPress = () => { } }) {
-  const [show, setShow] = useState(visible)
-
-  useEffect(() => {
-    setShow(visible)
-  }, [visible])
 
   const handlePressButton = () => {
-    setShow(false)
     onPress()
   }
 
@@ -19,7 +12,7 @@ export function ModalWaitingPassenger({ visible = false, onPress = () => { } }) 
     <Modal
       animationType='fade'
       transparent
-      visible={show}
+      visible={visible}
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>

@@ -1,24 +1,22 @@
-import { View, Text, StyleSheet, Modal } from 'react-native'
-import { Button } from '@rneui/base'
 import { useContext, useState } from 'react'
-import { supabase } from '../services/supabase'
-import { TextInput } from 'react-native-gesture-handler'
+import { View, Text, StyleSheet, Modal } from 'react-native'
 import { Icon } from 'react-native-elements'
+import { TextInput } from 'react-native-gesture-handler'
+import { Button } from '@rneui/base'
+
+import { supabase } from '../services/supabase'
+
 import UserContext from '../context/UserContext'
 
-export function ModalReport ({ visible = false, onPress = () => {}, userToReport }) {
+export function ModalReport ({ visible = false, onConfirm = () => {}, onCancel = () => {}, userToReport }) {
   const [description, setDescription] = useState('')
-  const [show, setShow] = useState(visible)
   const { userData } = useContext(UserContext)
 
   const handleCancel = async () => {
-    setShow(false)
-    onPress()
+    onCancel()
   }
 
-  const handleReport = async () => {
-    setShow(false)
-    onPress()
+  const handleConfirm = async () => {
     const { error } = await supabase.from('report').insert({
       description,
       idpassenger: userToReport,
@@ -27,6 +25,7 @@ export function ModalReport ({ visible = false, onPress = () => {}, userToReport
 
     console.log(error)
     subtractRating()
+    onConfirm()
   }
 
   const subtractRating = async () => {
@@ -45,7 +44,7 @@ export function ModalReport ({ visible = false, onPress = () => {}, userToReport
   }
 
   return (
-    <Modal animationType='fade' transparent visible={show}>
+    <Modal animationType='fade' transparent visible={visible}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <View style={styles.modalTitle}>
@@ -74,7 +73,7 @@ export function ModalReport ({ visible = false, onPress = () => {}, userToReport
             />
             <Button
               buttonStyle={styles.buttonReport}
-              onPress={handleReport}
+              onPress={handleConfirm}
               title={<Icon name='check' size={20} color='#FFF' />}
               color={styles.buttonReport.color}
             />
@@ -90,7 +89,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: '30%'
+    marginBottom: '25%'
   },
   modalView: {
     backgroundColor: 'white',

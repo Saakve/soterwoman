@@ -8,7 +8,7 @@ import Avatar from "./Avatar"
 import serviceType from "../utils/serviceType"
 import paymentMethodType from "../utils/paymentMethodType"
 
-export function TripSelector({ trip, passenger, distanceToOrigin, timeToOrigin, onCancelledTrip = () => { }, onConfirmedTrip = () => { }, onSelectedTrip = () => { } }) {
+export function TripSelector({ trip, passenger, distanceToOrigin, timeToOrigin, onCancelledTrip = () => { }, onConfirmedTrip = () => { } }) {
   const [counter, setCounter] = useState(30)
   const interval = useRef(null)
 
@@ -20,8 +20,6 @@ export function TripSelector({ trip, passenger, distanceToOrigin, timeToOrigin, 
   }, [counter])
 
   useEffect(() => {
-    onSelectedTrip(trip)
-
     interval.current = setInterval(() => {
       setCounter(counter => --counter)
     }, 1000)

@@ -3,7 +3,7 @@ import { Button, Icon } from "@rneui/base"
 
 import Avatar from "./Avatar"
 
-export function ToEndpoint({ trip, passenger, onReport = () => { }, arrived = true, onArriveOriginTrip = () => { } }) {
+export function ToEndpoint({ trip, passenger, onReport = () => { }, arrived = false, onArriveEndpoint = () => { } }) {
   return (
     <View style={styles.selector}>
       <View style={styles.header}>
@@ -39,7 +39,7 @@ export function ToEndpoint({ trip, passenger, onReport = () => { }, arrived = tr
               buttonStyle={styles.button}
               color="#4CE5B1"
               onPressOut={() => {
-                onArriveOriginTrip(trip)
+                onArriveEndpoint(trip)
               }}
               disabled={!arrived}
             />

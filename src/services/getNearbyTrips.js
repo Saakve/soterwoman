@@ -8,7 +8,7 @@ export async function getNearbyTrips({idUser,latitude, longitude, range}) {
     range: range
   })
 
-  const filteredData = data.filter(trip => (trip.iddriver === idUser || trip.idstatus < tripStatus.PENDING))
+  const filteredData = data.filter(trip => ((trip.iddriver === idUser && trip.idstatus < tripStatus.COMPLETED) || trip.idstatus < tripStatus.PENDING) )
 
   const trips = filteredData.map(({
     id,
