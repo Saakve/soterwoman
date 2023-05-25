@@ -23,6 +23,7 @@ import useCurrentLocationUpdateListener from '../hooks/useListenCurrentLocationU
 
 import tripStatus from '../utils/tripStatus'
 import { distanceBetweenCoords } from '../utils/distanceBetweenCoords'
+import paymentMethodType from '../utils/paymentMethodType'
 
 function HomeDriver({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext)
@@ -211,10 +212,21 @@ function HomeDriver({ navigation }) {
 
   const handleArriveEndpoint = async () => {
     setShowRouteToEndpoint(false)
+
     const { error } = await supabase.from('trip').update({
       idstatus: tripStatus.COMPLETED
     }).eq('id', tripSelected.id)
+
     if (error) console.log('handleArriveEndpoint', error)
+
+    if (tripSelected.idPaymentmethodType === paymentMethodType.CASH) {
+      const { error: errorProfile } = await supabase.from('profile').update({
+        debt: tripSelected.cost
+      }).eq('id', userData.id)
+
+      if (error) console.log('SUPA_UPDATE_PROFILE:', errorProfile)
+    }
+
     setTripSelected(null)
     fetchTrips()
     listenTripChanges()
