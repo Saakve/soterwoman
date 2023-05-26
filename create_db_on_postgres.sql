@@ -406,11 +406,14 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION public."equalPassword" (passwordToValidate VARCHAR)
 RETURNS boolean AS $$
+DECLARE
+  user_id UUID;
 BEGIN
-  IF EXISTS ( 
-    SELECT 1 FROM auth.users 
-    WHERE id = auth.uid()
-    AND encrypted_password = crypt(passwordToValidate, encrypted_password)) 
+  user_id := auth.uid();
+  IF EXISTS (
+    SELECT 1 FROM auth.users
+    WHERE id = user_id
+    AND auth.users.encrypted_password = crypt(passwordToValidate, auth.users.encrypted_password)) 
   THEN
     RETURN TRUE;
   ELSE 
