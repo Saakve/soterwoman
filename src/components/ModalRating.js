@@ -29,10 +29,8 @@ function getArrayOf5Items (item) {
 
 export function ModalRating ({ visible = false, onPress = () => {}, userToRate }) {
   const [rating, setRating] = useState(1)
-  const [show, setShow] = useState(visible)
 
   const handlePressButton = async () => {
-    setShow(false)
     onPress()
     const { data } = await supabase.from('profile').select('rating').eq('id', userToRate)
     if (data[0].rating === 0) {
@@ -48,7 +46,7 @@ export function ModalRating ({ visible = false, onPress = () => {}, userToRate }
     <Modal
       animationType='fade'
       transparent
-      visible={show}
+      visible={visible}
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>

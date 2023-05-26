@@ -7,6 +7,7 @@ import UserContext from '../context/UserContext'
 import SignInLikeContext from '../context/SingInLikeContext'
 
 import { ModalReport } from '../components/ModalReport'
+import { ModalRating } from '../components/ModalRating'
 import { MapContainer } from '../components/MapContainer'
 import { ToggleOnService } from '../components/ToggleOnService'
 import { ToStartingpoint } from '../components/ToStartingpoint'
@@ -48,6 +49,7 @@ function HomeDriver({ navigation }) {
   const [showRouteToEndpoint, setShowRouteToEndpoint] = useState(false)
   const [showRouteToStartingpoint, setShowRouteToStartingpoint] = useState(false)
   const [showReport, setShowReport] = useState(false)
+  const [showModalRating, setShowModalRating] = useState(false)
 
   const tripsChannel = useRef(null)
   const locationChannel = useRef(null)
@@ -227,13 +229,18 @@ function HomeDriver({ navigation }) {
       if (error) console.log('SUPA_UPDATE_PROFILE:', error)
     }
 
-    setTripSelected(null)
+    setShowModalRating(true)
     fetchTrips()
     listenTripChanges()
   }
 
   const displayReport = () => {
     setShowReport(true)
+  }
+
+  const handleOnPressRating = () => {
+    setShowModalRating(false)
+    setTripSelected(null)
   }
 
   const handleConfirmReport = async () => {
@@ -254,6 +261,7 @@ function HomeDriver({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <ToggleOnService onToggle={handleToggleService} />
       <ModalReport
         visible={showReport}
         userToReport={tripSelected?.idPassenger}
@@ -263,6 +271,11 @@ function HomeDriver({ navigation }) {
       <ModalWaitingPassenger
         visible={showWaitingModal}
         onPress={startTrip}
+      />
+      <ModalRating
+        userToRate={tripSelected?.idPassenger}
+        visible={showModalRating}
+        onPress={handleOnPressRating}
       />
       <MapContainer
         currentLocation={location}
@@ -337,7 +350,6 @@ function HomeDriver({ navigation }) {
           pinColor='#8946A6'
         />
       </MapContainer>
-      <ToggleOnService onToggle={handleToggleService} />
       {
         showSelector &&
         <TripSelector
