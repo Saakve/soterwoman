@@ -220,11 +220,11 @@ function HomeDriver({ navigation }) {
     if (error) console.log('handleArriveEndpoint', error)
 
     if (tripSelected.idPaymentmethodType === paymentMethodType.CASH) {
-      const { error: errorProfile } = await supabase.from('profile').update({
-        debt: tripSelected.cost
-      }).eq('id', userData.id)
+      const { error } = await supabase.rpc('increaseDebt', {
+        for_trip: tripSelected.id
+      })
 
-      if (error) console.log('SUPA_UPDATE_PROFILE:', errorProfile)
+      if (error) console.log('SUPA_UPDATE_PROFILE:', error)
     }
 
     setTripSelected(null)

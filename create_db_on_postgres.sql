@@ -274,6 +274,24 @@ CREATE POLICY "Anyone can update their own avatar"
   );
 
 --Functions and Triggers
+CREATE OR REPLACE FUNCTION public."increaseDebt"(for_trip BIGINT)
+RETURNS void AS $$
+DECLARE
+  current_debt MONEY;
+  user_id UUID;
+  trip_cost MONEY;
+BEGIN
+  user_id := auth.uid();
+  SELECT debt INTO current_debt FROM profile WHERE id = user_id;
+  SELECT cost * 0.25 INTO trip_cost FROM trip WHERE id = for_trip;
+
+  UPDATE profile
+  SET
+    debt = current_debt + trip_cost
+  WHERE id = user_id;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION public."getTrips"(rowsToShow INTEGER) 
 RETURNS TABLE (
   id BIGINT,
