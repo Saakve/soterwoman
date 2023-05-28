@@ -10,6 +10,7 @@ import TripContainer from '../components/TripContainer'
 import { ModalPayOffDebt } from '../components/ModalPayOffDebt'
 
 import UserContext from '../context/UserContext'
+import tripStatus from '../utils/tripStatus'
 
 export default function Trip() {
   const { userData } = useContext(UserContext)
@@ -22,6 +23,7 @@ export default function Trip() {
       const { data } = await supabase
         .from('trip')
         .select()
+        .gte("idstatus", tripStatus.COMPLETED)
         .order('done_on', { ascending: false })
         .limit(5)
       setTrip(data)
@@ -138,8 +140,8 @@ export default function Trip() {
             return (
               <TripContainer
                 key={trips.id}
-                startingPoint={trips.startingpoint}
-                endPoint={trips.endpoint}
+                startingPoint={trips.name_startingpoint}
+                endPoint={trips.name_endpoint}
                 cost={trips.cost}
                 status={trips.idstatus}
               />

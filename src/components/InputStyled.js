@@ -12,7 +12,7 @@ export function InputStyled ({ name, errorMessage = null, ...props }) {
                 ((isFormatError(errorMessage) || isAuthError(errorMessage)) && errorMessage.param === name)
                   ? errorMessage.message
                   : (typeof errorMessage === 'string') ? errorMessage : null
-            }
+            }cxf
       {...props}
     />
   )
