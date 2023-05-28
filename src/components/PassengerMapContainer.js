@@ -1,65 +1,161 @@
-import { StyleSheet, View, Dimensions } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { SearchBar } from "./SearchBar";
-import { useState, useEffect, useContext } from "react";
-import MapViewDirections from "react-native-maps-directions";
-import WonderSelector from "../pages/WonderSelector";
-import PayChildrenSelector from "../pages/PayChildrenSelector";
-import WaitSelector from "../pages/WaitSelector";
-import { ManageTripPassenger } from "./ManageTripPassenger";
-import { supabase } from "../services/supabase";
-import { makeChannel } from "../services/makeChannel";
-import UserContext from "../context/UserContext";
+import { useState, useContext, useRef } from "react"
+import { StyleSheet, View, Dimensions, Alert } from "react-native"
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
+import MapViewDirections from "react-native-maps-directions"
+import { useNavigation } from "@react-navigation/native"
 
-export function PassengerMapContainer({currentLocation}) {
+import { SearchBar } from "./SearchBar"
+import { ManageTripPassenger } from "./ManageTripPassenger"
+import { ModalRating } from './ModalRating'
+import { ModalTip } from './ModalTip'
+import { ToEndpointPassenger } from "./ToEndpointPassenger"
+
+import WonderSelector from "../pages/WonderSelector"
+import PayChildrenSelector from "../pages/PayChildrenSelector"
+import WaitSelector from "../pages/WaitSelector"
+
+import { supabase } from "../services/supabase"
+import { calculateTripCost } from "../services/calculateTripCost"
+
+import UserContext from "../context/UserContext"
+
+import tripStatus from "../utils/tripStatus"
+import paymentMethodType from "../utils/paymentMethodType"
+
+export function PassengerMapContainer({ currentLocation }) {
+  const { userData } = useContext(UserContext);
   const [searchLocation, setSearchLocation] = useState(null)
   const [showWonderSelector, setShowWonderSelector] = useState(false)
   const [showPaySelector, setShowPaySelector] = useState(false);
   const [showWaitSelector, seShowWaitSelector] = useState(false);
   const [showManageTrip, setShowManageTrip] = useState(false);
-  const [channel, setChannel] = useState(null);
-  const { userData, dataIsLoaded } = useContext(UserContext);
+  const [wonders, setWonders] = useState(null)
+  const [serviceSelected, setService] = useState(null)
+  const [trip, setTrip] = useState(null)
+  const [driver, setDriver] = useState(null)
+  const [showToEndpoint, setShowToEndpoint] = useState(false)
+  const [showModalRating, setShowModalRating] = useState(false)
+  const [showModalTip, setShowModalTip] = useState(false)
+  const tripChannel = useRef(null)
 
-    useEffect(() => {
-      const channel = makeChannel({
-        channelName: "trips",
-        eventType: "broadcast",
-        filter: { event: "accept" },
-        callback: (response) => console.log(response),
-      });
-      setChannel(channel);
-      console.log("LISTENING");
-
-      return () => supabase.removeChannel(channel);
-    }, [supabase]);
+  const navigation = useNavigation()
 
   const handleSearch = (searchLocation) => {
-    setSearchLocation(searchLocation) 
+    setSearchLocation(searchLocation)
     setShowWonderSelector(true)
   }
 
-  
-  const handleSelectWonder = () => {
+  const handleOnSelectEndpoint = async ({ distance }) => {
+    const wonders = await calculateTripCost(distance)
+    setWonders(wonders)
+  }
+
+  const handleSelectWonder = (id) => {
+    setService(id)
     setShowWonderSelector(false)
     setShowPaySelector(true)
   }
 
-  const handleConfirmTrip = () => {
-     const sendRequest = async () => {
-       await channel.send({
-         type: "broadcast",
-         event: "request",
-         payload: `Hola soy ${userData.name}`,
-       });
-     };
-     sendRequest()
-     setShowPaySelector(false)
-     seShowWaitSelector(true)
+  const fetchDriver = async (id) => {
+    const { data: [driver] } = await supabase.from("profile").select("*").eq("id", id);
+    return driver
   }
 
-  const handleCancel = () => {
-    seShowWaitSelector(false);
-    setShowManageTrip(true);
+  const onTripChange = async ({ new: trip }) => {
+    if (trip.idstatus === tripStatus.CONFIRMED) {
+      const driver = await fetchDriver(trip.iddriver)
+      setDriver(driver)
+      seShowWaitSelector(false)
+      setShowManageTrip(true)
+    } else if (trip.idstatus === tripStatus.STARTED) {
+      setShowManageTrip(false)
+      setShowToEndpoint(true)
+    } else if (trip.idstatus === tripStatus.COMPLETED) {
+      setShowToEndpoint(false)
+      setShowModalRating(true)
+    }
+  }
+
+  const listenTripChanges = (trip) => {
+    const newChannel = supabase
+      .channel('trip')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'trip', filter: `id=eq.${trip}` }, onTripChange)
+      .subscribe()
+
+    tripChannel.current = newChannel
+  }
+
+  const stopListeningTripChanges = () => {
+    if (tripChannel.current) supabase.removeChannel(tripChannel.current)
+    tripChannel.current = null
+  }
+
+  const handleConfirmTrip = async ({ childrenNumber, paymentMethodSelected }) => {
+
+    if (paymentMethodSelected === paymentMethodType.CARD && !userData.idStripe) {
+      Alert.alert('Advertencia', 'Debes agregar por lo menos una tarjeta')
+      navigation.navigate('Cards')
+      return
+    }
+
+    const { data: [trip], error } = await supabase.from('trip')
+      .insert({
+        name_startingpoint: currentLocation.street.concat(" #", currentLocation.streetNumber),
+        name_endpoint: searchLocation.name,
+        startingpoint: `POINT(${currentLocation.coords.longitude} ${currentLocation.coords.latitude})`,
+        endpoint: `POINT(${searchLocation.lng} ${searchLocation.lat})`,
+        children: childrenNumber,
+        cost: wonders.find(({ id }) => id === serviceSelected).price,
+        idpassenger: userData.id,
+        idstatus: tripStatus.DRAFT,
+        idservicetype: serviceSelected,
+        idpaymentmethodtype: paymentMethodSelected
+      })
+      .select('id')
+
+    if (error) {
+      console.log(error)
+      return
+    }
+
+    setTrip(trip.id)
+    listenTripChanges(trip.id)
+    setShowPaySelector(false)
+    seShowWaitSelector(true)
+  }
+
+  const handleCancel = async () => {
+    stopListeningTripChanges()
+
+    const { error } = await supabase.from('trip').update({
+      idstatus: tripStatus.CANCELLED
+    }).eq('id', trip)
+
+    if (error) console.log("handleCancel", error)
+
+    setTrip(null)
+    seShowWaitSelector(false)
+    setShowManageTrip(false)
+    setSearchLocation(null)
+  }
+
+  const handleOnPressRating = (rating) => {
+    setShowModalRating(false)
+    setSearchLocation(null)
+    setTrip(null)
+    stopListeningTripChanges()
+
+    if (rating >= 4) {
+      setShowModalTip(true)
+      return
+    }
+
+    setDriver(null)
+  }
+
+  const handleOnPressTip = () => {
+    setShowModalTip(false)
+    setDriver(null)
   }
 
   return (
@@ -87,61 +183,91 @@ export function PassengerMapContainer({currentLocation}) {
             latitude: currentLocation.coords.latitude,
             longitude: currentLocation.coords.longitude,
           }}
-          title={"Marcador"}
+          title={"Yo"}
           pinColor={"purple"}
         />
-        {searchLocation && (
-          <>
-            <MapViewDirections
-              origin={{
-                latitude: currentLocation.coords.latitude,
-                longitude: currentLocation.coords.longitude,
-              }}
-              destination={{
-                latitude: searchLocation.lat,
-                longitude: searchLocation.lng,
-              }}
-              apikey={"AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0"}
-              strokeWidth={3}
-              strokeColor="pink"
-            />
-            <Marker
-              draggable={false}
-              coordinate={{
-                latitude: searchLocation.lat,
-                longitude: searchLocation.lng,
-              }}
-              title={"Marcador"}
-              pinColor={"hotpink"}
-            />
-          </>
-        )}
+        {
+          searchLocation && (
+            <>
+              <MapViewDirections
+                origin={{
+                  latitude: currentLocation.coords.latitude,
+                  longitude: currentLocation.coords.longitude,
+                }}
+                destination={{
+                  latitude: searchLocation.lat,
+                  longitude: searchLocation.lng,
+                }}
+                apikey={"AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0"}
+                strokeWidth={3}
+                strokeColor="pink"
+                onReady={handleOnSelectEndpoint}
+              />
+              <Marker
+                draggable={false}
+                coordinate={{
+                  latitude: searchLocation.lat,
+                  longitude: searchLocation.lng,
+                }}
+                title={"Marcador"}
+                pinColor={"hotpink"}
+              />
+            </>
+          )
+        }
       </MapView>
       <SearchBar currentLocation={currentLocation} onSearch={handleSearch} />
-      {showWonderSelector && (
-        <WonderSelector
-          origin={currentLocation.name}
-          destination={searchLocation.name}
-          onSelectWonder={handleSelectWonder}
+      {
+        showWonderSelector && (
+          <WonderSelector
+            wonders={wonders}
+            origin={currentLocation.street.concat(" #", currentLocation.streetNumber)}
+            destination={searchLocation.name}
+            onSelectWonder={handleSelectWonder}
+          />
+        )
+      }
+      {
+        showPaySelector && (
+          <PayChildrenSelector
+            origin={currentLocation.street.concat(" #", currentLocation.streetNumber)}
+            destination={searchLocation.name}
+            onPress={handleConfirmTrip}
+          />
+        )
+      }
+      {
+        showWaitSelector && (
+          <WaitSelector onPress={handleCancel} />
+        )
+      }
+      {
+        showManageTrip && (
+          <ManageTripPassenger
+            driver={driver}
+            onCancelledTrip={handleCancel}
+            origin={currentLocation.street.concat(" #", currentLocation.streetNumber)}
+            destination={searchLocation.name}
+          />
+        )
+      }
+      {
+        showToEndpoint && <ToEndpointPassenger
+          driver={driver}
         />
-      )}
-      {showPaySelector && (
-        <PayChildrenSelector
-          origin={currentLocation.name}
-          destination={searchLocation.name}
-          onPress={handleConfirmTrip}
-        />
-      )}
-      {showWaitSelector && <WaitSelector onPress={handleCancel} />}
-      {showManageTrip && (
-        <ManageTripPassenger
-          onPress={handleCancel}
-          origin={currentLocation.name}
-          destination={searchLocation.name}
-        />
-      )}
+      }
+      <ModalRating
+        userToRate={driver?.id}
+        visible={showModalRating}
+        onPress={handleOnPressRating}
+      />
+      <ModalTip
+        driverToSendTip={driver && driver}
+        visible={showModalTip}
+        onPress={handleOnPressTip}
+      />
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({

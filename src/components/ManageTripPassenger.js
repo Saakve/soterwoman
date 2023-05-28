@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Call from "react-native-phone-call";
@@ -6,28 +5,19 @@ import { Button, Icon } from "@rneui/base";
 
 import Avatar from "./Avatar";
 
-import { supabase } from "../services/supabase";
 import { TripPoints } from "./TripPoints";
 
 export function ManageTripPassenger({
-  trip,
+  driver,
   origin,
   destination,
   onCancelledTrip = () => {},
 }) {
-  const [passenger, setPassenger] = useState(null);
   const navigation = useNavigation();
-
-  const fetchPassenger = async () => {
-    const {
-      data: [passengerData],
-    } = await supabase.from("profile").select("*").eq("id", trip.idPassenger);
-    setPassenger(passengerData);
-  };
 
   const triggerCall = () => {
     const args = {
-      number: passenger.phone,
+      number: driver.phone,
       prompt: true,
     };
 
@@ -36,28 +26,24 @@ export function ManageTripPassenger({
 
   const displayMessage = () => {
     navigation.navigate("Message", {
-      toUser: passenger,
+      toUser: driver,
     });
   };
-
-  useEffect(() => {
-    fetchPassenger();
-  }, []);
 
   return (
     <View style={styles.selector}>
       <View style={styles.header}>
         <Avatar
-          url={passenger?.idimage}
+          url={driver?.idimage}
           editable={false}
           size={50}
           style={styles.avatar}
         />
         <View style={styles.userdata}>
-          <Text style={styles.text}>{passenger?.name}</Text>
+          <Text style={styles.text}>{driver?.name}</Text>
           <View style={styles.ratinguser}>
             <Icon name="star" type="font-awesome" color="#FFCC00" />
-            <Text style={styles.rating}>{passenger?.rating}</Text>
+            <Text style={styles.rating}>{driver?.rating}</Text>
           </View>
         </View>
         <View style={styles.tripdata}>
@@ -84,7 +70,7 @@ export function ManageTripPassenger({
           title={"Cancelar Viaje"}
           buttonStyle={styles.button}
           color="#B10710"
-          onPressOut={() => onCancelledTrip(trip)}
+          onPressOut={onCancelledTrip}
         />
       </View>
     </View>

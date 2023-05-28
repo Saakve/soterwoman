@@ -1,7 +1,7 @@
 import { View, StyleSheet, Text } from "react-native";
 import { Icon, Button } from "@rneui/base";
 
-export default function WonderType({ name, onPress = () => {} }) {
+export default function WonderType({ name, price, onPress = () => {} }) {
   return (
     <View style={styles.wondertypes}>
         <Button
@@ -13,12 +13,12 @@ export default function WonderType({ name, onPress = () => {} }) {
               color="#242E42"
             />
           }
-          title={`${name.name}`}
+          title={`Wonder ${name[0].toUpperCase() + name.substring(1)}`}
           titleStyle={{ color: "#111" }}
           buttonStyle={styles.button}
           onPress={onPress}
         />
-        <Text style={{fontSize: 18}}>{`${name.price}`}</Text>
+        <Text style={{fontSize: 18}}>{`${price}`}</Text>
     </View>
   );
 }

@@ -1,16 +1,15 @@
 import { View, StyleSheet } from "react-native";
 import WonderType from "../components/WonderType";
 import { TripPoints } from "../components/TripPoints";
-import { WONDER_TYPE } from "../constants/wonderTypes";
 
-export default function WonderSelector({ origin, destination, onSelectWonder = () => {} }) {
+export default function WonderSelector({ wonders, origin, destination, onSelectWonder = () => { } }) {
 
   return (
     <View style={styles.selector}>
-      <TripPoints nameStartingpoint={origin} nameEndpoint={destination}/>
+      <TripPoints nameStartingpoint={origin} nameEndpoint={destination} />
       <View>
-        {WONDER_TYPE.map((name = {}, index) => (
-          <WonderType key={index} name={name} onPress={onSelectWonder}/>
+        {wonders?.map(({ id, name, price }) => (
+          <WonderType key={id} name={name} price={price} onPress={() => onSelectWonder(id)} />
         ))}
       </View>
     </View>

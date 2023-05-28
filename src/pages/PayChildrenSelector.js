@@ -1,62 +1,82 @@
 import { View, StyleSheet, Text } from "react-native";
 import { TripPoints } from "../components/TripPoints";
 import { Icon, Button } from "@rneui/base";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../services/supabase";
+
+import paymentMethodType from "../utils/paymentMethodType"
+import { Dimensions } from "react-native";
+
+const { width } = Dimensions.get('window')
+
 
 export default function PayChildrenSelector({
   origin,
   destination,
-  onPress = () => {}
+  onPress = () => { }
 }) {
   const [childrenNumber, setChildrenNumber] = useState(0)
+  const [paymentMethods, setPaymentMethods] = useState(null)
+  const [paymentMethodSelected, setPaymentMethod] = useState(paymentMethodType.CASH)
+
   const MAX_CHILDREN_NUMBER = 3
   const MIN_CHILDREN_NUMBER = 0;
 
   const addChildrens = () => {
     const lastChildrenNumber = childrenNumber
     childrenNumber < MAX_CHILDREN_NUMBER ?
-    setChildrenNumber(childrenNumber + 1) : setChildrenNumber(lastChildrenNumber)
-   console.log(lastChildrenNumber)
-
+      setChildrenNumber(childrenNumber + 1) : setChildrenNumber(lastChildrenNumber)
   }
 
   const substractChildrens = () => {
     const lastChildrenNumber = childrenNumber
     childrenNumber > MIN_CHILDREN_NUMBER ?
-      setChildrenNumber(childrenNumber - 1) : 
-      setChildrenNumber(lastChildrenNumber) 
+      setChildrenNumber(childrenNumber - 1) :
+      setChildrenNumber(lastChildrenNumber)
   };
+
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      const { data } = await supabase.from('paymentmethodtype').select()
+      setPaymentMethods(data)
+    }
+    fetchPaymentMethods()
+  }, [])
 
   return (
     <View style={styles.selector}>
       <TripPoints nameStartingpoint={origin} nameEndpoint={destination} />
       <View style={styles.selector_payments}>
-        <Button
-          icon={
-            <Icon
-              style={styles.payment_icons}
-              name="credit-card"
-              type="font-awesome-5"
-              color="#0040C1"
+        {
+          paymentMethods?.map(({ id, name }) => {
+            const button = { title: "", iconName: "", iconColor: "" }
+
+            if (id === paymentMethodType.CARD) {
+              button.iconName = "credit-card"
+              button.iconColor = "#0040C1"
+            } else if (id === paymentMethodType.CASH) {
+              button.iconName = "money-bill"
+              button.iconColor = "#03DE73"
+            }
+
+            return <Button
+              key={id}
+              icon={
+                <Icon
+                  style={styles.payment_icons}
+                  name={button.iconName}
+                  type="font-awesome-5"
+                  color={button.iconColor}
+                />
+              }
+              title={name[0].toUpperCase() + name.substring(1)}
+              titleStyle={styles.titlePaymentMethod}
+              buttonStyle={[{...styles.paymentMethod}, id === paymentMethodSelected ? {...styles.paymentMethodSelected} : null]}
+              onPressOut={() => setPaymentMethod(id)}
+              type="clear"
             />
-          }
-          title={"Tarjeta de debito/credito"}
-          titleStyle={{ color: "#111" }}
-          buttonStyle={styles.button}
-        />
-        <Button
-          icon={
-            <Icon
-              style={styles.payment_icons}
-              name="money-bill"
-              type="font-awesome-5"
-              color="#03DE73"
-            />
-          }
-          title={"Efectivo"}
-          titleStyle={{ color: "#111" }}
-          buttonStyle={styles.button}
-        />
+          })
+        }
       </View>
       <View style={styles.selector_children}>
         <Icon
@@ -87,7 +107,7 @@ export default function PayChildrenSelector({
         <Button
           title="Confirmar viaje"
           buttonStyle={styles.button_confirm}
-          onPress={onPress}
+          onPress={() => onPress({childrenNumber,paymentMethodSelected})}
         />
       </View>
     </View>
@@ -100,27 +120,31 @@ const styles = StyleSheet.create({
     height: "35%",
     position: "absolute",
     backgroundColor: "#fff",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "space-evenly",
     bottom: Platform.select({ ios: "0%", android: "0%" }),
   },
 
   selector_payments: {
     justifyContent: "flex-start",
-    flexDirection: "column-reverse",
-    flexWrap: "wrap",
-    alignItems: "baseline",
   },
   payment_icons: {
     marginHorizontal: "5%",
   },
-  button: {
-    height: 40,
-    backgroundColor: "#FFF",
+  titlePaymentMethod: {
+    color: "#111",
+  },
+  paymentMethod: {
+    justifyContent: "flex-start",
+    width,
+    paddingVertical: "3%",
+  },
+  paymentMethodSelected: {
+    backgroundColor: "rgba(255, 205, 221, 0.4)",
   },
   change_button: {
-    backgroundColor: "#8946A6",    
-    borderRadius: 5 
+    backgroundColor: "#8946A6",
+    borderRadius: 5
   },
   selector_children: {
     flexDirection: "row",
@@ -139,7 +163,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%"
   },
-   button_confirm: {
+  button_confirm: {
     borderRadius: 10,
     backgroundColor: "#8946A6",
   },
