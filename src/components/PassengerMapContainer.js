@@ -21,6 +21,7 @@ import UserContext from "../context/UserContext"
 
 import tripStatus from "../utils/tripStatus"
 import paymentMethodType from "../utils/paymentMethodType"
+import { ModalDriverArrived } from "./ModalDriverArrived"
 
 export function PassengerMapContainer({ currentLocation }) {
   const { userData } = useContext(UserContext);
@@ -33,61 +34,33 @@ export function PassengerMapContainer({ currentLocation }) {
   const [serviceSelected, setService] = useState(null)
   const [trip, setTrip] = useState(null)
   const [driver, setDriver] = useState(null)
+  const [showModalDriverArrived, setShowModalDriverArrived] = useState(false)
   const [showToEndpoint, setShowToEndpoint] = useState(false)
   const [showModalRating, setShowModalRating] = useState(false)
   const [showModalTip, setShowModalTip] = useState(false)
+  const [driverLocation, setDriverLocation] = useState(null)
+  const [showSearchBar, setShowSearchBar] = useState(true)
+
   const tripChannel = useRef(null)
+  const driverChannel = useRef(null)
 
   const navigation = useNavigation()
-
-  const handleSearch = (searchLocation) => {
-    setSearchLocation(searchLocation)
-    setShowWonderSelector(true)
-  }
 
   const handleOnSelectEndpoint = async ({ distance }) => {
     const wonders = await calculateTripCost(distance)
     setWonders(wonders)
   }
 
+  const handleSearch = (searchLocation) => {
+    setSearchLocation(searchLocation)
+    setShowWonderSelector(true)
+  }
+
   const handleSelectWonder = (id) => {
+    setShowSearchBar(false)
     setService(id)
     setShowWonderSelector(false)
     setShowPaySelector(true)
-  }
-
-  const fetchDriver = async (id) => {
-    const { data: [driver] } = await supabase.from("profile").select("*").eq("id", id);
-    return driver
-  }
-
-  const onTripChange = async ({ new: trip }) => {
-    if (trip.idstatus === tripStatus.CONFIRMED) {
-      const driver = await fetchDriver(trip.iddriver)
-      setDriver(driver)
-      seShowWaitSelector(false)
-      setShowManageTrip(true)
-    } else if (trip.idstatus === tripStatus.STARTED) {
-      setShowManageTrip(false)
-      setShowToEndpoint(true)
-    } else if (trip.idstatus === tripStatus.COMPLETED) {
-      setShowToEndpoint(false)
-      setShowModalRating(true)
-    }
-  }
-
-  const listenTripChanges = (trip) => {
-    const newChannel = supabase
-      .channel('trip')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'trip', filter: `id=eq.${trip}` }, onTripChange)
-      .subscribe()
-
-    tripChannel.current = newChannel
-  }
-
-  const stopListeningTripChanges = () => {
-    if (tripChannel.current) supabase.removeChannel(tripChannel.current)
-    tripChannel.current = null
   }
 
   const handleConfirmTrip = async ({ childrenNumber, paymentMethodSelected }) => {
@@ -124,8 +97,26 @@ export function PassengerMapContainer({ currentLocation }) {
     seShowWaitSelector(true)
   }
 
+  const listenTripChanges = (trip) => {
+    const newChannel = supabase
+      .channel('trip')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'trip', filter: `id=eq.${trip}` }, onTripChange)
+      .subscribe()
+
+    tripChannel.current = newChannel
+  }
+
+  const stopListeningTripChanges = () => {
+    if (tripChannel.current) supabase.removeChannel(tripChannel.current)
+    tripChannel.current = null
+  }
+
   const handleCancel = async () => {
     stopListeningTripChanges()
+    stopListeningDriverLocation()
+    setDriver(null)
+    setDriverLocation(null)
+    setShowSearchBar(true)
 
     const { error } = await supabase.from('trip').update({
       idstatus: tripStatus.CANCELLED
@@ -137,6 +128,51 @@ export function PassengerMapContainer({ currentLocation }) {
     seShowWaitSelector(false)
     setShowManageTrip(false)
     setSearchLocation(null)
+  }
+
+  const onTripChange = async ({ new: trip }) => {
+    if (trip.idstatus === tripStatus.CONFIRMED) {
+      const driver = await fetchDriver(trip.iddriver)
+      setDriver(driver)
+      seShowWaitSelector(false)
+      setShowManageTrip(true)
+      listenDriverLocation(driver)
+    } else if (trip.idstatus === tripStatus.ARRIVED) {
+      setShowModalDriverArrived(true)
+    } else if (trip.idstatus === tripStatus.STARTED) {
+      setShowModalDriverArrived(false)
+      setShowManageTrip(false)
+      setShowToEndpoint(true)
+    } else if (trip.idstatus === tripStatus.COMPLETED) {
+      setShowToEndpoint(false)
+      setShowModalRating(true)
+      stopListeningDriverLocation()
+      setDriverLocation(null)
+      setShowSearchBar(true)
+    }
+  }
+
+  const fetchDriver = async (id) => {
+    const { data: [driver] } = await supabase.from("profile").select("*").eq("id", id);
+    return driver
+  }
+
+  const listenDriverLocation = (driver) => {
+    const newChannel = supabase
+      .channel('driver-location')
+      .on('broadcast', { event: driver.id }, onDriverLocation)
+      .subscribe()
+
+    driverChannel.current = newChannel
+  }
+
+  const onDriverLocation = ({ payload: { latitude, longitude } }) => {
+    setDriverLocation({ latitude, longitude })
+  }
+
+  const stopListeningDriverLocation = () => {
+    if (driverChannel.current) supabase.removeChannel(driverChannel.current)
+    driverChannel.current = null
   }
 
   const handleOnPressRating = (rating) => {
@@ -160,6 +196,20 @@ export function PassengerMapContainer({ currentLocation }) {
 
   return (
     <View style={styles.container}>
+      <ModalRating
+        userToRate={driver?.id}
+        visible={showModalRating}
+        onPress={handleOnPressRating}
+      />
+      <ModalTip
+        driverToSendTip={driver && driver}
+        visible={showModalTip}
+        onPress={handleOnPressTip}
+      />
+      <ModalDriverArrived
+        visible={showModalDriverArrived}
+        driver={driver}
+      />
       <MapView
         provider={PROVIDER_GOOGLE}
         style={styles.mapStyle}
@@ -215,8 +265,28 @@ export function PassengerMapContainer({ currentLocation }) {
             </>
           )
         }
+        {
+          driverLocation && (
+            <Marker
+              draggable={true}
+              coordinate={{
+                latitude: driverLocation.latitude,
+                longitude: driverLocation.longitude,
+              }}
+              title={"Conductora"}
+              pinColor={"purple"}
+            />
+          )
+        }
       </MapView>
-      <SearchBar currentLocation={currentLocation} onSearch={handleSearch} />
+      {
+        showSearchBar && (
+          <SearchBar
+            currentLocation={currentLocation}
+            onSearch={handleSearch}
+          />
+        )
+      }
       {
         showWonderSelector && (
           <WonderSelector
@@ -256,16 +326,6 @@ export function PassengerMapContainer({ currentLocation }) {
           driver={driver}
         />
       }
-      <ModalRating
-        userToRate={driver?.id}
-        visible={showModalRating}
-        onPress={handleOnPressRating}
-      />
-      <ModalTip
-        driverToSendTip={driver && driver}
-        visible={showModalTip}
-        onPress={handleOnPressTip}
-      />
     </View>
   )
 }
