@@ -380,13 +380,15 @@ CREATE OR REPLACE FUNCTION public."getStats" (
 ) AS $$
 BEGIN
 IF (SELECT idusertype FROM profile WHERE profile.id = userid) = 1 THEN 
-  SELECT SUM(cost) INTO total_cost
+  SELECT SUM(cost * 0.75) INTO total_cost
     FROM trip
-   WHERE iddriver = userid;
+   WHERE iddriver = userid
+   AND idstatus = 6;
 
     SELECT COUNT(*) INTO trip_count
     FROM trip
-   WHERE iddriver = userid;
+   WHERE iddriver = userid
+   AND idstatus >= 6;
 
      SELECT profile.debt INTO debt
     FROM profile
@@ -395,11 +397,13 @@ IF (SELECT idusertype FROM profile WHERE profile.id = userid) = 1 THEN
 ELSE 
   SELECT  SUM(cost) INTO total_cost
     FROM trip
-   WHERE idpassenger = userid;
+   WHERE idpassenger = userid
+   AND idstatus = 6;
 
     SELECT COUNT(*) INTO trip_count
     FROM trip
-   WHERE idpassenger = userid;
+   WHERE idpassenger = userid
+   AND idstatus >= 6;
 
      SELECT profile.debt INTO debt
     FROM profile

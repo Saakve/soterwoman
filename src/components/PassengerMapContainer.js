@@ -26,7 +26,7 @@ import UserContext from '../context/UserContext'
 import tripStatus from '../utils/tripStatus'
 import paymentMethodType from '../utils/paymentMethodType'
 
-export function PassengerMapContainer ({ currentLocation }) {
+export function PassengerMapContainer({ currentLocation }) {
   const { userData } = useContext(UserContext)
   const [searchLocation, setSearchLocation] = useState(null)
   const [showWonderSelector, setShowWonderSelector] = useState(false)
@@ -84,7 +84,7 @@ export function PassengerMapContainer ({ currentLocation }) {
 
     const { data: [trip], error } = await supabase.from('trip')
       .insert({
-        name_startingpoint: currentLocation.street.concat(' #', currentLocation.streetNumber),
+        name_startingpoint: (currentLocation.street) ? currentLocation.street.concat(' #', currentLocation.streetNumber) : currentLocation.name,
         name_endpoint: searchLocation.name,
         startingpoint: `POINT(${currentLocation.coords.longitude} ${currentLocation.coords.latitude})`,
         endpoint: `POINT(${searchLocation.lng} ${searchLocation.lat})`,
@@ -311,7 +311,7 @@ export function PassengerMapContainer ({ currentLocation }) {
         showWonderSelector && (
           <WonderSelector
             wonders={wonders}
-            origin={currentLocation.street.concat(' #', currentLocation.streetNumber)}
+            origin={(currentLocation.street) ? currentLocation.street.concat(' #', currentLocation.streetNumber) : currentLocation.name}
             destination={searchLocation.name}
             onSelectWonder={handleSelectWonder}
           />
@@ -320,7 +320,7 @@ export function PassengerMapContainer ({ currentLocation }) {
       {
         showPaySelector && (
           <PayChildrenSelector
-            origin={currentLocation.street.concat(' #', currentLocation.streetNumber)}
+            origin={(currentLocation.street) ? currentLocation.street.concat(' #', currentLocation.streetNumber) : currentLocation.name}
             destination={searchLocation.name}
             onPress={handleConfirmTrip}
           />
@@ -336,7 +336,7 @@ export function PassengerMapContainer ({ currentLocation }) {
           <ManageTripPassenger
             driver={driver}
             onCancelledTrip={handleCancel}
-            origin={currentLocation.street.concat(' #', currentLocation.streetNumber)}
+            origin={(currentLocation.street) ? currentLocation.street.concat(' #', currentLocation.streetNumber) : currentLocation.name}
             destination={searchLocation.name}
           />
         )
@@ -344,7 +344,7 @@ export function PassengerMapContainer ({ currentLocation }) {
       {
         showToEndpoint && <ToEndpointPassenger
           driver={driver}
-                          />
+        />
       }
     </View>
   )

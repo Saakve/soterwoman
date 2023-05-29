@@ -1,10 +1,17 @@
 import { View, StyleSheet, Text } from 'react-native'
 
-export default function TripStatus ({ cost, status }) {
+import tripStatus from '../utils/tripStatus'
+
+export default function TripStatus({ cost, status }) {
+  let statusString = ''
+
+  if (status === tripStatus.COMPLETED) statusString = 'Completado'
+  if (status === tripStatus.CANCELLED) statusString = 'Cancelado'
+
   return (
     <View style={styles.container}>
       <Text style={{ ...styles.Text, textAlign: 'left', marginRight: '15%' }}>{cost}</Text>
-      <Text style={{ ...styles.Text, textAlign: 'right' }}>{status === 1 ? 'Completado' : 'Cancelado'}</Text>
+      <Text style={{ ...styles.Text, textAlign: 'right' }}>{statusString}</Text>
     </View>
   )
 }

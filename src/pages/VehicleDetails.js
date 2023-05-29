@@ -14,11 +14,9 @@ export default function VehicleDetails () {
       const { data, error } = await supabase.rpc('getVehicleFromIdDriver', {
         iddriver: userData.id
       })
-      console.log('Soy el vehiculo', data, error)
       setVehicle(data[0])
     }
     getVehicle()
-    console.log(vehicle?.year)
   }, [])
 
   return (
