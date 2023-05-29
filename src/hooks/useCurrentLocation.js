@@ -24,8 +24,9 @@ export default function useCurrentLocation () {
         latitude: loc.coords.latitude,
         longitude: loc.coords.longitude
       })
-
       loc.name = codeFormatAdress[0].name
+      loc.streetNumber = codeFormatAdress[0].streetNumber
+      loc.street = codeFormatAdress[0].street
       setLocation(loc)
       setLoaded(true)
     }

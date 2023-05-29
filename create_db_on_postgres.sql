@@ -472,6 +472,7 @@ BEGIN
     trip.idstatus
   FROM trip
   WHERE date(trip.done_on) = current_date
+  AND trip.idstatus >= 6
   ORDER BY trip.done_on DESC
   LIMIT rowsToShow;
   RETURN;
@@ -511,7 +512,8 @@ BEGIN
   FROM trip
   WHERE date_part('year', trip.done_on) = date_part('year', CURRENT_DATE) 
   AND date_part('week', trip.done_on ) = date_part('week', CURRENT_TIMESTAMP)
-  ORDER BY trip.done_on DESC 
+  AND trip.idstatus >= 6
+  ORDER BY trip.done_on DESC
   LIMIT rowsToShow;
 
   RETURN;
@@ -551,6 +553,7 @@ BEGIN
   FROM trip
   WHERE date_part('year', trip.done_on) = date_part('year', CURRENT_DATE)
   AND date_part('month', trip.done_on ) = date_part('month', CURRENT_TIMESTAMP)
+  AND trip.idstatus >= 6
   ORDER BY trip.done_on DESC
   LIMIT rowsToShow;
 
@@ -590,6 +593,7 @@ BEGIN
     trip.idstatus
   FROM trip
   WHERE date_part('year', trip.done_on) = date_part('year', CURRENT_DATE)
+  AND trip.idstatus >= 6
   ORDER BY trip.done_on DESC
   LIMIT rowsToShow;
 

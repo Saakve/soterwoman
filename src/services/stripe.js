@@ -16,6 +16,22 @@ export async function payoffDebt ({ idCustomer, idAccount, amount }) {
   }
 }
 
+export async function createPaymentIntent ({ idCustomer, idAccount, amount }) {
+  try {
+    const response = await fetch(`${BASE_URL}/create-payment-intent/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ idCustomer, idAccount, amount })
+    })
+
+    return await response.json()
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 export async function createTipIntent ({ idCustomer, idAccount, amount }) {
   try {
     const response = await fetch(`${BASE_URL}/create-tip-intent/`, {

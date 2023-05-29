@@ -1,4 +1,4 @@
 export default {
-    CASH: 1,
-    CARD: 2
+    CASH: 2,
+    CARD: 1
 }

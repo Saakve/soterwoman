@@ -5,12 +5,13 @@ import { Button } from '@rneui/base'
 
 import { confirmPayment, initStripe } from '@stripe/stripe-react-native'
 
-import { createTipIntent } from '../services/stripe'
+import { createTipIntent, getPassengerDefaultPaymentMethod } from '../services/stripe'
 import { getPublishableKey } from '../services/getPublishableKey'
 
 import UserContext from '../context/UserContext'
+import { useNavigation } from '@react-navigation/native'
 
-function TipButton ({ pressed = false, onPress, value }) {
+function TipButton({ pressed = false, onPress, value }) {
   const color = pressed ? '#FFCDDD' : '#FFF'
   const borderColor = pressed ? '#FFF' : '#000'
 
@@ -26,11 +27,11 @@ function TipButton ({ pressed = false, onPress, value }) {
   )
 }
 
-export function ModalTip ({ visible = false, onPress = () => { }, driverToSendTip }) {
+export function ModalTip({ visible = false, onPress = () => { }, driverToSendTip }) {
   const { userData } = useContext(UserContext)
   const [amount, setAmount] = useState(0)
-  const [show, setShow] = useState(visible)
   const [loading, setLoading] = useState(false)
+  const navigation = useNavigation()
 
   const amounts = [0, 10, 20, 30]
 
@@ -39,16 +40,22 @@ export function ModalTip ({ visible = false, onPress = () => { }, driverToSendTi
 
     if (amount === 0) {
       setLoading(false)
-      setShow(false)
+      onPress()
       return
     }
 
-    const { tipIntent, error: errorTipIntent } = await createTipIntent({ idCustomer: userData.idStripe, idAccount: driverToSendTip, amount: amount * 100 })
+    if(!userData.idStripe) {
+      Alert.alert('Advertencia', 'Debes agregar por lo menos una tarjeta')
+      navigation.navigate('Cards')
+      return
+    }
+
+    const { tipIntent, error: errorTipIntent } = await createTipIntent({ idCustomer: userData.idStripe, idAccount: driverToSendTip.idStripe, amount: amount * 100 })
 
     if (errorTipIntent) {
       Alert.alert('Ups!', 'Hubo un problema no se realizo ningún cargo')
       setLoading(false)
-      setShow(false)
+      onPress()
       return
     }
 
@@ -57,12 +64,11 @@ export function ModalTip ({ visible = false, onPress = () => { }, driverToSendTi
     if (error) {
       Alert.alert('Ups!', 'Hubo un problema no se realizo ningún cargo')
       setLoading(false)
-      setShow(false)
+      onPress()
       return
     }
 
     setLoading(false)
-    setShow(false)
     onPress()
   }
 
@@ -78,7 +84,7 @@ export function ModalTip ({ visible = false, onPress = () => { }, driverToSendTi
     <Modal
       animationType='fade'
       transparent
-      visible={show}
+      visible={visible}
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>

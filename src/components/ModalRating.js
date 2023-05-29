@@ -31,7 +31,7 @@ export function ModalRating ({ visible = false, onPress = () => {}, userToRate }
   const [rating, setRating] = useState(1)
 
   const handlePressButton = async () => {
-    onPress()
+    onPress(rating)
     const { data } = await supabase.from('profile').select('rating').eq('id', userToRate)
     if (data[0].rating === 0) {
       const { error } = await supabase.from('profile').update({ rating }).eq('id', userToRate).select()

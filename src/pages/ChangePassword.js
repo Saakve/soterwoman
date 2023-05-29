@@ -12,19 +12,24 @@ export function ChangePassword ({ navigation }) {
   const [password, setPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newPasswordValidation, setNewPasswordValidation] = useState('')
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [errorMessagePassword, setErrorMessageNewPassword] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleOnPress = async () => {
     setErrorMessage(null)
+     setErrorMessageNewPassword(null);
     if (newPassword !== newPasswordValidation) {
       setErrorMessage('Contraseñas diferentes')
       return
     }
 
-    const { data } = await supabase.rpc('equalPassword', { passwordtovalidate: password })
+    const { data, error } = await supabase.rpc("equalPassword", {
+      passwordtovalidate: password,
+    });
+
 
     if (!data) {
-      setErrorMessage('Contraseña actual no coincide')
+      setErrorMessageNewPassword("Contraseña actual no coincide");
       return
     }
 
@@ -36,7 +41,6 @@ export function ChangePassword ({ navigation }) {
     }
 
     const { dataNewPassword, errorNewPassword } = await supabase.auth.updateUser({ password: newPassword })
-
     navigation.goBack()
   }
 
@@ -58,7 +62,7 @@ export function ChangePassword ({ navigation }) {
         }}
         inputMode='text'
         placeholder='Contraseña actual'
-        errorMessage={errorMessage}
+        errorMessage={errorMessagePassword}
       />
       <InputStyled
         name='newpassword'
