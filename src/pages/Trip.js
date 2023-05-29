@@ -76,57 +76,69 @@ export default function Trip () {
 
   return (
     <View style={styles.container}>
-      <ModalPayOffDebt visible={showModal} onPress={() => setShowModal(false)} amount={stat.debt} />
+      <ModalPayOffDebt
+        visible={showModal}
+        onPress={() => setShowModal(false)}
+        amount={stat.debt}
+      />
       <View style={styles.filterSection}>
         <Text style={[styles.title]}>Mis viajes</Text>
         <View style={styles.filterButons}>
           <Button
-            title='Hoy'
-            onPress={() => filterTrips('getTripsToday')}
-            color='#FFFFFF'
-            titleStyle={{ color: '#000000' }}
+            title="Hoy"
+            onPress={() => filterTrips("getTripsToday")}
+            color="#FFFFFF"
+            titleStyle={{ color: "#000000" }}
           />
           <Button
-            title='Semana'
-            onPress={() => filterTrips('getTripsThisWeek')}
-            color='#FFFFFF'
-            titleStyle={{ color: '#000000' }}
+            title="Semana"
+            onPress={() => filterTrips("getTripsThisWeek")}
+            color="#FFFFFF"
+            titleStyle={{ color: "#000000" }}
           />
           <Button
-            title='Mes'
-            color='#FFFFFF'
-            titleStyle={{ color: '#000000' }}
-            onPress={() => filterTrips('getTripsThisMonth')}
+            title="Mes"
+            color="#FFFFFF"
+            titleStyle={{ color: "#000000" }}
+            onPress={() => filterTrips("getTripsThisMonth")}
           />
           <Button
-            title='Año'
-            color='#FFFFFF'
-            titleStyle={{ color: '#000000' }}
-            onPress={() => filterTrips('getTripsThisYear')}
+            title="Año"
+            color="#FFFFFF"
+            titleStyle={{ color: "#000000" }}
+            onPress={() => filterTrips("getTripsThisYear")}
           />
         </View>
       </View>
       <View style={styles.statsSection}>
         <View style={styles.statsButtons}>
           <Button
-            title={stat.trip_count + ' Viajes'}
-            color='#B762C1'
-            titleStyle={{ color: '#FFFFFF' }}
+            title={stat.trip_count + " Viajes"}
+            color="#B762C1"
+            titleStyle={{ color: "#FFFFFF" }}
           />
           <Button
-            title='23 horas en línea'
-            color='#B762C1'
-            titleStyle={{ color: '#FFFFFF' }}
+            title="23 horas en línea"
+            color="#B762C1"
+            titleStyle={{ color: "#FFFFFF" }}
           />
+          {userData.idUserType !== 1 ? 
+            <Button
+              title={stat.total_cost + " Gastado"}
+              color="#B762C1"
+              titleStyle={{ color: "#FFFFFF" }}
+            />
+         :
+            <Button
+              title={stat.total_cost + " Ganado"}
+              color="#B762C1"
+              titleStyle={{ color: "#FFFFFF" }}
+            />
+          }
           <Button
-            title={stat.total_cost + ' Gastado'}
-            color='#B762C1'
-            titleStyle={{ color: '#FFFFFF' }}
-          />
-          <Button
-            title={stat.debt + ' Debiendo'}
-            color='#B762C1'
-            titleStyle={{ color: '#FFFFFF' }}
+            title={stat.debt + " Debiendo"}
+            color="#B762C1"
+            titleStyle={{ color: "#FFFFFF" }}
             onPress={handlePayOff}
           />
         </View>
@@ -142,12 +154,12 @@ export default function Trip () {
                 cost={trips.cost}
                 status={trips.idstatus}
               />
-            )
+            );
           })}
         </View>
       </ScrollView>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({

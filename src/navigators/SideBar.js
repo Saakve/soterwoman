@@ -40,13 +40,13 @@ function SideBar () {
       }}
       drawerContent={props => <CustomDrawerContent {...props} />}
     >
-      <Drawer.Screen name='Home' component={idUserType === userType.DRIVER ? HomeDriver : HomePassenger} />
-      <Drawer.Screen name='Profile' component={Profile} />
-      {idUserType === userType.DRIVER ? <Drawer.Screen name='Vehicle' component={VehicleDetails} /> : null}
-      <Drawer.Screen name='Trip' component={Trip} />
+      <Drawer.Screen name='Mapa' component={idUserType === userType.DRIVER ? HomeDriver : HomePassenger} />
+      <Drawer.Screen name='Información de usuario' component={Profile} />
+      {idUserType === userType.DRIVER ? <Drawer.Screen name='Información del vehículo' component={VehicleDetails} /> : null}
+      <Drawer.Screen name='Viajes realizados' component={Trip} />
       <Drawer.Screen
         name='Cards' component={Cards} options={{
-          drawerLabel: idUserType === userType.DRIVER ? 'Metodos de cobro' : 'Métodos de pago'
+          drawerLabel: idUserType === userType.DRIVER ? 'Métodos de cobro' : 'Métodos de pago'
         }}
       />
     </Drawer.Navigator>
