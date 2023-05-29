@@ -1,5 +1,5 @@
 import { View, StyleSheet, Text } from "react-native";
-import { TripPoints } from "../components/TripPoints";
+import { TripPoints } from "./TripPoints";
 import { Icon, Button } from "@rneui/base";
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";

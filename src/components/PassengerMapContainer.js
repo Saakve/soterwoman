@@ -1,27 +1,29 @@
-import { useState, useContext, useRef } from "react"
+import { useState, useContext, useEffect, useRef } from "react"
 import { StyleSheet, View, Dimensions, Alert } from "react-native"
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
 import MapViewDirections from "react-native-maps-directions"
 import { useNavigation } from "@react-navigation/native"
+import { confirmPayment, initStripe } from "@stripe/stripe-react-native"
 
 import { SearchBar } from "./SearchBar"
 import { ManageTripPassenger } from "./ManageTripPassenger"
 import { ModalRating } from './ModalRating'
 import { ModalTip } from './ModalTip'
 import { ToEndpointPassenger } from "./ToEndpointPassenger"
-
-import WonderSelector from "../pages/WonderSelector"
-import PayChildrenSelector from "../pages/PayChildrenSelector"
-import WaitSelector from "../pages/WaitSelector"
+import { ModalDriverArrived } from "./ModalDriverArrived"
+import WonderSelector from "./WonderSelector"
+import PayChildrenSelector from "./PayChildrenSelector"
+import WaitSelector from "./WaitSelector"
 
 import { supabase } from "../services/supabase"
 import { calculateTripCost } from "../services/calculateTripCost"
+import { createPaymentIntent } from "../services/stripe"
+import { getPublishableKey } from "../services/getPublishableKey"
 
 import UserContext from "../context/UserContext"
 
 import tripStatus from "../utils/tripStatus"
 import paymentMethodType from "../utils/paymentMethodType"
-import { ModalDriverArrived } from "./ModalDriverArrived"
 
 export function PassengerMapContainer({ currentLocation }) {
   const { userData } = useContext(UserContext);
@@ -43,8 +45,17 @@ export function PassengerMapContainer({ currentLocation }) {
 
   const tripChannel = useRef(null)
   const driverChannel = useRef(null)
+  const clientSecret = useRef(null)
 
   const navigation = useNavigation()
+
+  useEffect(() => {
+    const fetchKey = async () => {
+      const publishableKey = await getPublishableKey()
+      await initStripe({ publishableKey })
+    }
+    fetchKey()
+  }, [])
 
   const handleOnSelectEndpoint = async ({ distance }) => {
     const wonders = await calculateTripCost(distance)
@@ -130,25 +141,34 @@ export function PassengerMapContainer({ currentLocation }) {
     setSearchLocation(null)
   }
 
-  const onTripChange = async ({ new: trip }) => {
-    if (trip.idstatus === tripStatus.CONFIRMED) {
-      const driver = await fetchDriver(trip.iddriver)
+  const onTripChange = async ({ new: { idstatus, iddriver } }) => {
+    if (idstatus === tripStatus.CONFIRMED) {
+      const driver = await fetchDriver(iddriver)
       setDriver(driver)
       seShowWaitSelector(false)
       setShowManageTrip(true)
       listenDriverLocation(driver)
-    } else if (trip.idstatus === tripStatus.ARRIVED) {
+
+      const amount = Math.trunc(wonders.find(({ id }) => id === serviceSelected).price * 100)
+
+      const { paymentIntent, error } = await createPaymentIntent({ idCustomer: userData.idStripe, idAccount: driver.idstripe, amount })
+      if (error) console.log(error)
+
+      clientSecret.current = paymentIntent
+    } else if (idstatus === tripStatus.ARRIVED) {
       setShowModalDriverArrived(true)
-    } else if (trip.idstatus === tripStatus.STARTED) {
+    } else if (idstatus === tripStatus.STARTED) {
       setShowModalDriverArrived(false)
       setShowManageTrip(false)
       setShowToEndpoint(true)
-    } else if (trip.idstatus === tripStatus.COMPLETED) {
+    } else if (idstatus === tripStatus.COMPLETED) {
       setShowToEndpoint(false)
       setShowModalRating(true)
       stopListeningDriverLocation()
       setDriverLocation(null)
       setShowSearchBar(true)
+      const { error } = await confirmPayment(clientSecret.current)
+      if (error) console.log("confirmPayment", error)
     }
   }
 

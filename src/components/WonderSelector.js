@@ -1,6 +1,6 @@
 import { View, StyleSheet } from "react-native";
-import WonderType from "../components/WonderType";
-import { TripPoints } from "../components/TripPoints";
+import WonderType from "./WonderType";
+import { TripPoints } from "./TripPoints";
 
 export default function WonderSelector({ wonders, origin, destination, onSelectWonder = () => { } }) {
 
