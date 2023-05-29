@@ -15,7 +15,6 @@ export function useSignInWithProvider ({ provider }) {
   const URL = Linking.useURL()
 
   useEffect(() => {
-    console.log(`Listen: ${URL}`, { isSignInBrowser })
     if (isSignInBrowser) setSession()
     if (Platform.OS === 'ios' && URL) WebBrowser.dismissBrowser()
   }, [URL, isSignInBrowser])

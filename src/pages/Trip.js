@@ -27,7 +27,6 @@ export default function Trip () {
         .order('done_on', { ascending: false })
         .limit(5)
       setTrip(data)
-      console.log(data)
     }
     getTrip()
   }, [])
@@ -39,7 +38,6 @@ export default function Trip () {
       const fetchStats = async () => {
         const { data } = await supabase.rpc('getStats', { userid: userData.id })
         if (isActive) setStats(data)
-        console.log('FETCH FROM FOCUS')
       }
 
       fetchStats()
@@ -52,7 +50,6 @@ export default function Trip () {
     const fetchStats = async () => {
       const { data } = await supabase.rpc('getStats', { userid: userData.id })
       setStats(data)
-      console.log('FETCH FROM EFFECT')
     }
     if (!showModal) fetchStats()
   }, [showModal])

@@ -80,6 +80,7 @@ export default function ProfileDetails ({ navigation }) {
       }
     } catch (error) {
       setErrorMessage(error)
+      setLoading(false)
       return
     }
 
