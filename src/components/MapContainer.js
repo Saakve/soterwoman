@@ -1,7 +1,7 @@
 import { StyleSheet, View, Dimensions } from 'react-native'
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps'
 
-export function MapContainer({ currentLocation, children }) {
+export function MapContainer ({ currentLocation, children }) {
   return (
     <View style={styles.container}>
       <MapView
@@ -21,7 +21,7 @@ export function MapContainer({ currentLocation, children }) {
         }}
         mapType='standard'
       >
-        { children }
+        {children}
       </MapView>
     </View>
   )
@@ -36,6 +36,6 @@ const styles = StyleSheet.create({
   },
   mapStyle: {
     width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    height: Dimensions.get('window').height
   }
 })

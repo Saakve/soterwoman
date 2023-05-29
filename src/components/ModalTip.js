@@ -5,13 +5,13 @@ import { Button } from '@rneui/base'
 
 import { confirmPayment, initStripe } from '@stripe/stripe-react-native'
 
-import { createTipIntent, getPassengerDefaultPaymentMethod } from '../services/stripe'
+import { createTipIntent } from '../services/stripe'
 import { getPublishableKey } from '../services/getPublishableKey'
 
 import UserContext from '../context/UserContext'
 import { useNavigation } from '@react-navigation/native'
 
-function TipButton({ pressed = false, onPress, value }) {
+function TipButton ({ pressed = false, onPress, value }) {
   const color = pressed ? '#FFCDDD' : '#FFF'
   const borderColor = pressed ? '#FFF' : '#000'
 
@@ -27,7 +27,7 @@ function TipButton({ pressed = false, onPress, value }) {
   )
 }
 
-export function ModalTip({ visible = false, onPress = () => { }, driverToSendTip }) {
+export function ModalTip ({ visible = false, onPress = () => { }, driverToSendTip }) {
   const { userData } = useContext(UserContext)
   const [amount, setAmount] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -44,7 +44,7 @@ export function ModalTip({ visible = false, onPress = () => { }, driverToSendTip
       return
     }
 
-    if(!userData.idStripe) {
+    if (!userData.idStripe) {
       Alert.alert('Advertencia', 'Debes agregar por lo menos una tarjeta')
       navigation.navigate('Cards')
       return

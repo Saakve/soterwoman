@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Switch } from 'react-native-elements'
 
-export function ToggleOnService({ onToggle = () => {}}) {
+export function ToggleOnService ({ onToggle = () => {} }) {
   const [onService, setOnService] = useState(false)
 
   const toggleSwitch = () => {

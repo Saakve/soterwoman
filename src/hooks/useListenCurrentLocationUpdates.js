@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import * as Location from 'expo-location'
 
-export default function useCurrentLocationUpdateListener() {
+export default function useCurrentLocationUpdateListener () {
   const locationSubscription = useRef(null)
 
   const subscribe = async (callback) => {
@@ -21,7 +21,7 @@ export default function useCurrentLocationUpdateListener() {
   }
 
   const remove = () => {
-    if(!locationSubscription.current) return
+    if (!locationSubscription.current) return
     locationSubscription.current.remove()
     locationSubscription.current = null
   }

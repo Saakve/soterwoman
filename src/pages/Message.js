@@ -12,7 +12,7 @@ import { supabase } from '../services/supabase'
 import { Input, Button } from '@rneui/themed'
 import Avatar from '../components/Avatar'
 
-export default function Message({ route }) {
+export default function Message ({ route }) {
   const { toUser } = route.params
   const [channel, setChannel] = useState(null)
   const [messages, setMessages] = useState([])
@@ -79,7 +79,7 @@ export default function Message({ route }) {
                     titleStyle={styles.contentMessageDestin}
                   />
                 </View>
-              )
+                )
               : (
                 <View style={styles.messageOriginSection}>
                   <Button
@@ -89,7 +89,7 @@ export default function Message({ route }) {
                     titleStyle={styles.contentMessageOrigin}
                   />
                 </View>
-              )}
+                )}
           keyExtractor={(_, index) => index}
         />
       </View>

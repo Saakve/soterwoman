@@ -17,7 +17,7 @@ import VehicleDetails from '../pages/VehicleDetails'
 
 const Drawer = createDrawerNavigator()
 
-function CustomDrawerContent(props) {
+function CustomDrawerContent (props) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
@@ -29,7 +29,7 @@ function CustomDrawerContent(props) {
   )
 }
 
-function SideBar() {
+function SideBar () {
   const { userData: { idUserType } } = useContext(UserContext)
 
   return (

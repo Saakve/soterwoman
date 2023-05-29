@@ -4,7 +4,7 @@ import Message from '../pages/Message'
 
 const Stack = createNativeStackNavigator()
 
-function ProfileComplete() {
+function ProfileComplete () {
   return (
     <Stack.Navigator
       screenOptions={{

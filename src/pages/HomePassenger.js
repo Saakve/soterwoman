@@ -1,6 +1,5 @@
-import { useContext, useEffect, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-
+import { useContext, useEffect } from 'react'
+import { StyleSheet, View } from 'react-native'
 
 import UserContext from '../context/UserContext'
 import SignInLikeContext from '../context/SingInLikeContext'
@@ -11,7 +10,7 @@ import useCurrentLocation from '../hooks/useCurrentLocation'
 function HomePassenger ({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext)
   const { signInLike } = useContext(SignInLikeContext)
-  const { location } = useCurrentLocation();
+  const { location } = useCurrentLocation()
 
   useEffect(() => {
     if (dataIsLoaded && !userData.idUserType) {
@@ -30,11 +29,11 @@ function HomePassenger ({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
- 
-});
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
+
+})
 
 export { HomePassenger }

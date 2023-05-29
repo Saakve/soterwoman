@@ -1,4 +1,4 @@
 export default {
-    CLASSIC: 1,
-    EMERGENCY: 2,
+  CLASSIC: 1,
+  EMERGENCY: 2
 }

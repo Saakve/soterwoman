@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View } from "react-native"
-import { Button, Icon } from "@rneui/base"
+import { StyleSheet, Text, View } from 'react-native'
+import { Button, Icon } from '@rneui/base'
 
-import Avatar from "./Avatar"
+import Avatar from './Avatar'
 
-export function ToEndpoint({ trip, passenger, onReport = () => { }, arrived = false, onArriveEndpoint = () => { } }) {
+export function ToEndpoint ({ trip, passenger, onReport = () => { }, arrived = false, onArriveEndpoint = () => { } }) {
   return (
     <View style={styles.selector}>
       <View style={styles.header}>
@@ -34,15 +34,15 @@ export function ToEndpoint({ trip, passenger, onReport = () => { }, arrived = fa
           />
           {
             arrived &&
-            <Button
-              title={'Terminar'}
-              buttonStyle={styles.button}
-              color="#4CE5B1"
-              onPressOut={() => {
-                onArriveEndpoint(trip)
-              }}
-              disabled={!arrived}
-            />
+              <Button
+                title='Terminar'
+                buttonStyle={styles.button}
+                color='#4CE5B1'
+                onPressOut={() => {
+                  onArriveEndpoint(trip)
+                }}
+                disabled={!arrived}
+              />
           }
         </View>
       </View>
@@ -70,69 +70,69 @@ export function ToEndpoint({ trip, passenger, onReport = () => { }, arrived = fa
 
 const styles = StyleSheet.create({
   selector: {
-    width: "100%",
-    height: "25%",
+    width: '100%',
+    height: '25%',
     bottom: 0,
-    position: "absolute",
-    backgroundColor: "#FFF",
+    position: 'absolute',
+    backgroundColor: '#FFF'
   },
   header: {
-    height: "35%",
-    flexDirection: "row",
-    paddingHorizontal: "2%",
-    alignItems: "center",
+    height: '35%',
+    flexDirection: 'row',
+    paddingHorizontal: '2%',
+    alignItems: 'center'
   },
   avatar: {
-    marginTop: 0,
+    marginTop: 0
   },
   userdata: {
-    marginHorizontal: "5%",
-    justifyContent: "center",
+    marginHorizontal: '5%',
+    justifyContent: 'center'
   },
   ratinguser: {
-    flexDirection: "row",
+    flexDirection: 'row'
   },
   rating: {
-    color: "#C8C7CC",
-    paddingLeft: "2%"
+    color: '#C8C7CC',
+    paddingLeft: '2%'
   },
   buttonscontainer: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-around"
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   },
   servicetype: {
-    marginRight: "5%",
-    alignItems: "center"
+    marginRight: '5%',
+    alignItems: 'center'
   },
   children: {
-    marginLeft: "5%",
-    alignItems: "center"
+    marginLeft: '5%',
+    alignItems: 'center'
   },
   trippoints: {
-    flexDirection: "row",
-    height: "30%",
-    marginBottom: "2%",
+    flexDirection: 'row',
+    height: '30%',
+    marginBottom: '2%',
     flex: 1
   },
   icons: {
-    marginHorizontal: "5%",
-    justifyContent: "space-evenly"
+    marginHorizontal: '5%',
+    justifyContent: 'space-evenly'
   },
   nametrippoints: {
-    justifyContent: "space-evenly"
+    justifyContent: 'space-evenly'
   },
   buttons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   },
   button: {
     borderRadius: 10,
     width: 163,
-    height: 50,
+    height: 50
   },
   text: {
-    color: "#111",
+    color: '#111',
     fontSize: 16
   }
 })

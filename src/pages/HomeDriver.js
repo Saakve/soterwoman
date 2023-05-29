@@ -26,7 +26,7 @@ import tripStatus from '../utils/tripStatus'
 import { distanceBetweenCoords } from '../utils/distanceBetweenCoords'
 import paymentMethodType from '../utils/paymentMethodType'
 
-function HomeDriver({ navigation }) {
+function HomeDriver ({ navigation }) {
   const { userData, dataIsLoaded } = useContext(UserContext)
   const { signInLike } = useContext(SignInLikeContext)
 
@@ -64,7 +64,7 @@ function HomeDriver({ navigation }) {
   useEffect(() => {
     if (tripSelected && showRouteToStartingpoint && !arrivedToStartingpoint) {
       const distance = distanceBetweenCoords(tripSelected.startingpoint, currentLocation)
-      console.log("ToStartingpoint: ", distance)
+      console.log('ToStartingpoint: ', distance)
       if (distance <= 20) setArrivedToStartingpoint(true)
     }
   }, [currentLocation])
@@ -72,7 +72,7 @@ function HomeDriver({ navigation }) {
   useEffect(() => {
     if (tripSelected && showRouteToEndpoint && !arrivedToEndpoint) {
       const distance = distanceBetweenCoords(tripSelected.endpoint, currentLocation)
-      console.log("ToEndpoint: ", distance)
+      console.log('ToEndpoint: ', distance)
       if (distance <= 20) setArrivedToEndpoint(true)
     }
   }, [currentLocation])
@@ -117,8 +117,8 @@ function HomeDriver({ navigation }) {
         type: 'broadcast',
         event: userData.id,
         payload: {
-          longitude: coords.latitude,
-          longitude: coords.longitude,
+          latitude: coords.latitude,
+          longitude: coords.longitude
         }
       })
     })
@@ -282,64 +282,64 @@ function HomeDriver({ navigation }) {
       >
         {
           !!trips.length &&
-          <TripMarkers
-            trips={trips}
-            onPress={handleMarkerPress}
-          />
+            <TripMarkers
+              trips={trips}
+              onPress={handleMarkerPress}
+            />
         }
         {
           showRouteToStartingpoint && tripSelected &&
-          <MapViewDirections
-            origin={{
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            }}
-            destination={{
-              latitude: tripSelected.startingpoint.latitude,
-              longitude: tripSelected.startingpoint.longitude,
-            }}
-            apikey={"AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0"}
-            strokeWidth={6}
-            strokeColor="#FDCD03"
-            onReady={({ distance, duration }) => {
-              setDistanceToOrigin(distance)
-              setTimeToOrigin(duration)
-            }}
-          />
+            <MapViewDirections
+              origin={{
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude
+              }}
+              destination={{
+                latitude: tripSelected.startingpoint.latitude,
+                longitude: tripSelected.startingpoint.longitude
+              }}
+              apikey='AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0'
+              strokeWidth={6}
+              strokeColor='#FDCD03'
+              onReady={({ distance, duration }) => {
+                setDistanceToOrigin(distance)
+                setTimeToOrigin(duration)
+              }}
+            />
         }
         {
           showRouteToEndpoint && tripSelected &&
-          <>
-            <MapViewDirections
-              origin={{
-                latitude: tripSelected.startingpoint.latitude,
-                longitude: tripSelected.startingpoint.longitude
-              }}
-              destination={{
-                latitude: tripSelected.endpoint.latitude,
-                longitude: tripSelected.endpoint.longitude
-              }}
-              apikey={"AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0"}
-              strokeWidth={6}
-              strokeColor="#B762C1"
-            />
-            <Marker
-              coordinate={{
-                latitude: tripSelected.startingpoint.latitude,
-                longitude: tripSelected.startingpoint.longitude
-              }}
-              title='Inicio'
-              pinColor='#8946A6'
-            />
-            <Marker
-              coordinate={{
-                latitude: tripSelected.endpoint.latitude,
-                longitude: tripSelected.endpoint.longitude
-              }}
-              title='Final'
-              pinColor='#8946A6'
-            />
-          </>
+            <>
+              <MapViewDirections
+                origin={{
+                  latitude: tripSelected.startingpoint.latitude,
+                  longitude: tripSelected.startingpoint.longitude
+                }}
+                destination={{
+                  latitude: tripSelected.endpoint.latitude,
+                  longitude: tripSelected.endpoint.longitude
+                }}
+                apikey='AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0'
+                strokeWidth={6}
+                strokeColor='#B762C1'
+              />
+              <Marker
+                coordinate={{
+                  latitude: tripSelected.startingpoint.latitude,
+                  longitude: tripSelected.startingpoint.longitude
+                }}
+                title='Inicio'
+                pinColor='#8946A6'
+              />
+              <Marker
+                coordinate={{
+                  latitude: tripSelected.endpoint.latitude,
+                  longitude: tripSelected.endpoint.longitude
+                }}
+                title='Final'
+                pinColor='#8946A6'
+              />
+            </>
         }
         <Marker
           coordinate={{
@@ -352,34 +352,34 @@ function HomeDriver({ navigation }) {
       </MapContainer>
       {
         showSelector &&
-        <TripSelector
-          trip={tripSelected}
-          passenger={passenger}
-          onCancelledTrip={handleCancelledTrip}
-          onConfirmedTrip={handleConfirmedTrip}
-          timeToOrigin={timeToOrigin}
-          distanceToOrigin={distanceToOrigin}
-        />
+          <TripSelector
+            trip={tripSelected}
+            passenger={passenger}
+            onCancelledTrip={handleCancelledTrip}
+            onConfirmedTrip={handleConfirmedTrip}
+            timeToOrigin={timeToOrigin}
+            distanceToOrigin={distanceToOrigin}
+          />
       }
       {
         !showSelector && showRouteToStartingpoint &&
-        <ToStartingpoint
-          trip={tripSelected}
-          passenger={passenger}
-          onCancelledTrip={handleCancelledTrip}
-          onArriveOriginTrip={handleArriveStartingpoint}
-          arrived={arrivedToStartingpoint}
-        />
+          <ToStartingpoint
+            trip={tripSelected}
+            passenger={passenger}
+            onCancelledTrip={handleCancelledTrip}
+            onArriveOriginTrip={handleArriveStartingpoint}
+            arrived={arrivedToStartingpoint}
+          />
       }
       {
         showRouteToEndpoint &&
-        <ToEndpoint
-          passenger={passenger}
-          trip={tripSelected}
-          arrived={arrivedToEndpoint}
-          onArriveEndpoint={handleArriveEndpoint}
-          onReport={displayReport}
-        />
+          <ToEndpoint
+            passenger={passenger}
+            trip={tripSelected}
+            arrived={arrivedToEndpoint}
+            onArriveEndpoint={handleArriveEndpoint}
+            onReport={displayReport}
+          />
       }
     </View>
   )

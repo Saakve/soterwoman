@@ -13,23 +13,22 @@ export function ChangePassword ({ navigation }) {
   const [newPassword, setNewPassword] = useState('')
   const [newPasswordValidation, setNewPasswordValidation] = useState('')
   const [errorMessagePassword, setErrorMessageNewPassword] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null)
 
   const handleOnPress = async () => {
     setErrorMessage(null)
-     setErrorMessageNewPassword(null);
+    setErrorMessageNewPassword(null)
     if (newPassword !== newPasswordValidation) {
       setErrorMessage('Contraseñas diferentes')
       return
     }
 
-    const { data, error } = await supabase.rpc("equalPassword", {
-      passwordtovalidate: password,
-    });
-
+    const { data, error } = await supabase.rpc('equalPassword', {
+      passwordtovalidate: password
+    })
 
     if (!data) {
-      setErrorMessageNewPassword("Contraseña actual no coincide");
+      setErrorMessageNewPassword('Contraseña actual no coincide')
       return
     }
 

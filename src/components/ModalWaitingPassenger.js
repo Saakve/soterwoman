@@ -2,8 +2,7 @@ import { View, Text, StyleSheet, Modal, ActivityIndicator } from 'react-native'
 
 import { Button } from '@rneui/base'
 
-export function ModalWaitingPassenger({ visible = false, onPress = () => { } }) {
-
+export function ModalWaitingPassenger ({ visible = false, onPress = () => { } }) {
   const handlePressButton = () => {
     onPress()
   }
@@ -16,7 +15,7 @@ export function ModalWaitingPassenger({ visible = false, onPress = () => { } }) 
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <ActivityIndicator size="large" color="#B762C1"/>
+          <ActivityIndicator size='large' color='#B762C1' />
           <Text style={[styles.modalText, styles.title]}>Esperando a pasajera</Text>
           <Button
             titleStyle={styles.textButton}

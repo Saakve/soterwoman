@@ -1,37 +1,38 @@
-import { useState, useContext, useEffect, useRef } from "react"
-import { StyleSheet, View, Dimensions, Alert } from "react-native"
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
-import MapViewDirections from "react-native-maps-directions"
-import { useNavigation } from "@react-navigation/native"
-import { confirmPayment, initStripe } from "@stripe/stripe-react-native"
+import { useState, useContext, useEffect, useRef } from 'react'
+import { StyleSheet, View, Dimensions, Alert } from 'react-native'
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import MapViewDirections from 'react-native-maps-directions'
+import { useNavigation } from '@react-navigation/native'
+import { confirmPayment, initStripe } from '@stripe/stripe-react-native'
 
-import { SearchBar } from "./SearchBar"
-import { ManageTripPassenger } from "./ManageTripPassenger"
+import { SearchBar } from './SearchBar'
+import { ManageTripPassenger } from './ManageTripPassenger'
 import { ModalRating } from './ModalRating'
 import { ModalTip } from './ModalTip'
-import { ToEndpointPassenger } from "./ToEndpointPassenger"
-import { ModalDriverArrived } from "./ModalDriverArrived"
-import WonderSelector from "./WonderSelector"
-import PayChildrenSelector from "./PayChildrenSelector"
-import WaitSelector from "./WaitSelector"
+import { ToEndpointPassenger } from './ToEndpointPassenger'
+import { ModalDriverArrived } from './ModalDriverArrived'
+import WonderSelector from './WonderSelector'
+import PayChildrenSelector from './PayChildrenSelector'
+import WaitSelector from './WaitSelector'
 
-import { supabase } from "../services/supabase"
-import { calculateTripCost } from "../services/calculateTripCost"
-import { createPaymentIntent } from "../services/stripe"
-import { getPublishableKey } from "../services/getPublishableKey"
+import { supabase } from '../services/supabase'
 
-import UserContext from "../context/UserContext"
+import { calculateTripCost } from '../services/calculateTripCost'
+import { createPaymentIntent } from '../services/stripe'
+import { getPublishableKey } from '../services/getPublishableKey'
 
-import tripStatus from "../utils/tripStatus"
-import paymentMethodType from "../utils/paymentMethodType"
+import UserContext from '../context/UserContext'
 
-export function PassengerMapContainer({ currentLocation }) {
-  const { userData } = useContext(UserContext);
+import tripStatus from '../utils/tripStatus'
+import paymentMethodType from '../utils/paymentMethodType'
+
+export function PassengerMapContainer ({ currentLocation }) {
+  const { userData } = useContext(UserContext)
   const [searchLocation, setSearchLocation] = useState(null)
   const [showWonderSelector, setShowWonderSelector] = useState(false)
-  const [showPaySelector, setShowPaySelector] = useState(false);
-  const [showWaitSelector, seShowWaitSelector] = useState(false);
-  const [showManageTrip, setShowManageTrip] = useState(false);
+  const [showPaySelector, setShowPaySelector] = useState(false)
+  const [showWaitSelector, seShowWaitSelector] = useState(false)
+  const [showManageTrip, setShowManageTrip] = useState(false)
   const [wonders, setWonders] = useState(null)
   const [serviceSelected, setService] = useState(null)
   const [trip, setTrip] = useState(null)
@@ -75,7 +76,6 @@ export function PassengerMapContainer({ currentLocation }) {
   }
 
   const handleConfirmTrip = async ({ childrenNumber, paymentMethodSelected }) => {
-
     if (paymentMethodSelected === paymentMethodType.CARD && !userData.idStripe) {
       Alert.alert('Advertencia', 'Debes agregar por lo menos una tarjeta')
       navigation.navigate('Cards')
@@ -84,7 +84,7 @@ export function PassengerMapContainer({ currentLocation }) {
 
     const { data: [trip], error } = await supabase.from('trip')
       .insert({
-        name_startingpoint: currentLocation.street.concat(" #", currentLocation.streetNumber),
+        name_startingpoint: currentLocation.street.concat(' #', currentLocation.streetNumber),
         name_endpoint: searchLocation.name,
         startingpoint: `POINT(${currentLocation.coords.longitude} ${currentLocation.coords.latitude})`,
         endpoint: `POINT(${searchLocation.lng} ${searchLocation.lat})`,
@@ -133,7 +133,7 @@ export function PassengerMapContainer({ currentLocation }) {
       idstatus: tripStatus.CANCELLED
     }).eq('id', trip)
 
-    if (error) console.log("handleCancel", error)
+    if (error) console.log('handleCancel', error)
 
     setTrip(null)
     seShowWaitSelector(false)
@@ -168,12 +168,12 @@ export function PassengerMapContainer({ currentLocation }) {
       setDriverLocation(null)
       setShowSearchBar(true)
       const { error } = await confirmPayment(clientSecret.current)
-      if (error) console.log("confirmPayment", error)
+      if (error) console.log('confirmPayment', error)
     }
   }
 
   const fetchDriver = async (id) => {
-    const { data: [driver] } = await supabase.from("profile").select("*").eq("id", id);
+    const { data: [driver] } = await supabase.from('profile').select('*').eq('id', id)
     return driver
   }
 
@@ -237,24 +237,24 @@ export function PassengerMapContainer({ currentLocation }) {
           latitude: 18,
           longitude: -94,
           latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
+          longitudeDelta: 0.01
         }}
         region={{
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
           latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
+          longitudeDelta: 0.01
         }}
-        mapType="standard"
+        mapType='standard'
       >
         <Marker
-          draggable={true}
+          draggable
           coordinate={{
             latitude: currentLocation.coords.latitude,
-            longitude: currentLocation.coords.longitude,
+            longitude: currentLocation.coords.longitude
           }}
-          title={"Yo"}
-          pinColor={"purple"}
+          title='Yo'
+          pinColor='purple'
         />
         {
           searchLocation && (
@@ -262,25 +262,25 @@ export function PassengerMapContainer({ currentLocation }) {
               <MapViewDirections
                 origin={{
                   latitude: currentLocation.coords.latitude,
-                  longitude: currentLocation.coords.longitude,
+                  longitude: currentLocation.coords.longitude
                 }}
                 destination={{
                   latitude: searchLocation.lat,
-                  longitude: searchLocation.lng,
+                  longitude: searchLocation.lng
                 }}
-                apikey={"AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0"}
+                apikey='AIzaSyBNLEE0e6JiPHJh88NuSvdOLBggmS43Mv0'
                 strokeWidth={3}
-                strokeColor="pink"
+                strokeColor='pink'
                 onReady={handleOnSelectEndpoint}
               />
               <Marker
                 draggable={false}
                 coordinate={{
                   latitude: searchLocation.lat,
-                  longitude: searchLocation.lng,
+                  longitude: searchLocation.lng
                 }}
-                title={"Marcador"}
-                pinColor={"hotpink"}
+                title='Marcador'
+                pinColor='hotpink'
               />
             </>
           )
@@ -288,13 +288,13 @@ export function PassengerMapContainer({ currentLocation }) {
         {
           driverLocation && (
             <Marker
-              draggable={true}
+              draggable
               coordinate={{
                 latitude: driverLocation.latitude,
-                longitude: driverLocation.longitude,
+                longitude: driverLocation.longitude
               }}
-              title={"Conductora"}
-              pinColor={"purple"}
+              title='Conductora'
+              pinColor='purple'
             />
           )
         }
@@ -311,7 +311,7 @@ export function PassengerMapContainer({ currentLocation }) {
         showWonderSelector && (
           <WonderSelector
             wonders={wonders}
-            origin={currentLocation.street.concat(" #", currentLocation.streetNumber)}
+            origin={currentLocation.street.concat(' #', currentLocation.streetNumber)}
             destination={searchLocation.name}
             onSelectWonder={handleSelectWonder}
           />
@@ -320,7 +320,7 @@ export function PassengerMapContainer({ currentLocation }) {
       {
         showPaySelector && (
           <PayChildrenSelector
-            origin={currentLocation.street.concat(" #", currentLocation.streetNumber)}
+            origin={currentLocation.street.concat(' #', currentLocation.streetNumber)}
             destination={searchLocation.name}
             onPress={handleConfirmTrip}
           />
@@ -336,7 +336,7 @@ export function PassengerMapContainer({ currentLocation }) {
           <ManageTripPassenger
             driver={driver}
             onCancelledTrip={handleCancel}
-            origin={currentLocation.street.concat(" #", currentLocation.streetNumber)}
+            origin={currentLocation.street.concat(' #', currentLocation.streetNumber)}
             destination={searchLocation.name}
           />
         )
@@ -344,7 +344,7 @@ export function PassengerMapContainer({ currentLocation }) {
       {
         showToEndpoint && <ToEndpointPassenger
           driver={driver}
-        />
+                          />
       }
     </View>
   )
@@ -352,13 +352,13 @@ export function PassengerMapContainer({ currentLocation }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: -1,
+    backgroundColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: -1
   },
   mapStyle: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
-  },
-});
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height
+  }
+})

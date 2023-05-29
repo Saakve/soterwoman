@@ -1,34 +1,34 @@
-import { StyleSheet, Text, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import Call from "react-native-phone-call";
-import { Button, Icon } from "@rneui/base";
+import { StyleSheet, Text, View } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import Call from 'react-native-phone-call'
+import { Button, Icon } from '@rneui/base'
 
-import Avatar from "./Avatar";
+import Avatar from './Avatar'
 
-import { TripPoints } from "./TripPoints";
+import { TripPoints } from './TripPoints'
 
-export function ManageTripPassenger({
+export function ManageTripPassenger ({
   driver,
   origin,
   destination,
-  onCancelledTrip = () => {},
+  onCancelledTrip = () => {}
 }) {
-  const navigation = useNavigation();
+  const navigation = useNavigation()
 
   const triggerCall = () => {
     const args = {
       number: driver.phone,
-      prompt: true,
-    };
+      prompt: true
+    }
 
-    Call(args).catch(console.error);
-  };
+    Call(args).catch(console.error)
+  }
 
   const displayMessage = () => {
-    navigation.navigate("Message", {
-      toUser: driver,
-    });
-  };
+    navigation.navigate('Message', {
+      toUser: driver
+    })
+  }
 
   return (
     <View style={styles.selector}>
@@ -42,23 +42,23 @@ export function ManageTripPassenger({
         <View style={styles.userdata}>
           <Text style={styles.text}>{driver?.name}</Text>
           <View style={styles.ratinguser}>
-            <Icon name="star" type="font-awesome" color="#FFCC00" />
+            <Icon name='star' type='font-awesome' color='#FFCC00' />
             <Text style={styles.rating}>{driver?.rating}</Text>
           </View>
         </View>
         <View style={styles.tripdata}>
           <Icon
-            name="comment-dots"
-            type="font-awesome-5"
+            name='comment-dots'
+            type='font-awesome-5'
             solid
-            color="#4252FF"
+            color='#4252FF'
             size={35}
             onPressOut={displayMessage}
           />
           <Icon
-            name="phone"
-            type="font-awesome"
-            color="#4CE5B1"
+            name='phone'
+            type='font-awesome'
+            color='#4CE5B1'
             size={35}
             onPressOut={triggerCall}
           />
@@ -67,80 +67,80 @@ export function ManageTripPassenger({
       <TripPoints nameStartingpoint={origin} nameEndpoint={destination} />
       <View style={styles.buttons}>
         <Button
-          title={"Cancelar Viaje"}
+          title='Cancelar Viaje'
           buttonStyle={styles.button}
-          color="#B10710"
+          color='#B10710'
           onPressOut={onCancelledTrip}
         />
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   selector: {
-    width: "100%",
-    height: "25%",
+    width: '100%',
+    height: '25%',
     bottom: 0,
-    position: "absolute",
-    backgroundColor: "#FFF",
+    position: 'absolute',
+    backgroundColor: '#FFF'
   },
   header: {
-    height: "35%",
-    backgroundColor: "#F7F7F7",
-    flexDirection: "row",
-    paddingHorizontal: "2%",
-    alignItems: "center",
+    height: '35%',
+    backgroundColor: '#F7F7F7',
+    flexDirection: 'row',
+    paddingHorizontal: '2%',
+    alignItems: 'center'
   },
   avatar: {
-    marginTop: 0,
+    marginTop: 0
   },
   userdata: {
-    marginHorizontal: "5%",
-    justifyContent: "center",
+    marginHorizontal: '5%',
+    justifyContent: 'center'
   },
   ratinguser: {
-    flexDirection: "row",
+    flexDirection: 'row'
   },
   rating: {
-    color: "#C8C7CC",
-    paddingLeft: "2%",
+    color: '#C8C7CC',
+    paddingLeft: '2%'
   },
   tripdata: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "space-evenly",
+    flexDirection: 'row',
+    justifyContent: 'space-evenly'
   },
   servicetype: {
-    marginRight: "5%",
-    alignItems: "center",
+    marginRight: '5%',
+    alignItems: 'center'
   },
   children: {
-    marginLeft: "5%",
-    alignItems: "center",
+    marginLeft: '5%',
+    alignItems: 'center'
   },
   trippoints: {
-    flexDirection: "row",
-    height: "30%",
-    marginBottom: "2%",
+    flexDirection: 'row',
+    height: '30%',
+    marginBottom: '2%'
   },
   icons: {
-    marginHorizontal: "5%",
-    justifyContent: "space-evenly",
+    marginHorizontal: '5%',
+    justifyContent: 'space-evenly'
   },
   nametrippoints: {
-    justifyContent: "space-evenly",
+    justifyContent: 'space-evenly'
   },
   buttons: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   },
   button: {
     borderRadius: 10,
     width: 163,
-    height: 50,
+    height: 50
   },
   text: {
-    color: "#111",
-  },
-});
+    color: '#111'
+  }
+})

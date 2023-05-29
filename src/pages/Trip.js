@@ -12,7 +12,7 @@ import { ModalPayOffDebt } from '../components/ModalPayOffDebt'
 import UserContext from '../context/UserContext'
 import tripStatus from '../utils/tripStatus'
 
-export default function Trip() {
+export default function Trip () {
   const { userData } = useContext(UserContext)
   const [trip, setTrip] = useState([])
   const [stat, setStats] = useState([{}])
@@ -23,7 +23,7 @@ export default function Trip() {
       const { data } = await supabase
         .from('trip')
         .select()
-        .gte("idstatus", tripStatus.COMPLETED)
+        .gte('idstatus', tripStatus.COMPLETED)
         .order('done_on', { ascending: false })
         .limit(5)
       setTrip(data)
@@ -39,7 +39,7 @@ export default function Trip() {
       const fetchStats = async () => {
         const { data } = await supabase.rpc('getStats', { userid: userData.id })
         if (isActive) setStats(data)
-        console.log("FETCH FROM FOCUS")
+        console.log('FETCH FROM FOCUS')
       }
 
       fetchStats()
@@ -52,7 +52,7 @@ export default function Trip() {
     const fetchStats = async () => {
       const { data } = await supabase.rpc('getStats', { userid: userData.id })
       setStats(data)
-      console.log("FETCH FROM EFFECT")
+      console.log('FETCH FROM EFFECT')
     }
     if (!showModal) fetchStats()
   }, [showModal])
@@ -61,7 +61,7 @@ export default function Trip() {
     const getFilterTrip = async () => {
       const { data, error } = await supabase.rpc(range, { rowstoshow: 15 })
 
-      if (error) console.log("filterTrips: ", error)
+      if (error) console.log('filterTrips: ', error)
 
       setTrip(data)
     }

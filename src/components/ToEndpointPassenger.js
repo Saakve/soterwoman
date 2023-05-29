@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View } from "react-native";
-import { Icon, fonts } from "@rneui/base";
+import { StyleSheet, Text, View } from 'react-native'
+import { Icon } from '@rneui/base'
 
-import Avatar from "./Avatar";
-import { useEffect, useState } from "react";
-import { supabase } from "../services/supabase";
+import Avatar from './Avatar'
+import { useEffect, useState } from 'react'
+import { supabase } from '../services/supabase'
 
-export function ToEndpointPassenger({ driver }) {
+export function ToEndpointPassenger ({ driver }) {
   const [vehicle, setVehicle] = useState(null)
 
   useEffect(() => {
@@ -35,13 +35,13 @@ export function ToEndpointPassenger({ driver }) {
         <View style={styles.userdata}>
           <Text style={styles.text}>{driver?.name}</Text>
           <View style={styles.ratinguser}>
-            <Icon name="star" type="font-awesome" color="#FFCC00" />
+            <Icon name='star' type='font-awesome' color='#FFCC00' />
             <Text style={styles.rating}>{driver?.rating}</Text>
           </View>
         </View>
-        <View style={{ alignItems: "flex-end" }}>
+        <View style={{ alignItems: 'flex-end' }}>
           <Text style={styles.licenseplate}>{vehicle?.licenseplate}</Text>
-          <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
             <Text style={styles.vehicletext}>{vehicle?.brand}</Text>
             <Text style={styles.vehicletext}>{vehicle?.year}</Text>
             <Text style={styles.vehicletext}>{vehicle?.model}</Text>
@@ -49,60 +49,60 @@ export function ToEndpointPassenger({ driver }) {
         </View>
       </View>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   selector: {
-    width: "100%",
-    height: "20%",
+    width: '100%',
+    height: '20%',
     bottom: 0,
-    position: "absolute",
-    backgroundColor: "#FFF",
+    position: 'absolute',
+    backgroundColor: '#FFF'
   },
   avatarcontainer: {
     top: -20,
-    backgroundColor: "#FFF",
-    marginLeft: "10%",
+    backgroundColor: '#FFF',
+    marginLeft: '10%',
     height: 75,
     width: 75,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 50
   },
   avatar: {
-    marginTop: 0,
+    marginTop: 0
   },
   ratinguser: {
-    flexDirection: "row",
+    flexDirection: 'row'
   },
   rating: {
-    color: "#C8C7CC",
-    paddingLeft: "2%",
+    color: '#C8C7CC',
+    paddingLeft: '2%'
   },
   driverinfo: {
     top: -10,
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   },
   text: {
-    color: "#111",
-    fontFamily: "OpenSans-Bold",
+    color: '#111',
+    fontFamily: 'OpenSans-Bold',
     fontSize: 16
   },
   licenseplate: {
-    color: "#3E4958",
-    fontFamily: "OpenSans-Bold",
+    color: '#3E4958',
+    fontFamily: 'OpenSans-Bold',
     fontSize: 16,
-    backgroundColor: "#D5DEE2",
+    backgroundColor: '#D5DEE2',
     borderRadius: 50,
     paddingVertical: 5,
     paddingHorizontal: 20
   },
   vehicletext: {
-    marginHorizontal: "1%",
-    fontFamily: "OpenSans-Regular",
-    color: "#3E4958",
+    marginHorizontal: '1%',
+    fontFamily: 'OpenSans-Regular',
+    color: '#3E4958',
     fontSize: 16
   }
-});
+})
