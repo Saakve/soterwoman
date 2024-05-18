@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, Dimensions } from 'react-native'
+import { View, StyleSheet, Text, Dimensions, Platform } from 'react-native'
 import { TripPoints } from './TripPoints'
 import { Icon, Button } from '@rneui/base'
 import { useEffect, useState } from 'react'
