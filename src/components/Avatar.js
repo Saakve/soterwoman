@@ -48,15 +48,15 @@ export default function Avatar ({ url, size = 100, onUpload = () => { }, editabl
       })
 
       const photo = {
-        uri: file.uri,
-        type: file.mimeType,
-        name: file.name
+        uri: file.assets[0].uri,
+        type: file.assets[0].mimeType,
+        name: file.assets[0].name
       }
 
       const formData = new FormData()
       formData.append('file', photo)
 
-      const fileExt = file.name.split('.').pop()
+      const fileExt = photo.name.split('.').pop()
       const filePath = `${Math.random()}.${fileExt}`
       const { error } = await supabase.storage.from('avatars').upload(filePath, formData)
       if (error) throw error

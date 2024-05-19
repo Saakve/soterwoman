@@ -1,6 +1,5 @@
 import { useContext, useState } from 'react'
-import { ScrollView } from 'react-native-gesture-handler'
-import { View, Text, StyleSheet, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native'
 import { Button } from '@rneui/base'
 
 import { InputStyled } from '../components/InputStyled'
